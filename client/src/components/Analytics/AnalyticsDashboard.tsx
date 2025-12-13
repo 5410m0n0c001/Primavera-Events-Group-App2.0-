@@ -26,10 +26,10 @@ const AnalyticsDashboard: React.FC = () => {
         try {
             const res = await fetch('/api/analytics/dashboard');
             const data = await res.json();
-            setMetrics(data.metrics);
-            setRevenueData(data.revenue);
-            setEventStats(data.eventStats);
-            setPipeline(data.pipeline);
+            setMetrics(data.metrics || null);
+            setRevenueData(data.revenue || { labels: [], data: [] });
+            setEventStats(data.eventStats || { labels: [], data: [] });
+            setPipeline(data.pipeline || []);
         } catch (e) {
             console.error(e);
         } finally {
@@ -62,15 +62,15 @@ const AnalyticsDashboard: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-white p-6 rounded shadow border-t-4 border-indigo-500">
                     <div className="text-gray-500 text-sm font-bold uppercase mb-2">Ingresos Anuales (YTD)</div>
-                    <div className="text-4xl font-bold text-gray-800">${metrics?.totalRevenue.toLocaleString()}</div>
+                    <div className="text-4xl font-bold text-gray-800">${(metrics?.totalRevenue || 0).toLocaleString()}</div>
                 </div>
                 <div className="bg-white p-6 rounded shadow border-t-4 border-pink-500">
                     <div className="text-gray-500 text-sm font-bold uppercase mb-2">Proyectos Activos</div>
-                    <div className="text-4xl font-bold text-gray-800">{metrics?.activeProjects}</div>
+                    <div className="text-4xl font-bold text-gray-800">{metrics?.activeProjects || 0}</div>
                 </div>
                 <div className="bg-white p-6 rounded shadow border-t-4 border-yellow-500">
                     <div className="text-gray-500 text-sm font-bold uppercase mb-2">Leads Pendientes</div>
-                    <div className="text-4xl font-bold text-gray-800">{metrics?.pendingLeads}</div>
+                    <div className="text-4xl font-bold text-gray-800">{metrics?.pendingLeads || 0}</div>
                 </div>
             </div>
 
