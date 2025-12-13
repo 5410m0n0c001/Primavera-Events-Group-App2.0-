@@ -13,7 +13,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-primavera} -d ${POSTGRES_DB:-primavera_events}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-primavera} -d ${POSTGRES_DB:-primavera_events}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -42,7 +42,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -54,17 +54,16 @@ services:
       dockerfile: Dockerfile
       target: production
       args:
-        - VITE_API_URL=${VITE_API_URL:-http://localhost:3000}
+        - VITE_API_URL=${VITE_API_URL:-/api}
         - COOLIFY_URL=${COOLIFY_URL:-}
         - COOLIFY_FQDN=${COOLIFY_FQDN:-}
     restart: unless-stopped
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/" ]
       interval: 30s
       timeout: 10s
       retries: 3

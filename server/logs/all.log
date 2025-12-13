@@ -4,3 +4,21 @@
 2025-12-12 23:34:18:3418 [32minfo[39m: [32mServer running on http://localhost:3000[39m
 2025-12-12 23:53:08:538 [35mhttp[39m: [35mGET /api/venues[39m
 2025-12-12 23:53:08:538 [35mhttp[39m: [35mGET /api/venues[39m
+2025-12-13 01:47:16:4716 [35mhttp[39m: [35mGET /api/venues[39m
+2025-12-13 01:47:17:4717 [35mhttp[39m: [35mGET /api/venues[39m
+2025-12-13 01:47:48:4748 [35mhttp[39m: [35mGET /api/clients[39m
+2025-12-13 01:47:48:4748 [35mhttp[39m: [35mGET /api/clients[39m
+2025-12-13 01:47:49:4749 [35mhttp[39m: [35mGET /api/calendar[39m
+2025-12-13 01:47:49:4749 [35mhttp[39m: [35mGET /api/calendar[39m
+2025-12-13 01:47:52:4752 [35mhttp[39m: [35mGET /api/venues[39m
+2025-12-13 01:47:52:4752 [35mhttp[39m: [35mGET /api/clients[39m
+2025-12-13 01:47:52:4752 [35mhttp[39m: [35mGET /api/venues[39m
+2025-12-13 01:47:52:4752 [35mhttp[39m: [35mGET /api/clients[39m
+2025-12-13 01:53:08:538 [35mhttp[39m: [35mGET /api/suppliers[39m
+2025-12-13 01:53:08:538 [35mhttp[39m: [35mGET /api/suppliers[39m
+2025-12-13 01:53:13:5313 [35mhttp[39m: [35mGET /api/finance/stats[39m
+2025-12-13 01:53:13:5313 [35mhttp[39m: [35mGET /api/finance/stats[39m
+2025-12-13 01:53:13:5313 [35mhttp[39m: [35mGET /api/finance/payments[39m
+2025-12-13 01:53:13:5313 [35mhttp[39m: [35mGET /api/finance/payments[39m
+2025-12-13 01:53:13:5313 [35mhttp[39m: [35mGET /api/finance/expenses[39m
+2025-12-13 01:53:13:5313 [35mhttp[39m: [35mGET /api/finance/expenses[39m
