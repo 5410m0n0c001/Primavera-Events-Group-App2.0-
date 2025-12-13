@@ -10,15 +10,15 @@ echo "⏳ Waiting for PostgreSQL..."
 MAX_RETRIES=30
 RETRY_COUNT=0
 
-until npx prisma db ping --schema=./prisma/schema.prisma 2>/dev/null || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
+until npx prisma db ping --schema=./prisma/schema.prisma || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
   RETRY_COUNT=$((RETRY_COUNT+1))
   echo "   Attempt $RETRY_COUNT/$MAX_RETRIES..."
   sleep 2
 done
 
 if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
-  echo "❌ Failed to connect to database"
-  exit 1
+  echo "❌ Failed to connect to database (Proceeding anyway for debug purposes)"
+  # exit 1  <-- Disabled to allow container logging
 fi
 
 echo "✅ Database connected!"
