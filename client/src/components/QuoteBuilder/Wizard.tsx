@@ -66,6 +66,8 @@ const DATA_CATEGORIES = [
     }
 ];
 
+import { useQuoteCalculations } from '../../hooks/useQuoteCalculations';
+
 const QuoteWizard: React.FC = () => {
     const [step, setStep] = useState(1);
     const [draft, setDraft] = useState<QuoteDraft>({
@@ -77,29 +79,8 @@ const QuoteWizard: React.FC = () => {
     const [budget, setBudget] = useState(0);
     const [showManualForm, setShowManualForm] = useState(false);
 
-
-    // Derived State using useMemo - Guaranteed to be in sync with render
-    // Derived State using useMemo - Guaranteed to be in sync with render
-    // Derived State using useMemo - Guaranteed to be in sync with render
-    // Handles "Instant Sync" requirement better than useEffect by deriving state during render pass
-    const totals = useMemo(() => {
-        const rawSubtotal = draft.selectedItems.reduce((acc, curr) => {
-            // "Senior" Logic: Strict price validation with fallback
-            const price = Number(curr.unitPrice) || Number(curr.item?.price) || 0;
-            return acc + (Number(price) * Number(curr.quantity));
-        }, 0);
-
-        const subtotal = Number(rawSubtotal.toFixed(2));
-        const tax = Number((subtotal * 0.16).toFixed(2));
-        const total = Number((subtotal + tax).toFixed(2));
-
-        return {
-            subtotal,
-            tax,
-            total,
-            costPerPerson: (draft.guestCount > 0 && total > 0) ? total / draft.guestCount : 0
-        };
-    }, [draft.selectedItems, draft.guestCount]);
+    // Use the centralized calculation hook
+    const totals = useQuoteCalculations(draft);
 
     // Capacity Validation
     const selectedLocation = draft.selectedItems.find(i => i.item?.category === 'Locaciones');
@@ -329,12 +310,8 @@ const QuoteWizard: React.FC = () => {
             <div className="w-96 flex-shrink-0 relative">
                 <div className="sticky top-6">
                     <QuoteBreakdown
-                        items={draft.selectedItems}
+                        draft={draft}
                         onRemove={handleRemoveItem}
-                        total={totals.total}
-                        subtotal={totals.subtotal}
-                        tax={totals.tax}
-                        costPerPerson={totals.costPerPerson}
                     />
 
                     {isOverCapacity && (

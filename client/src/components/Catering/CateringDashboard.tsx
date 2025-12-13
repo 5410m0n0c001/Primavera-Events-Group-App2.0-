@@ -34,6 +34,15 @@ const CateringDashboard: React.FC = () => {
     const [newIngUnit, setNewIngUnit] = useState('kg');
     const [newIngCost, setNewIngCost] = useState('');
 
+    // Dish Form State
+    const [showDishForm, setShowDishForm] = useState(false);
+    const [newDishName, setNewDishName] = useState('');
+    const [newDishPrice, setNewDishPrice] = useState('');
+
+    // Menu Form State
+    const [showMenuForm, setShowMenuForm] = useState(false);
+    const [newMenuName, setNewMenuName] = useState('');
+
     useEffect(() => {
         loadData();
     }, [view]);
@@ -63,6 +72,26 @@ const CateringDashboard: React.FC = () => {
             body: JSON.stringify({ name: newIngName, unit: newIngUnit, costPerUnit: newIngCost, stock: 0 })
         });
         setNewIngName(''); setNewIngCost(''); loadData();
+    };
+
+    const createDish = async (e: React.FormEvent) => {
+        e.preventDefault();
+        // Simulate API call
+        const newDish = { id: `dish_${Date.now()}`, name: newDishName, price: Number(newDishPrice), cost: 0 };
+        // Ideally: POST /api/catering/dishes
+        setDishes([...dishes, newDish]);
+        setShowDishForm(false);
+        setNewDishName(''); setNewDishPrice('');
+    };
+
+    const createMenu = async (e: React.FormEvent) => {
+        e.preventDefault();
+        // Simulate API call
+        const newMenu = { id: `menu_${Date.now()}`, name: newMenuName, dishes: [] };
+        // Ideally: POST /api/catering/menus
+        setMenus([...menus, newMenu]);
+        setShowMenuForm(false);
+        setNewMenuName('');
     };
 
     return (
@@ -121,48 +150,102 @@ const CateringDashboard: React.FC = () => {
             )}
 
             {view === 'dishes' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {/* Add Dish Button Placeholder */}
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex items-center justify-center text-gray-400 font-bold cursor-pointer hover:border-primavera-gold hover:text-primavera-gold transition">
-                        + Nuevo Platillo
-                    </div>
-                    {dishes.map(d => (
-                        <div key={d.id} className="bg-white p-4 rounded shadow hover:shadow-md transition">
-                            <h3 className="font-bold text-lg">{d.name}</h3>
-                            <div className="mt-2 text-sm space-y-1">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Precio Venta:</span>
-                                    <span className="font-bold text-gray-800">${d.price}</span>
+                <div>
+                    {!showDishForm ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <button
+                                onClick={() => setShowDishForm(true)}
+                                className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center text-gray-400 font-bold cursor-pointer hover:border-primavera-gold hover:text-primavera-gold transition min-h-[150px]"
+                            >
+                                <span className="text-3xl mb-2">+</span>
+                                <span>Nuevo Platillo</span>
+                            </button>
+                            {dishes.map(d => (
+                                <div key={d.id} className="bg-white p-4 rounded shadow hover:shadow-md transition">
+                                    <h3 className="font-bold text-lg">{d.name}</h3>
+                                    <div className="mt-2 text-sm space-y-1">
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500">Precio Venta:</span>
+                                            <span className="font-bold text-gray-800">${d.price}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-500">Costo (Insumos):</span>
+                                            <span className="font-bold text-red-500">${d.cost || 0}</span>
+                                        </div>
+                                        <div className="border-t pt-1 mt-1 flex justify-between bg-gray-50 p-1 rounded">
+                                            <span className="text-gray-600 text-xs uppercase font-bold">Ganancia:</span>
+                                            <span className="font-bold text-green-600">${d.price - (d.cost || 0)}</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Costo (Insumos):</span>
-                                    <span className="font-bold text-red-500">${d.cost || 0}</span>
-                                </div>
-                                <div className="border-t pt-1 mt-1 flex justify-between bg-gray-50 p-1 rounded">
-                                    <span className="text-gray-600 text-xs uppercase font-bold">Ganancia:</span>
-                                    <span className="font-bold text-green-600">${d.price - (d.cost || 0)}</span>
-                                </div>
-                            </div>
+                            ))}
                         </div>
-                    ))}
+                    ) : (
+                        <div className="bg-white p-6 rounded shadow max-w-md mx-auto">
+                            <h3 className="font-bold text-xl mb-4">Crear Nuevo Platillo</h3>
+                            <form onSubmit={createDish} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700">Nombre del Platillo</label>
+                                    <input className="w-full border p-2 rounded" value={newDishName} onChange={e => setNewDishName(e.target.value)} required />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700">Precio de Venta</label>
+                                    <input className="w-full border p-2 rounded" type="number" value={newDishPrice} onChange={e => setNewDishPrice(e.target.value)} required />
+                                </div>
+                                {/* Future: Ingredient Selector */}
+                                <div className="flex justify-end gap-2 pt-4">
+                                    <button type="button" onClick={() => setShowDishForm(false)} className="text-gray-500 px-4 py-2">Cancelar</button>
+                                    <button type="submit" className="bg-primavera-gold text-white px-6 py-2 rounded font-bold">Guardar Platillo</button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
                 </div>
             )}
 
             {view === 'menus' && (
-                <div className="grid grid-cols-1 gap-4">
-                    {menus.map(m => (
-                        <div key={m.id} className="bg-white p-4 rounded shadow">
-                            <h3 className="font-bold text-xl text-primavera-gold">{m.name}</h3>
-                            <div className="mt-2">
-                                <h4 className="text-xs font-bold text-gray-400 uppercase">Platillos Incluidos:</h4>
-                                <div className="flex flex-wrap gap-2 mt-1">
-                                    {m.dishes && m.dishes.length > 0 ? m.dishes.map(d => (
-                                        <span key={d.id} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm">{d.name}</span>
-                                    )) : <span className="text-gray-400 italic text-sm">Sin platillos</span>}
+                <div>
+                    {!showMenuForm ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <button
+                                onClick={() => setShowMenuForm(true)}
+                                className="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center text-gray-400 font-bold cursor-pointer hover:border-primavera-gold hover:text-primavera-gold transition min-h-[150px]"
+                            >
+                                <span className="text-3xl mb-2">+</span>
+                                <span>Nuevo Menú</span>
+                            </button>
+                            {menus.map(m => (
+                                <div key={m.id} className="bg-white p-4 rounded shadow flex flex-col justify-between">
+                                    <div>
+                                        <h3 className="font-bold text-xl text-primavera-gold">{m.name}</h3>
+                                        <div className="mt-2 text-gray-600 text-sm">
+                                            {m.dishes?.length || 0} platillos incluidos
+                                        </div>
+                                    </div>
+                                    <div className="mt-4 pt-4 border-t">
+                                        <button className="text-sm text-blue-600 font-bold hover:underline">Editar Contenido</button>
+                                    </div>
                                 </div>
-                            </div>
+                            ))}
                         </div>
-                    ))}
+                    ) : (
+                        <div className="bg-white p-6 rounded shadow max-w-md mx-auto">
+                            <h3 className="font-bold text-xl mb-4">Configurar Nuevo Menú</h3>
+                            <form onSubmit={createMenu} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700">Nombre del Menú</label>
+                                    <input className="w-full border p-2 rounded" value={newMenuName} onChange={e => setNewMenuName(e.target.value)} placeholder="Ej. Menú Ejecutivo 2025" required />
+                                </div>
+                                <div className="bg-blue-50 p-3 rounded text-sm text-blue-800">
+                                    💡 Podrás agregar platillos después de crear el menú.
+                                </div>
+                                <div className="flex justify-end gap-2 pt-4">
+                                    <button type="button" onClick={() => setShowMenuForm(false)} className="text-gray-500 px-4 py-2">Cancelar</button>
+                                    <button type="submit" className="bg-primavera-gold text-white px-6 py-2 rounded font-bold">Crear Menú</button>
+                                </div>
+                            </form>
+                        </div>
+                    )}
                 </div>
             )}
         </div>

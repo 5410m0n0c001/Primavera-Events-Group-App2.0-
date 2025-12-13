@@ -12,7 +12,8 @@ const SmartCategory: React.FC<SmartCategoryProps> = ({ title, items, selectedIte
 
     // Simulate smart rule application (frontend simplified logic)
     const getSuggestedQuantity = (item: any) => {
-        // Example: Waiters (rule: 1 per 15 guests)
+        // Smart scaling rules:
+        if (item.unit === 'persona') return guestCount; // Auto-scale menus/drinks to guest count
         if (item.name.toLowerCase().includes('mesero')) return Math.ceil(guestCount / 15);
         if (item.name.toLowerCase().includes('mesa')) return Math.ceil(guestCount / 10);
         return 1;

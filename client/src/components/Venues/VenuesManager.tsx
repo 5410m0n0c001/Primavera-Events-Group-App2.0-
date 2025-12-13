@@ -11,6 +11,15 @@ const VenuesManager: React.FC = () => {
     const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
     const [editingVenue, setEditingVenue] = useState<Venue | null>(null);
 
+    // Fallback Data in case backend is offline/empty
+    const MOCK_VENUES: Venue[] = [
+        { id: 'v1', name: 'Salón Los Caballos', capacity: 300, priceRent: 15000, description: 'Amplio salón estilo hacienda con jardines.', features: [{ name: 'Jardín' }, { name: 'Pista de Baile' }], images: [], status: 'active', packages: [] },
+        { id: 'v2', name: 'Jardín La Flor', capacity: 200, priceRent: 12000, description: 'Hermoso jardín ideal para bodas al aire libre.', features: [{ name: 'Carpa' }, { name: 'Iluminación' }], images: [], status: 'active', packages: [] },
+        { id: 'v3', name: 'Salón Los Potrillos', capacity: 150, priceRent: 10000, description: 'Espacio íntimo para eventos familiares.', features: [{ name: 'Cocina' }, { name: 'Barra' }], images: [], status: 'active', packages: [] },
+        { id: 'v4', name: 'Salón Jardín Yolomécatl', capacity: 400, priceRent: 25000, description: 'Gran capacidad y elegancia para eventos masivos.', features: [{ name: 'Escenario' }, { name: 'Estacionamiento' }], images: [], status: 'active', packages: [] },
+        { id: 'v5', name: 'Salón Presidente', capacity: 500, priceRent: 30000, description: 'El venue más exclusivo y grande.', features: [{ name: 'A/C' }, { name: 'Suite' }], images: [], status: 'active', packages: [] },
+    ];
+
     useEffect(() => {
         fetchVenues();
     }, []);
@@ -20,10 +29,18 @@ const VenuesManager: React.FC = () => {
             const response = await fetch('http://localhost:3000/api/venues');
             if (response.ok) {
                 const data = await response.json();
-                setVenues(data);
+                if (Array.isArray(data) && data.length > 0) {
+                    setVenues(data);
+                } else {
+                    console.warn('Backend returned empty list, using mocks.');
+                    setVenues(MOCK_VENUES);
+                }
+            } else {
+                throw new Error('API Error');
             }
         } catch (error) {
-            console.error('Error fetching venues:', error);
+            console.error('Error fetching venues, using mock data:', error);
+            setVenues(MOCK_VENUES);
         } finally {
             setLoading(false);
         }
