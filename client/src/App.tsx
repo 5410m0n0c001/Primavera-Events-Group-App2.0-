@@ -20,9 +20,9 @@ function App() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-xl font-serif text-primavera-gold font-bold flex-shrink-0">Primavera Events Group</div>
 
-          {/* Mobile Scrollable Nav */}
-          <div className="w-full overflow-x-auto pb-2 md:pb-0">
-            <div className="flex space-x-4 min-w-max px-2 md:px-0">
+          {/* Mobile Scrollable Nav (Desktop: Grid/Wrap) */}
+          <div className="w-full md:w-auto overflow-x-auto md:overflow-visible pb-2 md:pb-0">
+            <div className="flex md:flex-wrap space-x-4 md:space-x-2 min-w-max md:min-w-0 px-2 md:px-0">
               <button
                 onClick={() => setView('quote')}
                 className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'quote' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}

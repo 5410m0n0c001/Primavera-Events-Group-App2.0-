@@ -66,13 +66,19 @@ const ProductionDashboard: React.FC = () => {
 
     // --- LAYOUT HANDLERS ---
 
-    // 1. Click to Add (Fallback)
+    // 1. Click to Add (Fallback with Random Position)
     const addLayoutObject = (type: LayoutObject['type']) => {
+        // Random pos within 200px range of center to avoid stacking
+        const centerX = canvasWidth / 2;
+        const centerY = canvasHeight / 2;
+        const randomOffsetX = (Math.random() - 0.5) * 200;
+        const randomOffsetY = (Math.random() - 0.5) * 200;
+
         const newObj: LayoutObject = {
             id: Date.now().toString(),
             type,
-            x: 50,
-            y: 50,
+            x: Math.max(0, Math.min(centerX + randomOffsetX, canvasWidth - 50)),
+            y: Math.max(0, Math.min(centerY + randomOffsetY, canvasHeight - 50)),
             label: getLabelForType(type)
         };
         setLayoutObjects([...layoutObjects, newObj]);
@@ -157,6 +163,31 @@ const ProductionDashboard: React.FC = () => {
             ));
             setDragId(null);
         }
+    };
+
+    // --- TOUCH HANDLERS (Mobile Support) ---
+    const handleTouchStart = (e: React.TouchEvent, id: string) => {
+        e.stopPropagation();
+        setSelectedId(id);
+        // We don't use dragId for touch, we move directly in TouchMove
+    };
+
+    const handleTouchMove = (e: React.TouchEvent, id: string) => {
+        e.stopPropagation();
+        if (!canvasRef.current) return;
+
+        const touch = e.touches[0];
+        const canvasRect = canvasRef.current.getBoundingClientRect();
+        const x = touch.clientX - canvasRect.left;
+        const y = touch.clientY - canvasRect.top;
+
+        // Constrain
+        const constrainedX = Math.max(0, Math.min(x - 25, canvasWidth - 40));
+        const constrainedY = Math.max(0, Math.min(y - 25, canvasHeight - 40));
+
+        setLayoutObjects(prev => prev.map(obj =>
+            obj.id === id ? { ...obj, x: constrainedX, y: constrainedY } : obj
+        ));
     };
 
     const renderObjectStyle = (type: LayoutObject['type']) => {
@@ -277,6 +308,9 @@ const ProductionDashboard: React.FC = () => {
                                     key={obj.id}
                                     draggable
                                     onDragStart={(e) => handleDragStartObject(e, obj.id)}
+                                    // Touch Events
+                                    onTouchStart={(e) => handleTouchStart(e, obj.id)}
+                                    onTouchMove={(e) => handleTouchMove(e, obj.id)}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setSelectedId(obj.id);
