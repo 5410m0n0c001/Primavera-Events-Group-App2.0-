@@ -10,15 +10,16 @@ echo "⏳ Waiting for PostgreSQL..."
 MAX_RETRIES=30
 RETRY_COUNT=0
 
-until npx prisma db ping --schema=./prisma/schema.prisma || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
+# Usar 'prisma migrate deploy' como check de conexión (es idempotente)
+until npx prisma migrate deploy --schema=./prisma/schema.prisma || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
   RETRY_COUNT=$((RETRY_COUNT+1))
-  echo "   Attempt $RETRY_COUNT/$MAX_RETRIES..."
-  sleep 2
+  echo "   Attempt $RETRY_COUNT/$MAX_RETRIES: DB not ready or migration failed, retrying..."
+  sleep 5
 done
 
 if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
-  echo "❌ Failed to connect to database (Proceeding anyway for debug purposes)"
-  # exit 1  <-- Disabled to allow container logging
+  echo "❌ Failed to connect to database or run migrations (Proceeding for logs)"
+  # exit 1 
 fi
 
 echo "✅ Database connected!"
