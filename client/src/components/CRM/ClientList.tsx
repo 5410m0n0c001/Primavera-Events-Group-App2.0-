@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { api } from '../../config/api';
 
 interface Client {
     id: string;
@@ -19,25 +20,28 @@ const ClientList: React.FC = () => {
         fetchClients();
     }, []);
 
-    const fetchClients = () => {
-        fetch('/api/clients')
-            .then(res => res.json())
-            .then(data => {
-                setClients(data);
-                setLoading(false);
-            });
+    const fetchClients = async () => {
+        try {
+            const { data } = await api.get('/clients');
+            setClients(data);
+        } catch (error) {
+            console.error('Error fetching clients:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await fetch('/api/clients', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newClient)
-        });
-        setShowForm(false);
-        setNewClient({ firstName: '', lastName: '', email: '', phone: '', type: 'LEAD' });
-        fetchClients();
+        try {
+            await api.post('/clients', newClient);
+            setShowForm(false);
+            setNewClient({ firstName: '', lastName: '', email: '', phone: '', type: 'LEAD' });
+            fetchClients();
+        } catch (error) {
+            console.error('Error creating client:', error);
+            alert('Error al guardar el cliente');
+        }
     };
 
     return (
@@ -116,8 +120,8 @@ const ClientList: React.FC = () => {
                                 <td className="p-4 text-gray-500">{client.phone || '-'}</td>
                                 <td className="p-4">
                                     <span className={`px-2 py-1 rounded-full text-xs font-bold ${client.type === 'ACTIVE' ? 'bg-green-100 text-green-800' :
-                                            client.type === 'PROSPECT' ? 'bg-yellow-100 text-yellow-800' :
-                                                'bg-gray-100 text-gray-800'
+                                        client.type === 'PROSPECT' ? 'bg-yellow-100 text-yellow-800' :
+                                            'bg-gray-100 text-gray-800'
                                         }`}>
                                         {client.type}
                                     </span>
