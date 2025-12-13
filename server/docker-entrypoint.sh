@@ -11,7 +11,7 @@ MAX_RETRIES=30
 RETRY_COUNT=0
 
 # Usar 'prisma migrate deploy' como check de conexión (es idempotente)
-until npx prisma migrate deploy --schema=./prisma/schema.prisma || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
+until npx prisma db push --schema=./prisma/schema.prisma --accept-data-loss || [ $RETRY_COUNT -eq $MAX_RETRIES ]; do
   RETRY_COUNT=$((RETRY_COUNT+1))
   echo "   Attempt $RETRY_COUNT/$MAX_RETRIES: DB not ready or migration failed, retrying..."
   sleep 5
@@ -25,8 +25,9 @@ fi
 echo "✅ Database connected!"
 
 # Migraciones
-echo "🔄 Running migrations..."
-npx prisma migrate deploy --schema=./prisma/schema.prisma || echo "⚠️  Migrations failed"
+echo "🔄 Running migrations (db push)..."
+# Usamos db push porque no estamos usando flujos de migraciones formales todavía
+npx prisma db push --schema=./prisma/schema.prisma --accept-data-loss || echo "⚠️  DB Push failed"
 
 # Generar cliente (redundante pero seguro)
 echo "🔄 Ensuring Prisma Client..."
