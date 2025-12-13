@@ -1,5 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import type { InventoryItem } from '../../types/InventoryTypes';
+import * as XLSX from 'xlsx';
+
+interface Category {
+    id: string;
+    name: string;
+    subCategories: { id: string; name: string }[];
+}
 
 const InventoryDashboard: React.FC = () => {
     const [items, setItems] = useState<InventoryItem[]>([]);
@@ -9,24 +16,49 @@ const InventoryDashboard: React.FC = () => {
     const [viewMode, setViewMode] = useState<'compact' | 'detailed'>('detailed');
     const [filterStatus, setFilterStatus] = useState<'ALL' | 'AVAILABLE' | 'LOW_STOCK' | 'UNAVAILABLE'>('ALL');
 
+    // Categories
+    const [categories, setCategories] = useState<Category[]>([]);
+
+    // Modal State
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [newItem, setNewItem] = useState({ name: '', unit: 'pieza', stock: 0, price: 0, subCategoryId: '' });
+
+    // File Upload
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     // Inline Edit State
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editForm, setEditForm] = useState<Partial<InventoryItem>>({});
 
     useEffect(() => {
         loadData();
+        loadCategories();
     }, [date]);
 
     const loadData = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:3000/api/inventory/availability?date=${date}`);
+            const res = await fetch(`/api/inventory/availability?date=${date}`);
             const data = await res.json();
             setItems(data);
         } catch (e) {
             console.error(e);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const loadCategories = async () => {
+        try {
+            const res = await fetch('/api/catalog');
+            const data = await res.json();
+            setCategories(data);
+            // Set default subcategory if available
+            if (data.length > 0 && data[0].subCategories.length > 0) {
+                setNewItem(prev => ({ ...prev, subCategoryId: data[0].subCategories[0].id }));
+            }
+        } catch (e) {
+            console.error(e);
         }
     };
 
@@ -65,7 +97,7 @@ const InventoryDashboard: React.FC = () => {
 
     const handleSave = async (id: string) => {
         try {
-            const res = await fetch(`http://localhost:3000/api/inventory/${id}`, {
+            const res = await fetch(`/api/inventory/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(editForm)
@@ -87,37 +119,95 @@ const InventoryDashboard: React.FC = () => {
     const handleDelete = async (id: string) => {
         if (!confirm('¿Seguro que deseas eliminar este artículo?')) return;
         try {
-            await fetch(`http://localhost:3000/api/inventory/${id}`, { method: 'DELETE' });
+            await fetch(`/api/inventory/${id}`, { method: 'DELETE' });
             setItems(prev => prev.filter(i => i.id !== id));
         } catch (error) {
             console.error(error);
         }
     };
 
-    const handleCreate = async () => {
-        // Quick create placeholder for MVP
-        const name = prompt("Nombre del nuevo artículo:");
-        if (!name) return;
+    const handleCreateWrapper = () => {
+        setIsModalOpen(true);
+    };
+
+    const submitCreate = async () => {
+        if (!newItem.name || !newItem.subCategoryId) {
+            alert("Nombre y Categoría son obligatorios");
+            return;
+        }
 
         try {
-            const res = await fetch('http://localhost:3000/api/inventory', {
+            const res = await fetch('/api/inventory', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name,
-                    unit: 'pieza',
-                    stock: 0,
-                    price: 0,
-                    subCategoryId: 'GENERIC' // Needs proper category handling in full app
-                })
+                body: JSON.stringify(newItem)
             });
             if (res.ok) {
                 loadData();
+                setIsModalOpen(false);
+                setNewItem({ name: '', unit: 'pieza', stock: 0, price: 0, subCategoryId: categories[0]?.subCategories[0]?.id || '' });
             }
         } catch (error) {
             console.error(error);
         }
     };
+
+    // --- Excel Import ---
+    const handleImportClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            const bstr = evt.target?.result;
+            const wb = XLSX.read(bstr, { type: 'binary' });
+            const wsname = wb.SheetNames[0];
+            const ws = wb.Sheets[wsname];
+            const data: any[] = XLSX.utils.sheet_to_json(ws);
+
+            // Map data to expected format
+            // Expected Excel columns: Name, Stock, Price, Unit, Location
+            const mappedItems = data.map(row => ({
+                name: row['Name'] || row['Nombre'],
+                stock: row['Stock'] || 0,
+                price: row['Price'] || row['Precio'] || 0,
+                unit: row['Unit'] || row['Unidad'] || 'pieza',
+                location: row['Location'] || row['Ubicacion']
+            }));
+
+            if (mappedItems.length > 0) {
+                uploadBulkItems(mappedItems);
+            }
+        };
+        reader.readAsBinaryString(file);
+        // Reset input
+        e.target.value = '';
+    };
+
+    const uploadBulkItems = async (items: any[]) => {
+        try {
+            const res = await fetch('/api/inventory/bulk', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(items)
+            });
+            if (res.ok) {
+                const result = await res.json();
+                alert(`Se importaron ${result.count} artículos exitosamente.`);
+                loadData();
+            } else {
+                alert('Error al importar');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error al conectar con servidor');
+        }
+    };
+
 
     const exportCSV = () => {
         const headers = ["Nombre", "Stock", "Reservado", "Disponible", "Precio", "Ubicación"];
@@ -151,11 +241,17 @@ const InventoryDashboard: React.FC = () => {
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
+            {/* Hidden File Input */}
+            <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".xlsx, .xls, .csv" className="hidden" />
+
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold text-gray-800">Gestión de Inventario</h1>
                 <div className="flex gap-2">
-                    <button onClick={exportCSV} className="px-4 py-2 border bg-white rounded shadow-sm text-gray-600 hover:bg-gray-50">Exportar Excel</button>
-                    <button onClick={handleCreate} className="px-4 py-2 bg-purple-600 text-white rounded shadow hover:bg-purple-700">+ Nuevo Artículo</button>
+                    <button onClick={handleImportClick} className="px-4 py-2 bg-green-600 text-white rounded shadow hover:bg-green-700">
+                        📥 Importar Excel
+                    </button>
+                    <button onClick={exportCSV} className="px-4 py-2 border bg-white rounded shadow-sm text-gray-600 hover:bg-gray-50">Exportar CSV</button>
+                    <button onClick={handleCreateWrapper} className="px-4 py-2 bg-purple-600 text-white rounded shadow hover:bg-purple-700">+ Nuevo Artículo</button>
                 </div>
             </div>
 
@@ -315,6 +411,81 @@ const InventoryDashboard: React.FC = () => {
             <div className="mt-4 text-center text-gray-500 text-xs">
                 Mostrando {filteredItems.length} artículos.
             </div>
+
+            {/* Create Item Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+                        <h2 className="text-xl font-bold mb-4">Nuevo Artículo</h2>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Nombre</label>
+                                <input
+                                    type="text"
+                                    className="w-full border rounded px-3 py-2 mt-1"
+                                    value={newItem.name}
+                                    onChange={e => setNewItem({ ...newItem, name: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Stock</label>
+                                    <input
+                                        type="number"
+                                        className="w-full border rounded px-3 py-2 mt-1"
+                                        value={newItem.stock}
+                                        onChange={e => setNewItem({ ...newItem, stock: parseInt(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Precio</label>
+                                    <input
+                                        type="number"
+                                        className="w-full border rounded px-3 py-2 mt-1"
+                                        value={newItem.price}
+                                        onChange={e => setNewItem({ ...newItem, price: parseFloat(e.target.value) || 0 })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Categoría</label>
+                                <select
+                                    className="w-full border rounded px-3 py-2 mt-1"
+                                    value={newItem.subCategoryId}
+                                    onChange={e => setNewItem({ ...newItem, subCategoryId: e.target.value })}
+                                >
+                                    <option value="">Selecciona una categoría...</option>
+                                    {categories.map(cat => (
+                                        <optgroup key={cat.id} label={cat.name}>
+                                            {cat.subCategories.map(sub => (
+                                                <option key={sub.id} value={sub.id}>{sub.name}</option>
+                                            ))}
+                                        </optgroup>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex justify-end gap-2">
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={submitCreate}
+                                className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 font-bold"
+                            >
+                                Crear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

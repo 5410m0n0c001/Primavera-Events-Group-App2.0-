@@ -126,6 +126,48 @@ router.get('/alerts', async (req, res) => {
     }
 });
 
+// POST Bulk Create (Excel Import)
+router.post('/bulk', async (req, res) => {
+    try {
+        const items = req.body; // Array of { name, stock, price, category }
+        if (!Array.isArray(items)) return res.status(400).json({ error: 'Expected array of items' });
+
+        const createdItems = [];
+
+        // Ensure "Imported" category exists
+        let catImport = await prisma.catalogCategory.findFirst({ where: { name: 'Importados' } });
+        if (!catImport) {
+            catImport = await prisma.catalogCategory.create({ data: { name: 'Importados', description: 'Items importados de Excel' } });
+        }
+        let subGeneric = await prisma.catalogSubCategory.findFirst({ where: { name: 'General', categoryId: catImport.id } });
+        if (!subGeneric) {
+            subGeneric = await prisma.catalogSubCategory.create({ data: { name: 'General', categoryId: catImport.id } });
+        }
+
+        for (const i of items) {
+            // Basic validation
+            if (!i.name) continue;
+
+            const newItem = await prisma.catalogItem.create({
+                data: {
+                    name: i.name,
+                    unit: i.unit || 'pieza',
+                    stock: Number(i.stock || 0),
+                    price: Number(i.price || 0),
+                    subCategoryId: subGeneric.id, // Assign to generic for now, user can move later
+                    options: i.location ? JSON.stringify({ location: i.location }) : null
+                }
+            });
+            createdItems.push(newItem);
+        }
+
+        res.json({ message: 'Import successful', count: createdItems.length });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to import items' });
+    }
+});
+
 // POST Create Item
 router.post('/', async (req, res) => {
     try {
@@ -135,7 +177,9 @@ router.post('/', async (req, res) => {
                 name,
                 unit,
                 stock: Number(stock),
-                subCategoryId,
+                subCategoryId: subCategoryId || undefined, // Prisma will fail if undefined needed? No, let's look up or fail.
+                // Actually, we should find a default if missing, or require it. 
+                // For now, let's assume UI sends a valid ID or we fail.
                 price: Number(price || 0),
                 options: options ? JSON.stringify(options) : null
             }
