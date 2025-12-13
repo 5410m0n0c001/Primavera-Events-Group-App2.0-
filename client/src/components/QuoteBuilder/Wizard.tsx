@@ -181,7 +181,7 @@ const QuoteWizard: React.FC = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto p-6 flex gap-8 items-start relative">
+        <div className="max-w-7xl mx-auto p-6 flex gap-8 relative">
 
             {/* Main Content */}
             <div className="flex-1">
