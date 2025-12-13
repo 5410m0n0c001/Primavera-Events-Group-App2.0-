@@ -68,9 +68,13 @@ router.get('/dashboard', async (req, res) => {
             }
         });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
-        res.status(500).json({ error: 'Failed to fetch analytics' });
+        res.status(500).json({
+            error: 'Failed to fetch analytics',
+            details: error.message,
+            stack: error.stack
+        });
     }
 });
 
