@@ -16,70 +16,74 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Navigation Bar */}
-      <nav className="bg-primavera-black text-white p-4 shadow-md">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div className="text-xl font-serif text-primavera-gold font-bold">Primavera Events Group</div>
-          <div className="space-x-4">
-            <button
-              onClick={() => setView('quote')}
-              className={`px-3 py-1 rounded transition ${view === 'quote' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-            >
-              Cotizador
-            </button>
-            <button
-              onClick={() => setView('venues')}
-              className={`px-3 py-1 rounded transition ${view === 'venues' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-            >
-              Locaciones
-            </button>
-            <button
-              onClick={() => setView('crm')}
-              className={`px-3 py-1 rounded transition ${view === 'crm' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-            >
-              CRM Clientes
-            </button>
-            <button
-              onClick={() => setView('calendar')}
-              className={`px-3 py-1 rounded transition ${view === 'calendar' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-            >
-              Calendario
-            </button>
-            <button
-              onClick={() => setView('inventory')}
-              className={`px-3 py-1 rounded transition ${view === 'inventory' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-            >
-              Inventario
-            </button>
-            <button
-              onClick={() => setView('suppliers')}
-              className={`px-3 py-1 rounded transition ${view === 'suppliers' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-            >
-              Proveedores
-            </button>
-            <button
-              onClick={() => setView('finance')}
-              className={`px-3 py-1 rounded transition ${view === 'finance' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-            >
-              Finanzas
-            </button>
-            <button
-              onClick={() => setView('catering')}
-              className={`px-3 py-1 rounded transition ${view === 'catering' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-            >
-              Catering
-            </button>
-            <button
-              onClick={() => setView('production')}
-              className={`px-3 py-1 rounded transition ${view === 'production' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-            >
-              Producción
-            </button>
-            <button
-              onClick={() => setView('analytics')}
-              className={`px-3 py-1 rounded transition ${view === 'analytics' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-            >
-              Analytics
-            </button>
+      <nav className="bg-primavera-black text-white p-4 shadow-md sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="text-xl font-serif text-primavera-gold font-bold flex-shrink-0">Primavera Events Group</div>
+
+          {/* Mobile Scrollable Nav */}
+          <div className="w-full overflow-x-auto pb-2 md:pb-0">
+            <div className="flex space-x-4 min-w-max px-2 md:px-0">
+              <button
+                onClick={() => setView('quote')}
+                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'quote' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
+              >
+                Cotizador
+              </button>
+              <button
+                onClick={() => setView('venues')}
+                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'venues' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
+              >
+                Locaciones
+              </button>
+              <button
+                onClick={() => setView('crm')}
+                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'crm' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
+              >
+                CRM Clientes
+              </button>
+              <button
+                onClick={() => setView('calendar')}
+                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'calendar' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
+              >
+                Calendario
+              </button>
+              <button
+                onClick={() => setView('inventory')}
+                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'inventory' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
+              >
+                Inventario
+              </button>
+              <button
+                onClick={() => setView('suppliers')}
+                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'suppliers' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
+              >
+                Proveedores
+              </button>
+              <button
+                onClick={() => setView('finance')}
+                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'finance' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
+              >
+                Finanzas
+              </button>
+              <button
+                onClick={() => setView('catering')}
+                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'catering' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
+              >
+                Catering
+              </button>
+              <button
+                onClick={() => setView('production')}
+                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'production' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
+              >
+                Producción
+              </button>
+              <button
+                onClick={() => setView('analytics')}
+                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'analytics' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
+              >
+                Analytics
+              </button>
+            </div>
           </div>
         </div>
       </nav>

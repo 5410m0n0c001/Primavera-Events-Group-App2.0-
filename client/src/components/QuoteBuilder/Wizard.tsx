@@ -181,28 +181,28 @@ const QuoteWizard: React.FC = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto p-6 flex gap-8 relative">
+        <div className="max-w-7xl mx-auto p-6 flex flex-col md:flex-row gap-8 relative">
 
             {/* Main Content */}
-            <div className="flex-1">
+            <div className="flex-1 w-full">
                 <div className="mb-8">
-                    <h1 className="text-4xl font-serif text-primavera-gold font-bold mb-2">
+                    <h1 className="text-3xl md:text-4xl font-serif text-primavera-gold font-bold mb-2 break-words">
                         Nueva Cotización Inteligente
                     </h1>
                     <p className="text-gray-500">Diseña el evento perfecto con cálculos automáticos.</p>
                 </div>
 
                 {/* Progress */}
-                <div className="flex gap-4 mb-8 text-sm font-bold text-gray-400 uppercase tracking-wider border-b pb-4">
-                    <span className={step === 1 ? 'text-black' : ''}>1. Evento</span>
-                    <span className={step === 2 ? 'text-black' : ''}>2. Servicios</span>
-                    <span className={step === 3 ? 'text-black' : ''}>3. Finalizar</span>
+                <div className="flex gap-4 mb-8 text-sm font-bold text-gray-400 uppercase tracking-wider border-b pb-4 overflow-x-auto">
+                    <span className={step === 1 ? 'text-black whitespace-nowrap' : 'whitespace-nowrap'}>1. Evento</span>
+                    <span className={step === 2 ? 'text-black whitespace-nowrap' : 'whitespace-nowrap'}>2. Servicios</span>
+                    <span className={step === 3 ? 'text-black whitespace-nowrap' : 'whitespace-nowrap'}>3. Finalizar</span>
                 </div>
 
                 {step === 1 && (
-                    <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+                    <div className="bg-white p-6 md:p-8 rounded-xl shadow-lg border border-gray-100">
                         <h2 className="text-2xl font-bold mb-6">Detalles del Evento</h2>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label className="block text-sm font-medium mb-1 text-gray-600">Nombre del Evento</label>
                                 <input
@@ -243,7 +243,7 @@ const QuoteWizard: React.FC = () => {
                             </div>
                         </div>
                         <div className="mt-8 flex justify-end">
-                            <button onClick={() => setStep(2)} className="bg-primavera-black text-white px-8 py-3 rounded-lg font-bold hover:bg-gray-800 transition">
+                            <button onClick={() => setStep(2)} className="w-full md:w-auto bg-primavera-black text-white px-8 py-3 rounded-lg font-bold hover:bg-gray-800 transition">
                                 Siguiente: Seleccionar Servicios →
                             </button>
                         </div>
@@ -255,7 +255,7 @@ const QuoteWizard: React.FC = () => {
                         <div className="flex justify-end">
                             <button
                                 onClick={() => setShowManualForm(true)}
-                                className="bg-white border border-primavera-gold text-primavera-gold px-4 py-2 rounded-lg font-bold hover:bg-yellow-50 transition flex items-center gap-2"
+                                className="w-full md:w-auto bg-white border border-primavera-gold text-primavera-gold px-4 py-2 rounded-lg font-bold hover:bg-yellow-50 transition flex items-center justify-center gap-2"
                             >
                                 + Agregar Elemento Manual
                             </button>
@@ -271,8 +271,8 @@ const QuoteWizard: React.FC = () => {
                                 guestCount={draft.guestCount}
                             />
                         ))}
-                        <div className="flex justify-between pt-6">
-                            <button onClick={() => setStep(1)} className="text-gray-500 hover:text-black font-medium">
+                        <div className="flex flex-col-reverse md:flex-row justify-between pt-6 gap-4">
+                            <button onClick={() => setStep(1)} className="text-gray-500 hover:text-black font-medium py-2">
                                 ← Volver
                             </button>
                             <button onClick={handleFinalize} className="bg-primavera-black text-white px-8 py-3 rounded-lg font-bold hover:bg-gray-800 transition">
@@ -290,8 +290,8 @@ const QuoteWizard: React.FC = () => {
                         <h2 className="text-3xl font-bold mb-2">¡Cotización Lista!</h2>
                         <p className="text-gray-600 mb-8">Has configurado un evento para {draft.guestCount} personas.</p>
 
-                        <div className="flex justify-center gap-4">
-                            <button onClick={handleGeneratePDF} className="bg-primavera-gold text-white px-8 py-3 rounded-lg font-bold hover:brightness-110 transition flex items-center gap-2">
+                        <div className="flex flex-col md:flex-row justify-center gap-4">
+                            <button onClick={handleGeneratePDF} className="bg-primavera-gold text-white px-8 py-3 rounded-lg font-bold hover:brightness-110 transition flex items-center justify-center gap-2">
                                 <span>📄</span> Descargar PDF Profesional
                             </button>
                             <button className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-bold hover:bg-gray-50 transition">
@@ -307,7 +307,7 @@ const QuoteWizard: React.FC = () => {
             </div>
 
             {/* Sidebar Calculator - Replaced by Breakdown Panel */}
-            <div className="w-96 flex-shrink-0 relative">
+            <div className="w-full md:w-96 flex-shrink-0 relative order-first md:order-last">
                 <div className="sticky top-6">
                     <QuoteBreakdown
                         draft={draft}
