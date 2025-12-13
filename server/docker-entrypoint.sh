@@ -32,6 +32,11 @@ npx prisma migrate deploy --schema=./prisma/schema.prisma || echo "⚠️  Migra
 echo "🔄 Ensuring Prisma Client..."
 npx prisma generate --schema=./prisma/schema.prisma
 
+# Semillado automático (simple, siempre intenta correr pero el script seed.ts debe ser idempotente o manejar duplicados si fallara)
+# Para producción real, lo ideal es una verificación seria. Aquí simplemente corremos seed y si falla (ya existen datos) no bloquea el inicio.
+echo "🌱 Seeding database..."
+npm run seed || echo "⚠️  Seeding skipped or failed (data might already exist)"
+
 echo "✅ Ready to start!"
 echo "================================================"
 

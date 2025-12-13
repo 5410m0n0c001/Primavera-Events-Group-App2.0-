@@ -113,6 +113,17 @@ async function main() {
         await prisma.venue.create({ data: v });
     }
 
+    // --- SEED CLIENTS (DUMMY) ---
+    console.log('Seeding Dummy Clients...');
+    const dummyClients = [
+        { firstName: 'Ana', lastName: 'García', email: 'ana@example.com', phone: '5512345678', type: 'LEAD', notes: 'Interesada en boda primavera 2026' },
+        { firstName: 'Carlos', lastName: 'López', email: 'carlos@example.com', phone: '5587654321', type: 'PROSPECT', notes: 'Cotizando paquete Gold' },
+        { firstName: 'Empresa', lastName: 'Tecnología SA', email: 'contacto@techsa.com', phone: '5555555555', type: 'ACTIVE', notes: 'Evento anual de fin de año' },
+    ];
+    for (const c of dummyClients) {
+        await prisma.client.create({ data: c });
+    }
+
 
     // --- 2. CATERING ---
     const catCatering = await prisma.catalogCategory.create({
