@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { api } from '../../config/api';
 
 interface Client {
     id: string;
@@ -22,7 +21,9 @@ const ClientList: React.FC = () => {
 
     const fetchClients = async () => {
         try {
-            const { data } = await api.get('/clients');
+            const res = await fetch('/api/clients');
+            if (!res.ok) throw new Error('Error fetching clients');
+            const data = await res.json();
             setClients(data);
         } catch (error) {
             console.error('Error fetching clients:', error);
@@ -34,7 +35,13 @@ const ClientList: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await api.post('/clients', newClient);
+            const res = await fetch('/api/clients', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newClient)
+            });
+            if (!res.ok) throw new Error('Error creating client');
+
             setShowForm(false);
             setNewClient({ firstName: '', lastName: '', email: '', phone: '', type: 'LEAD' });
             fetchClients();
