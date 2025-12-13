@@ -1,55 +1,59 @@
-import { Router } from 'express';
-import { CalculatorEngine } from '../services/CalculatorEngine';
+import PDFDocument from 'pdfkit';
+
+// ... existing code ...
 
 const router = Router();
 
-// Validation Endpoint
-router.post('/validate', async (req, res) => {
+// ... existing /validate route ...
+
+// PDF Generation Endpoint
+router.post('/generate-pdf', async (req, res) => {
     try {
-        const { items, guestCount } = req.body;
+        const { eventName, guestCount, date, items, totals } = req.body;
 
-        if (!items || !Array.isArray(items)) {
-            return res.status(400).json({ error: 'Invalid items array' });
-        }
+        const doc = new PDFDocument();
 
-        // 1. Re-calculate each item's total based on authoritative logic
-        // In a real app, we would fetch the price from DB here to ensure it hasn't changed.
-        // For MVP, we trust the 'price' in the payload or use a mock lookup.
-        const validatedItems = items.map((item: any) => {
-            const unitPrice = Number(item.price || item.unitPrice || 0); // In real DB, fetch by item.id
-            const quantity = Number(item.quantity || 0);
+        // Stream the PDF to the client
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=presupuesto-${eventName || 'evento'}.pdf`);
 
-            // Recalculate using engine
-            const total = CalculatorEngine.calculateTotal(quantity, unitPrice);
+        doc.pipe(res);
 
-            return {
-                ...item,
-                unitPrice, // Confirm price source of truth
-                total,
-                status: 'VALID' // Could be 'ADJUSTED' if we found a price diff
-            };
+        // Header
+        doc.fontSize(20).text('Primavera Events Group', { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(16).text('Cotización de Evento', { align: 'center' });
+        doc.moveDown();
+
+        // Event Details
+        doc.fontSize(12).text(`Evento: ${eventName}`);
+        doc.text(`Fecha: ${date || 'Por definir'}`);
+        doc.text(`Invitados: ${guestCount}`);
+        doc.moveDown();
+
+        // Items Table
+        doc.font('Helvetica-Bold').text('Detalle de Servicios:', { underline: true });
+        doc.moveDown(0.5);
+
+        items.forEach((item: any) => {
+            const price = Number(item.price || item.unitPrice || 0);
+            const total = Number(item.total || (price * item.quantity));
+            doc.font('Helvetica').text(`- ${item.name} (${item.quantity} ${item.unit}) - $${total.toLocaleString('es-MX')}`);
         });
 
-        // 2. Calculate Final Totals
-        const totals = CalculatorEngine.calculateQuoteTotals(validatedItems);
+        doc.moveDown();
 
-        res.json({
-            valid: true,
-            items: validatedItems,
-            totals
-        });
+        // Totals
+        const finalTotal = totals?.total || items.reduce((acc: number, curr: any) => acc + (Number(curr.total) || 0), 0);
+
+        doc.font('Helvetica-Bold').fontSize(14).text(`TOTAL: $${finalTotal.toLocaleString('es-MX')}`, { align: 'right' });
+
+        doc.end();
 
     } catch (error) {
-        console.error('Validation error:', error);
-        res.status(500).json({ error: 'Internal validation failed' });
+        console.error('PDF Generation error:', error);
+        res.status(500).json({ error: 'Error generating PDF' });
     }
-});
-
-// PDF Generation Endpoint (Moved/Standardized here)
-router.post('/generate-pdf', async (req, res) => {
-    // ... Existing PDF logic can be migrated here later
-    // For now, keeping the implementation simple to just support the current flow
-    res.status(501).json({ message: 'PDF Generation is handled in a separate service for now.' });
 });
 
 export default router;
