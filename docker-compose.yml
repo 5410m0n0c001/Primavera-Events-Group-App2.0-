@@ -58,6 +58,8 @@ services:
         - COOLIFY_FQDN=${COOLIFY_FQDN:-}
     expose:
       - "80"
+    ports:
+      - "8090:80"
     restart: unless-stopped
     depends_on:
       - backend
