@@ -29,17 +29,14 @@ echo "🔄 Running migrations (db push)..."
 # Usamos db push porque no estamos usando flujos de migraciones formales todavía
 npx prisma db push --schema=./prisma/schema.prisma --accept-data-loss || echo "⚠️  DB Push failed"
 
-echo "🌱 Seeding database..."
-npm run seed || echo "⚠️  Seeding failed (non-fatal)"
+echo "🌱 Seeding database (compiled)..."
+node dist/seed.js || echo "⚠️  Seeding skipped or failed"
 
 # Generar cliente (redundante pero seguro)
 echo "🔄 Ensuring Prisma Client..."
 npx prisma generate --schema=./prisma/schema.prisma
 
-# Semillado automático (simple, siempre intenta correr pero el script seed.ts debe ser idempotente o manejar duplicados si fallara)
-# Para producción real, lo ideal es una verificación seria. Aquí simplemente corremos seed y si falla (ya existen datos) no bloquea el inicio.
-echo "🌱 Seeding database..."
-npm run seed || echo "⚠️  Seeding skipped or failed (data might already exist)"
+
 
 echo "✅ Ready to start!"
 echo "================================================"
