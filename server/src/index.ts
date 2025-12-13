@@ -1,5 +1,4 @@
 import express from 'express';
-import cors from 'cors';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 import clientRoutes from './routes/clients';
@@ -15,7 +14,37 @@ import analyticsRoutes from './routes/analytics';
 import venueRoutes from './routes/venue.routes';
 import quotesRoutes from './routes/quotes';
 
-// ... other imports ...
+// Middlewares & Utils
+import { corsMiddleware } from './middleware/cors';
+import { helmetMiddleware } from './middleware/helmet';
+import { apiLimiter } from './middleware/rateLimiter';
+import { errorHandler } from './middleware/errorHandler';
+// import { sanitizeMiddleware } from './middleware/sanitize'; // Optional, can enable if strict strict needed
+import { healthCheck } from './health';
+import { logger } from './utils/logger';
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+const prisma = new PrismaClient();
+
+// Global Middlewares
+app.use(helmetMiddleware);
+app.use(corsMiddleware);
+app.use(express.json()); // Parse JSON bodies
+app.use(express.urlencoded({ extended: true }));
+app.use(apiLimiter);
+// app.use(sanitizeMiddleware);
+
+// Request Logger
+app.use((req, res, next) => {
+    logger.http(`${req.method} ${req.url}`);
+    next();
+});
+
+// Health Check
+app.get('/health', healthCheck);
 
 // API Routes
 app.use('/api/clients', clientRoutes);
@@ -31,9 +60,9 @@ app.use('/api/venues', venueRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/quotes', quotesRoutes);
 
-// Removed inline PDF generation in favor of api/quotes/generate-pdf
-// app.post('/api/quotes/generate-pdf' ... handled in quotesRoutes
+// Error Handler (Must be last)
+app.use(errorHandler);
 
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    logger.info(`Server running on http://localhost:${PORT}`);
 });
