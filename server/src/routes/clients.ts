@@ -12,7 +12,8 @@ router.get('/', async (req, res) => {
         });
         res.json(clients);
     } catch (error) {
-        res.status(500).json({ error: 'Error fetching clients' });
+        console.error('Error fetching clients:', error);
+        res.status(500).json({ error: 'Error fetching clients', details: String(error) });
     }
 });
 
