@@ -22,3 +22,6 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+# Prisma / Local databases
+*.db
+*.sqlite
