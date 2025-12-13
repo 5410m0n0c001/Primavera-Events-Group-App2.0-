@@ -29,6 +29,9 @@ echo "🔄 Running migrations (db push)..."
 # Usamos db push porque no estamos usando flujos de migraciones formales todavía
 npx prisma db push --schema=./prisma/schema.prisma --accept-data-loss || echo "⚠️  DB Push failed"
 
+echo "🌱 Seeding database..."
+npm run seed || echo "⚠️  Seeding failed (non-fatal)"
+
 # Generar cliente (redundante pero seguro)
 echo "🔄 Ensuring Prisma Client..."
 npx prisma generate --schema=./prisma/schema.prisma
