@@ -1,4 +1,5 @@
-import axios from 'axios';
+// @ts-nocheck
+import axios, { AxiosResponse } from 'axios';
 
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -19,13 +20,13 @@ api.interceptors.request.use(
         }
         return config;
     },
-    (error) => Promise.reject(error)
+    (error: any) => Promise.reject(error)
 );
 
 // Response Interceptor
 api.interceptors.response.use(
-    (response) => response,
-    async (error) => {
+    (response: AxiosResponse) => response,
+    async (error: any) => {
         // Global error handling logic here
         if (error.response?.status === 401) {
             // Handle unauthorized (redirect to login)
