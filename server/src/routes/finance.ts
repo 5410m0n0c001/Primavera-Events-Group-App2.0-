@@ -97,4 +97,43 @@ router.post('/expenses', async (req, res) => {
     }
 });
 
+// DELETE payment
+router.delete('/payments/:id', async (req, res) => {
+    try {
+        await prisma.payment.delete({ where: { id: req.params.id } });
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete payment' });
+    }
+});
+
+// DELETE expense
+router.delete('/expenses/:id', async (req, res) => {
+    try {
+        await prisma.expense.delete({ where: { id: req.params.id } });
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete expense' });
+    }
+});
+
+// GET Projections (Quotes Analysis)
+router.get('/projections', async (req, res) => {
+    try {
+        const quotes = await prisma.quote.findMany({
+            select: { total: true, status: true }
+        });
+
+        const projection = {
+            potential: quotes.filter(q => q.status === 'SENT' || q.status === 'DRAFT').reduce((sum, q) => sum + Number(q.total), 0),
+            confirmed: quotes.filter(q => q.status === 'ACCEPTED').reduce((sum, q) => sum + Number(q.total), 0),
+            lost: quotes.filter(q => q.status === 'REJECTED').reduce((sum, q) => sum + Number(q.total), 0)
+        };
+
+        res.json(projection);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch projections' });
+    }
+});
+
 export default router;
