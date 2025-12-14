@@ -294,9 +294,9 @@ const ProductionDashboard: React.FC = () => {
                                     </div>
                                     <button
                                         onClick={addCustomObject}
-                                        className="w-full py-2 bg-primavera-gold text-white rounded-lg text-xs font-bold shadow hover:bg-yellow-600 transition-colors"
+                                        className="w-full py-2 bg-purple-600 text-white rounded-lg text-xs font-bold shadow hover:bg-purple-700 transition-colors"
                                     >
-                                        + AGREGAR
+                                        + AGREGAR ITEM (FIX CHECK)
                                     </button>
                                 </div>
                             </div>
