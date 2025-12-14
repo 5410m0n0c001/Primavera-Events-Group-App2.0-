@@ -11,7 +11,7 @@ interface TimelineItem {
 
 interface LayoutObject {
     id: string;
-    type: string;
+    type: string; // Dynamic type from config
     x: number;
     y: number;
     label: string;
@@ -61,6 +61,7 @@ const ProductionDashboard: React.FC = () => {
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId) {
+                // Ignore if typing in an input
                 if (document.activeElement?.tagName === 'INPUT') return;
                 deleteSelectedObject();
             }
@@ -85,6 +86,7 @@ const ProductionDashboard: React.FC = () => {
     // --- LAYOUT HANDLERS ---
 
     const addLayoutObject = (config: LayoutItemConfig) => {
+        // Random pos within 200px range of center to avoid stacking
         const centerX = canvasWidth / 2;
         const centerY = canvasHeight / 2;
         const randomOffsetX = (Math.random() - 0.5) * 200;
@@ -122,7 +124,7 @@ const ProductionDashboard: React.FC = () => {
             colorClass: 'bg-white border-2 border-black dark:border-white text-black dark:text-white'
         };
         setLayoutObjects([...layoutObjects, newObj]);
-        setCustomLabel('');
+        setCustomLabel(''); // Reset input
     }
 
     const deleteSelectedObject = () => {
@@ -131,6 +133,7 @@ const ProductionDashboard: React.FC = () => {
         setSelectedId(null);
     };
 
+    // 2. Drag Start (Existing Object)
     const handleDragStartObject = (e: React.DragEvent, id: string) => {
         e.stopPropagation();
         setDragId(id);
@@ -139,6 +142,7 @@ const ProductionDashboard: React.FC = () => {
         e.dataTransfer.effectAllowed = "move";
     };
 
+    // 3. Drag Start (New Item from Sidebar)
     const handleDragStartNew = (e: React.DragEvent, config: LayoutItemConfig) => {
         setDragItemConfig(config);
         setDragId(null);
@@ -158,10 +162,12 @@ const ProductionDashboard: React.FC = () => {
         const x = e.clientX - canvasRect.left;
         const y = e.clientY - canvasRect.top;
 
+        // Constrain to bounds
         const constrainedX = Math.max(0, Math.min(x, canvasWidth - 10));
         const constrainedY = Math.max(0, Math.min(y, canvasHeight - 10));
 
         if (dragItemConfig) {
+            // Drop New Item
             const newObj: LayoutObject = {
                 id: Date.now().toString(),
                 type: dragItemConfig.type,
@@ -176,6 +182,7 @@ const ProductionDashboard: React.FC = () => {
             setLayoutObjects(prev => [...prev, newObj]);
             setDragItemConfig(null);
         } else if (dragId) {
+            // Move Existing Item
             const existing = layoutObjects.find(o => o.id === dragId);
             if (existing) {
                 setLayoutObjects(prev => prev.map(obj =>
@@ -190,7 +197,7 @@ const ProductionDashboard: React.FC = () => {
         }
     };
 
-    // --- TOUCH HANDLERS ---
+    // --- TOUCH HANDLERS (Mobile Support) ---
     const handleTouchStart = (e: React.TouchEvent, id: string) => {
         e.stopPropagation();
         setSelectedId(id);
@@ -205,6 +212,7 @@ const ProductionDashboard: React.FC = () => {
         const x = touch.clientX - canvasRect.left;
         const y = touch.clientY - canvasRect.top;
 
+        // Constrain
         const constrainedX = Math.max(0, Math.min(x, canvasWidth));
         const constrainedY = Math.max(0, Math.min(y, canvasHeight));
 
@@ -249,41 +257,40 @@ const ProductionDashboard: React.FC = () => {
 
             {view === 'layout' && (
                 <div className="flex-grow flex flex-col md:flex-row gap-6 h-full overflow-hidden">
-                    {/* SIDEBAR - Fixed Width at 320px (w-80) */}
-                    <div className="w-full md:w-80 flex flex-col h-full overflow-hidden shrink-0 bg-white dark:bg-[#1c1c1e] border border-gray-200 dark:border-white/10 rounded-xl shadow-sm">
+                    {/* Toolbar - FIXED STRUCTURE */}
+                    <div className="w-full md:w-80 glass-panel flex flex-col h-full overflow-hidden shrink-0 dark:bg-[#1c1c1e]/90 dark:border-white/10 p-0">
 
-                        {/* 1. CONFIG HEADER (Fixed) */}
-                        <div className="p-4 border-b border-gray-200 dark:border-white/10 bg-gray-50/50 dark:bg-white/5 shrink-0 space-y-4">
-
+                        {/* 1. FIXED HEADER: Configuration & Custom Item & Delete */}
+                        <div className="p-5 border-b border-gray-200 dark:border-white/10 bg-white/50 dark:bg-black/20 backdrop-blur-sm z-10 shrink-0 space-y-5">
                             {/* Canvas Size */}
                             <div>
-                                <h3 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Tamaño Lienzo</h3>
+                                <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Tamaño Lienzo</h3>
                                 <div className="grid grid-cols-2 gap-2">
                                     <div className="relative">
                                         <label className="absolute -top-1.5 left-2 text-[8px] bg-white dark:bg-[#2c2c2e] px-1 text-gray-400 font-bold">ANCHO</label>
-                                        <input type="number" className="apple-input py-1 text-xs h-8 pl-3" value={canvasWidth} onChange={(e) => setCanvasWidth(Number(e.target.value))} />
+                                        <input type="number" className="apple-input py-1 text-sm h-8" value={canvasWidth} onChange={(e) => setCanvasWidth(Number(e.target.value))} />
                                     </div>
                                     <div className="relative">
                                         <label className="absolute -top-1.5 left-2 text-[8px] bg-white dark:bg-[#2c2c2e] px-1 text-gray-400 font-bold">ALTO</label>
-                                        <input type="number" className="apple-input py-1 text-xs h-8 pl-3" value={canvasHeight} onChange={(e) => setCanvasHeight(Number(e.target.value))} />
+                                        <input type="number" className="apple-input py-1 text-sm h-8" value={canvasHeight} onChange={(e) => setCanvasHeight(Number(e.target.value))} />
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Custom Object */}
+                            {/* Custom Object Creator */}
                             <div>
-                                <h3 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Crear Elemento Personalizado</h3>
+                                <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Crear Elemento</h3>
                                 <div className="space-y-2">
                                     <input
                                         type="text"
                                         placeholder="Nombre (ej. Mesa Dulces)"
-                                        className="apple-input py-1 text-xs h-8 w-full"
+                                        className="apple-input py-1 text-sm h-8 w-full"
                                         value={customLabel}
                                         onChange={(e) => setCustomLabel(e.target.value)}
                                     />
                                     <div className="grid grid-cols-2 gap-2">
-                                        <input type="number" placeholder="W" className="apple-input py-1 text-xs h-8" value={customWidth} onChange={(e) => setCustomWidth(Number(e.target.value))} />
-                                        <input type="number" placeholder="H" className="apple-input py-1 text-xs h-8" value={customHeight} onChange={(e) => setCustomHeight(Number(e.target.value))} />
+                                        <input type="number" placeholder="W" className="apple-input py-1 text-sm h-8" value={customWidth} onChange={(e) => setCustomWidth(Number(e.target.value))} />
+                                        <input type="number" placeholder="H" className="apple-input py-1 text-sm h-8" value={customHeight} onChange={(e) => setCustomHeight(Number(e.target.value))} />
                                     </div>
                                     <button
                                         onClick={addCustomObject}
@@ -294,131 +301,117 @@ const ProductionDashboard: React.FC = () => {
                                 </div>
                             </div>
 
-                            {/* Delete Action */}
-                            <button
-                                onClick={deleteSelectedObject}
-                                disabled={!selectedId}
-                                className={`w-full py-2 rounded-lg font-bold text-xs transition-all border ${selectedId ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : 'bg-gray-50 text-gray-400 border-transparent cursor-not-allowed'}`}
-                            >
-                                {selectedId ? 'ELIMINAR SELECCIONADO' : 'SELECCIONA PARA ELIMINAR'}
-                            </button>
+                            {/* Delete Button (Correctly Placed) */}
+                            <div>
+                                <button
+                                    onClick={deleteSelectedObject}
+                                    disabled={!selectedId}
+                                    className={`w-full py-2 rounded-lg font-bold text-xs transition-all ${selectedId ? 'bg-red-500 text-white shadow hover:bg-red-600' : 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed'}`}
+                                >
+                                    {selectedId ? 'ELIMINAR SELECCIONADO' : 'SELECCIONA PARA ELIMINAR'}
+                                </button>
+                            </div>
                         </div>
 
-                        {/* 2. CATALOG BODY (Scrollable - Flex Grow) */}
-                        <div className="flex-1 overflow-y-auto min-h-0 bg-white dark:bg-[#1c1c1e] scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-white/10">
-                            <div className="p-3 sticky top-0 bg-white/95 dark:bg-[#1c1c1e] z-10 border-b border-gray-100 dark:border-white/5 backdrop-blur-sm">
-                                <h3 className="text-[10px] font-bold text-gray-800 dark:text-white uppercase tracking-widest text-center">Catálogo de Elementos</h3>
-                            </div>
-
-                            <div className="p-3 space-y-6">
-                                {(!LAYOUT_CATEGORIES || LAYOUT_CATEGORIES.length === 0) ? (
-                                    <div className="p-8 text-center border-2 border-dashed border-red-200 rounded-xl bg-red-50">
-                                        <p className="text-red-500 font-bold text-xs">Error de Carga</p>
-                                        <p className="text-red-400 text-[10px] mt-1">No se encontraron categorías.</p>
-                                    </div>
-                                ) : (
-                                    LAYOUT_CATEGORIES.map((cat) => (
-                                        <div key={cat.id}>
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <div className="h-px bg-gray-200 dark:bg-white/10 flex-grow"></div>
-                                                <h3 className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1">{cat.title}</h3>
-                                                <div className="h-px bg-gray-200 dark:bg-white/10 flex-grow"></div>
-                                            </div>
-                                            <div className="grid grid-cols-3 gap-2">
-                                                {cat.items.map(item => (
-                                                    <div
-                                                        key={item.type}
-                                                        draggable
-                                                        onDragStart={(e) => handleDragStartNew(e, item)}
-                                                        onClick={() => addLayoutObject(item)}
-                                                        className="aspect-square p-1 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-lg cursor-pointer flex flex-col items-center justify-center relative group transition-all"
-                                                        title={item.label}
-                                                    >
-                                                        <div className={`mb-1 border border-black/10 dark:border-white/20 ${getShapeStyle(item.shape)} ${item.colorClass} shadow-sm`}
-                                                            style={{ width: '50%', height: '50%', maxHeight: 24, maxWidth: 24 }}>
-                                                        </div>
-                                                        <span className="font-medium text-[7px] leading-tight text-gray-500 dark:text-gray-400 text-center line-clamp-2 w-full">{item.label}</span>
-                                                        <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 text-[8px] text-gray-300 pointer-events-none">+</div>
+                        {/* 2. SCROLLABLE BODY: Categories (WITH CRITICAL CSS FIX) */}
+                        <div className="flex-1 overflow-y-auto min-h-0 bg-white dark:bg-[#1c1c1e] custom-scrollbar p-3 space-y-4">
+                            {(!LAYOUT_CATEGORIES || LAYOUT_CATEGORIES.length === 0) ? (
+                                <div className="p-4 text-center text-red-500 font-bold text-xs border border-red-200 bg-red-50 rounded">
+                                    ¡ERROR: No hay categorías!
+                                </div>
+                            ) : (
+                                LAYOUT_CATEGORIES.map(cat => (
+                                    <div key={cat.id}>
+                                        <h3 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 sticky top-0 bg-white/95 dark:bg-[#1c1c1e] py-1 z-10">{cat.title}</h3>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {cat.items.map(item => (
+                                                <div
+                                                    key={item.type}
+                                                    draggable
+                                                    onDragStart={(e) => handleDragStartNew(e, item)}
+                                                    onClick={() => addLayoutObject(item)}
+                                                    className="p-1 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-lg cursor-pointer text-center group flex flex-col items-center justify-center h-20 relative"
+                                                    title={item.label}
+                                                >
+                                                    <div className={`mb-1 border border-black/10 dark:border-white/20 ${getShapeStyle(item.shape)} ${item.colorClass} shadow-sm`}
+                                                        style={{ width: Math.min(item.width, 24), height: Math.min(item.height, 24) }}>
                                                     </div>
-                                                ))}
-                                            </div>
+                                                    <span className="font-medium text-[7px] leading-tight text-gray-600 dark:text-gray-300 line-clamp-2">{item.label}</span>
+                                                    <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 text-[10px] text-gray-400 p-1">+</div>
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))
-                                )}
-                            </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
 
-                            {/* Version Info Footer */}
-                            <div className="p-4 text-center border-t border-gray-100 dark:border-white/5 mt-4">
-                                <span className="text-[9px] text-gray-300 font-medium">v2.3.0 · Primavera Events</span>
-                            </div>
+                        {/* 3. FIXED FOOTER with Version */}
+                        <div className="p-3 border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 shrink-0 z-20 text-center">
+                            <span className="text-[9px] text-gray-400 dark:text-gray-500 font-bold">v2.4.0 (Stable Restore)</span>
                         </div>
                     </div>
 
-                    {/* Canvas Container */}
-                    <div className="flex-grow bg-[#F5F5F7] dark:bg-black rounded-xl shadow-inner border border-black/5 dark:border-white/5 overflow-hidden flex flex-col relative">
-                        {/* Toolbar Overlay */}
-                        <div className="absolute top-4 right-4 z-10 bg-white dark:bg-[#1c1c1e] p-1.5 rounded-lg shadow-sm border border-black/5 dark:border-white/10 flex gap-2">
-                            <button className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded" onClick={() => setCanvasWidth(canvasWidth)} title="Centrar">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
-                            </button>
-                            <div className="w-px bg-gray-200 dark:bg-white/10 mx-1"></div>
-                            <span className="text-[10px] font-bold text-gray-400 self-center px-1">{canvasWidth} x {canvasHeight}px</span>
-                        </div>
+                    {/* Canvas Container (Scrollable) */}
+                    <div className="flex-grow bg-[#F5F5F7] dark:bg-black rounded-2xl shadow-inner border border-black/5 dark:border-white/5 overflow-auto relative p-8 flex items-center justify-center custom-scrollbar">
+                        {/* Actual Canvas */}
+                        <div
+                            ref={canvasRef}
+                            onDragOver={handleDragOver}
+                            onDrop={handleDrop}
+                            onClick={(e) => {
+                                // Deselect if clicking on empty canvas area
+                                if (e.target === canvasRef.current) setSelectedId(null);
+                            }}
+                            className="bg-white dark:bg-[#111] shadow-2xl relative transition-all duration-300 rounded-lg"
+                            style={{
+                                width: canvasWidth,
+                                height: canvasHeight,
+                                backgroundImage: `radial-gradient(var(--dot-color, #cbd5e1) 1px, transparent 1px)`,
+                                backgroundSize: '24px 24px',
+                                minWidth: canvasWidth, // Ensure it doesn't shrink
+                                minHeight: canvasHeight
+                            }}
+                        >
+                            <style>{`
+                                .dark .bg-white { --dot-color: #333; }
+                            `}</style>
 
-                        <div className="flex-grow overflow-auto p-8 flex items-center justify-center custom-scrollbar bg-[url('https://www.transparenttextures.com/patterns/graphy.png')] dark:bg-none">
-                            <div
-                                ref={canvasRef}
-                                onDragOver={handleDragOver}
-                                onDrop={handleDrop}
-                                onClick={(e) => {
-                                    if (e.target === canvasRef.current) setSelectedId(null);
-                                }}
-                                className="bg-white dark:bg-[#111] shadow-2xl relative transition-all duration-300 rounded-lg group"
-                                style={{
-                                    width: canvasWidth,
-                                    height: canvasHeight,
-                                    backgroundImage: `radial-gradient(var(--dot-color, #cbd5e1) 1px, transparent 1px)`,
-                                    backgroundSize: '24px 24px',
-                                    minWidth: canvasWidth,
-                                    minHeight: canvasHeight
-                                }}
-                            >
-                                <style>{`
-                                    .dark .bg-white { --dot-color: #333; }
-                                `}</style>
-
-                                {layoutObjects.length === 0 && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-40">
-                                        <div className="w-24 h-24 mb-4 rounded-3xl bg-gray-100 dark:bg-white/5 border-2 border-dashed border-gray-300 dark:border-gray-700 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                            <span className="text-4xl filter grayscale">✨</span>
-                                        </div>
-                                        <div className="text-xl font-bold text-gray-400 dark:text-gray-600">Arrastra elementos aquí</div>
-                                    </div>
-                                )}
-
-                                {layoutObjects.map(obj => (
-                                    <div
-                                        key={obj.id}
-                                        draggable
-                                        onDragStart={(e) => handleDragStartObject(e, obj.id)}
-                                        onTouchStart={(e) => handleTouchStart(e, obj.id)}
-                                        onTouchMove={(e) => handleTouchMove(e, obj.id)}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedId(obj.id);
-                                        }}
-                                        className={`absolute cursor-move flex items-center justify-center text-xs font-bold transition-all hover:scale-105 active:scale-95 border-2 text-center overflow-hidden shadow-sm backdrop-blur-sm select-none ${getShapeStyle(obj.shape)} ${obj.colorClass} ${selectedId === obj.id ? 'ring-2 ring-primavera-gold ring-offset-2 dark:ring-offset-black z-50 scale-105 shadow-xl' : ''}`}
-                                        style={{
-                                            left: obj.x,
-                                            top: obj.y,
-                                            width: obj.width,
-                                            height: obj.height
-                                        }}
-                                    >
-                                        <span className="line-clamp-2 px-1">{obj.label}</span>
-                                    </div>
-                                ))}
+                            <div className="absolute -top-8 left-0 text-xs font-bold text-gray-400 uppercase tracking-widest select-none whitespace-nowrap">
+                                Canvas: {canvasWidth}px x {canvasHeight}px
                             </div>
+
+                            {layoutObjects.length === 0 && (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-40">
+                                    <div className="w-24 h-24 mb-4 rounded-3xl bg-gray-100 dark:bg-white/5 border-2 border-dashed border-gray-300 dark:border-gray-700 flex items-center justify-center">
+                                        <span className="text-4xl">✨</span>
+                                    </div>
+                                    <div className="text-xl font-bold text-gray-400 dark:text-gray-600">Arrastra elementos aquí</div>
+                                </div>
+                            )}
+
+                            {layoutObjects.map(obj => (
+                                <div
+                                    key={obj.id}
+                                    draggable
+                                    onDragStart={(e) => handleDragStartObject(e, obj.id)}
+                                    onTouchStart={(e) => handleTouchStart(e, obj.id)}
+                                    onTouchMove={(e) => handleTouchMove(e, obj.id)}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedId(obj.id);
+                                    }}
+                                    className={`absolute cursor-move flex items-center justify-center text-xs font-bold transition-all hover:scale-105 active:scale-95 border-2 text-center overflow-hidden shadow-lg backdrop-blur-sm ${getShapeStyle(obj.shape)} ${obj.colorClass} ${selectedId === obj.id ? 'ring-4 ring-primavera-gold shadow-[0_0_30px_rgba(212,175,55,0.4)] z-50 scale-105' : ''}`}
+                                    style={{
+                                        left: obj.x,
+                                        top: obj.y,
+                                        width: obj.width,
+                                        height: obj.height
+                                    }}
+                                >
+                                    {obj.label}
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
