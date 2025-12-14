@@ -191,93 +191,116 @@ const ProductionDashboard: React.FC = () => {
     };
 
     const renderObjectStyle = (type: LayoutObject['type']) => {
-        const baseStyle = "absolute cursor-move flex items-center justify-center text-xs font-bold transition-transform active:scale-105 border-2 text-center overflow-hidden";
+        const baseStyle = "absolute cursor-move flex items-center justify-center text-xs font-bold transition-all hover:scale-105 active:scale-95 border-2 text-center overflow-hidden shadow-lg backdrop-blur-sm";
         switch (type) {
-            case 'table-round': return `${baseStyle} w-16 h-16 rounded-full bg-blue-100 border-blue-500 text-blue-800`;
-            case 'table-square': return `${baseStyle} w-16 h-16 rounded-sm bg-blue-100 border-blue-500 text-blue-800`;
-            case 'table-main-wedding': return `${baseStyle} w-32 h-12 rounded bg-yellow-100 border-yellow-600 text-yellow-900 border-double border-4`;
-            case 'table-main-xv': return `${baseStyle} w-32 h-12 rounded bg-pink-100 border-pink-500 text-pink-800 border-double border-4`;
-            case 'chair': return `${baseStyle} w-6 h-6 rounded bg-red-100 border-red-500 text-red-800`;
-            case 'cocktail-table': return `${baseStyle} w-8 h-8 rounded-full bg-orange-100 border-orange-500 text-orange-800`;
-            case 'lounge': return `${baseStyle} w-20 h-10 rounded-lg bg-purple-100 border-purple-500 text-purple-800`;
-            case 'bar': return `${baseStyle} w-24 h-8 bg-amber-800 border-amber-900 text-white`;
-            case 'stage': return `${baseStyle} w-32 h-24 bg-gray-300 border-gray-600 text-gray-800`;
-            case 'dj-booth': return `${baseStyle} w-16 h-12 bg-black text-white border-gray-600`;
-            case 'sound-area': return `${baseStyle} w-12 h-12 bg-gray-800 text-white rounded border-gray-600`;
-            case 'kitchen-cold': return `${baseStyle} w-24 h-24 bg-teal-100 border-teal-600 text-teal-900`;
-            case 'kitchen-hot': return `${baseStyle} w-24 h-24 bg-red-50 border-red-800 text-red-900`;
-            case 'restroom': return `${baseStyle} w-20 h-20 bg-cyan-50 border-cyan-500 text-cyan-800`;
-            case 'garden-area': return `${baseStyle} w-64 h-64 bg-green-100 border-green-500 text-green-800 opacity-50 border-dashed z-0`; // Big & transparent
-            case 'tent': return `${baseStyle} w-96 h-96 bg-white border-gray-400 text-gray-400 opacity-30 border-dashed z-0`; // Huge overlay
+            case 'table-round': return `${baseStyle} w-16 h-16 rounded-full bg-blue-100/90 dark:bg-blue-900/50 border-blue-500 text-blue-800 dark:text-blue-100`;
+            case 'table-square': return `${baseStyle} w-16 h-16 rounded-lg bg-blue-100/90 dark:bg-blue-900/50 border-blue-500 text-blue-800 dark:text-blue-100`;
+            case 'table-main-wedding': return `${baseStyle} w-36 h-14 rounded-xl bg-gradient-to-r from-yellow-100 to-yellow-50 dark:from-yellow-900/50 dark:to-yellow-800/50 border-yellow-600 text-yellow-900 dark:text-yellow-100 border-double border-4 shadow-yellow-500/20`;
+            case 'table-main-xv': return `${baseStyle} w-36 h-14 rounded-xl bg-gradient-to-r from-pink-100 to-pink-50 dark:from-pink-900/50 dark:to-pink-800/50 border-pink-500 text-pink-800 dark:text-pink-100 border-double border-4 shadow-pink-500/20`;
+            case 'chair': return `${baseStyle} w-6 h-6 rounded bg-red-100 dark:bg-red-900/50 border-red-500 text-red-800 dark:text-red-100`;
+            case 'cocktail-table': return `${baseStyle} w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/50 border-orange-500 text-orange-800 dark:text-orange-100`;
+            case 'lounge': return `${baseStyle} w-20 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/50 border-purple-500 text-purple-800 dark:text-purple-100`;
+            case 'bar': return `${baseStyle} w-24 h-8 bg-amber-800 dark:bg-amber-900 border-amber-900 text-white`;
+            case 'stage': return `${baseStyle} w-32 h-24 bg-gray-300 dark:bg-gray-700/80 border-gray-600 text-gray-800 dark:text-white`;
+            case 'dj-booth': return `${baseStyle} w-16 h-12 bg-black dark:bg-[#111] text-white border-gray-600`;
+            case 'sound-area': return `${baseStyle} w-12 h-12 bg-gray-800 dark:bg-gray-900 text-white rounded border-gray-600`;
+            case 'kitchen-cold': return `${baseStyle} w-24 h-24 bg-teal-100 dark:bg-teal-900/50 border-teal-600 text-teal-900 dark:text-teal-100`;
+            case 'kitchen-hot': return `${baseStyle} w-24 h-24 bg-red-50 dark:bg-red-900/30 border-red-800 text-red-900 dark:text-red-100`;
+            case 'restroom': return `${baseStyle} w-20 h-20 bg-cyan-50 dark:bg-cyan-900/30 border-cyan-500 text-cyan-800 dark:text-cyan-100`;
+            case 'garden-area': return `${baseStyle} w-64 h-64 bg-green-100/50 dark:bg-green-900/20 border-green-500 text-green-800 dark:text-green-100 border-dashed z-0`;
+            case 'tent': return `${baseStyle} w-96 h-96 bg-white/50 dark:bg-white/5 border-gray-400 text-gray-400 dark:text-gray-500 border-dashed z-0`;
             default: return baseStyle;
         }
     };
 
     return (
-        <div className="p-6 max-w-6xl mx-auto h-[calc(100vh-100px)] flex flex-col">
-            <h1 className="text-3xl font-serif font-bold text-gray-800 mb-6">Producción y Logística</h1>
+        <div className="p-4 md:p-8 max-w-[1800px] mx-auto h-[calc(100vh-100px)] flex flex-col animate-fade-in-up">
+            <h1 className="text-4xl font-display font-bold text-gray-900 dark:text-white mb-2 tracking-tight">Producción y Logística</h1>
+            <p className="text-gray-500 dark:text-gray-400 mb-6 font-medium">Diseña el plano del evento y coordina cada momento.</p>
 
-            <div className="flex gap-4 mb-6 border-b pb-2">
-                <button onClick={() => setView('layout')} className={`font-bold pb-2 ${view === 'layout' ? 'text-primavera-gold border-b-2 border-primavera-gold' : 'text-gray-500'}`}>Diseñador de Planos (Layout)</button>
-                <button onClick={() => setView('timeline')} className={`font-bold pb-2 ${view === 'timeline' ? 'text-primavera-gold border-b-2 border-primavera-gold' : 'text-gray-500'}`}>Minuto a Minuto</button>
+            <div className="flex gap-6 mb-6 border-b border-gray-200 dark:border-white/10 pb-1">
+                <button
+                    onClick={() => setView('layout')}
+                    className={`text-sm font-bold pb-3 px-2 transition-all duration-300 relative ${view === 'layout'
+                            ? 'text-primavera-gold'
+                            : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                        }`}
+                >
+                    Diseñador de Planos
+                    {view === 'layout' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primavera-gold rounded-full transition-all"></span>}
+                </button>
+                <button
+                    onClick={() => setView('timeline')}
+                    className={`text-sm font-bold pb-3 px-2 transition-all duration-300 relative ${view === 'timeline'
+                            ? 'text-primavera-gold'
+                            : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                        }`}
+                >
+                    Minuto a Minuto
+                    {view === 'timeline' && <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primavera-gold rounded-full transition-all"></span>}
+                </button>
             </div>
 
             {view === 'layout' && (
-                <div className="flex-grow flex gap-6 h-full overflow-hidden">
+                <div className="flex-grow flex flex-col md:flex-row gap-6 h-full overflow-hidden">
                     {/* Toolbar */}
-                    <div className="w-64 bg-white p-4 rounded shadow space-y-4 flex flex-col h-full overflow-y-auto shrink-0 text-sm">
-                        <h3 className="font-bold text-gray-700 border-b pb-2">Configuración</h3>
-                        <div className="space-y-2">
-                            <div><label className="text-xs font-bold text-gray-500">Ancho (px)</label><input type="number" className="w-full border p-1 rounded text-sm" value={canvasWidth} onChange={(e) => setCanvasWidth(Number(e.target.value))} /></div>
-                            <div><label className="text-xs font-bold text-gray-500">Alto (px)</label><input type="number" className="w-full border p-1 rounded text-sm" value={canvasHeight} onChange={(e) => setCanvasHeight(Number(e.target.value))} /></div>
-                        </div>
-
-                        <h3 className="font-bold text-gray-700 border-b pb-2 pt-4">Mobiliario</h3>
-                        <div className="grid grid-cols-2 gap-2">
-                            <div draggable onDragStart={(e) => handleDragStartNew(e, 'table-round')} onClick={() => addLayoutObject('table-round')} className="p-2 bg-gray-50 hover:bg-gray-100 border rounded cursor-pointer text-center text-xs">
-                                <div className="w-6 h-6 rounded-full bg-blue-200 mx-auto border-2 border-blue-400 mb-1"></div>Redonda
-                            </div>
-                            <div draggable onDragStart={(e) => handleDragStartNew(e, 'table-square')} onClick={() => addLayoutObject('table-square')} className="p-2 bg-gray-50 hover:bg-gray-100 border rounded cursor-pointer text-center text-xs">
-                                <div className="w-6 h-6 bg-blue-200 mx-auto border-2 border-blue-400 mb-1"></div>Cuadrada
-                            </div>
-                            <div draggable onDragStart={(e) => handleDragStartNew(e, 'chair')} onClick={() => addLayoutObject('chair')} className="p-2 bg-gray-50 hover:bg-gray-100 border rounded cursor-pointer text-center text-xs">
-                                <div className="w-4 h-4 bg-red-200 mx-auto border-2 border-red-400 mb-1"></div>Silla
-                            </div>
-                            <div draggable onDragStart={(e) => handleDragStartNew(e, 'cocktail-table')} onClick={() => addLayoutObject('cocktail-table')} className="p-2 bg-gray-50 hover:bg-gray-100 border rounded cursor-pointer text-center text-xs">
-                                <div className="w-4 h-4 rounded-full bg-orange-200 mx-auto border-2 border-orange-400 mb-1"></div>Periquera
-                            </div>
-                            <div draggable onDragStart={(e) => handleDragStartNew(e, 'lounge')} onClick={() => addLayoutObject('lounge')} className="p-2 bg-gray-50 hover:bg-gray-100 border rounded cursor-pointer text-center text-xs col-span-2">
-                                <div className="w-10 h-4 rounded bg-purple-200 mx-auto border-2 border-purple-400 mb-1"></div>Sala / Sillón
+                    <div className="w-full md:w-72 glass-panel p-5 space-y-6 flex flex-col h-full overflow-y-auto shrink-0 custom-scrollbar dark:bg-[#1c1c1e]/90 dark:border-white/10">
+                        <div>
+                            <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Configuración</h3>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div><label className="text-[10px] font-bold text-gray-400 mb-1 block">Ancho (px)</label><input type="number" className="apple-input py-2 text-sm" value={canvasWidth} onChange={(e) => setCanvasWidth(Number(e.target.value))} /></div>
+                                <div><label className="text-[10px] font-bold text-gray-400 mb-1 block">Alto (px)</label><input type="number" className="apple-input py-2 text-sm" value={canvasHeight} onChange={(e) => setCanvasHeight(Number(e.target.value))} /></div>
                             </div>
                         </div>
 
-                        <h3 className="font-bold text-gray-700 border-b pb-2 pt-2">Especiales</h3>
-                        <div className="space-y-1">
-                            <div draggable onDragStart={(e) => handleDragStartNew(e, 'table-main-wedding')} onClick={() => addLayoutObject('table-main-wedding')} className="p-2 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 rounded cursor-pointer text-center text-xs font-bold text-yellow-800">Mesa Novios</div>
-                            <div draggable onDragStart={(e) => handleDragStartNew(e, 'table-main-xv')} onClick={() => addLayoutObject('table-main-xv')} className="p-2 bg-pink-50 hover:bg-pink-100 border border-pink-200 rounded cursor-pointer text-center text-xs font-bold text-pink-800">Mesa XV Años</div>
+                        <div>
+                            <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Mobiliario</h3>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div draggable onDragStart={(e) => handleDragStartNew(e, 'table-round')} onClick={() => addLayoutObject('table-round')} className="p-3 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-xl cursor-pointer text-center text-xs transition-all duration-200 group">
+                                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 mx-auto border-2 border-blue-400/50 mb-2 group-hover:scale-110 transition-transform"></div>
+                                    <span className="font-medium text-gray-600 dark:text-gray-300">Redonda</span>
+                                </div>
+                                <div draggable onDragStart={(e) => handleDragStartNew(e, 'table-square')} onClick={() => addLayoutObject('table-square')} className="p-3 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-xl cursor-pointer text-center text-xs transition-all duration-200 group">
+                                    <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/50 mx-auto border-2 border-blue-400/50 mb-2 group-hover:scale-110 transition-transform"></div>
+                                    <span className="font-medium text-gray-600 dark:text-gray-300">Cuadrada</span>
+                                </div>
+                                <div draggable onDragStart={(e) => handleDragStartNew(e, 'chair')} onClick={() => addLayoutObject('chair')} className="p-3 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-xl cursor-pointer text-center text-xs transition-all duration-200 group">
+                                    <div className="w-5 h-5 bg-red-100 dark:bg-red-900/50 mx-auto border-2 border-red-400/50 mb-2 group-hover:scale-110 transition-transform"></div>
+                                    <span className="font-medium text-gray-600 dark:text-gray-300">Silla</span>
+                                </div>
+                                <div draggable onDragStart={(e) => handleDragStartNew(e, 'lounge')} onClick={() => addLayoutObject('lounge')} className="p-3 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-xl cursor-pointer text-center text-xs transition-all duration-200 group">
+                                    <div className="w-10 h-5 rounded bg-purple-100 dark:bg-purple-900/50 mx-auto border-2 border-purple-400/50 mb-2 group-hover:scale-110 transition-transform"></div>
+                                    <span className="font-medium text-gray-600 dark:text-gray-300">Sala</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <h3 className="font-bold text-gray-700 border-b pb-2 pt-2">Servicios</h3>
-                        <div className="grid grid-cols-2 gap-2">
-                            <div draggable onDragStart={(e) => handleDragStartNew(e, 'stage')} onClick={() => addLayoutObject('stage')} className="p-1 bg-gray-50 border rounded cursor-pointer text-center text-xs">Pista/Stage</div>
-                            <div draggable onDragStart={(e) => handleDragStartNew(e, 'bar')} onClick={() => addLayoutObject('bar')} className="p-1 bg-gray-50 border rounded cursor-pointer text-center text-xs">Barra</div>
-                            <div draggable onDragStart={(e) => handleDragStartNew(e, 'dj-booth')} onClick={() => addLayoutObject('dj-booth')} className="p-1 bg-gray-50 border rounded cursor-pointer text-center text-xs">DJ Booth</div>
-                            <div draggable onDragStart={(e) => handleDragStartNew(e, 'sound-area')} onClick={() => addLayoutObject('sound-area')} className="p-1 bg-gray-50 border rounded cursor-pointer text-center text-xs">Sonido</div>
-                            <div draggable onDragStart={(e) => handleDragStartNew(e, 'kitchen-hot')} onClick={() => addLayoutObject('kitchen-hot')} className="p-1 bg-gray-50 border rounded cursor-pointer text-center text-xs">C. Caliente</div>
-                            <div draggable onDragStart={(e) => handleDragStartNew(e, 'kitchen-cold')} onClick={() => addLayoutObject('kitchen-cold')} className="p-1 bg-gray-50 border rounded cursor-pointer text-center text-xs">C. Fría</div>
-                            <div draggable onDragStart={(e) => handleDragStartNew(e, 'restroom')} onClick={() => addLayoutObject('restroom')} className="p-1 bg-gray-50 border rounded cursor-pointer text-center text-xs">Baños</div>
-                            <div draggable onDragStart={(e) => handleDragStartNew(e, 'garden-area')} onClick={() => addLayoutObject('garden-area')} className="p-1 bg-green-50 border border-green-200 rounded cursor-pointer text-center text-xs text-green-800">Área Jardín</div>
-                            <div draggable onDragStart={(e) => handleDragStartNew(e, 'tent')} onClick={() => addLayoutObject('tent')} className="p-1 bg-white border border-dashed rounded cursor-pointer text-center text-xs col-span-2">Carpas (Zona)</div>
+                        <div>
+                            <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Zonas Especiales</h3>
+                            <div className="space-y-2">
+                                <div draggable onDragStart={(e) => handleDragStartNew(e, 'table-main-wedding')} onClick={() => addLayoutObject('table-main-wedding')} className="p-3 bg-gradient-to-r from-yellow-50 to-white dark:from-yellow-900/20 dark:to-transparent border border-yellow-100 dark:border-yellow-900/30 rounded-xl cursor-pointer flex items-center gap-3">
+                                    <div className="w-3 h-3 rounded-full bg-yellow-400 shadow-glow"></div>
+                                    <span className="text-xs font-bold text-yellow-800 dark:text-yellow-200">Mesa Novios</span>
+                                </div>
+                                <div draggable onDragStart={(e) => handleDragStartNew(e, 'stage')} onClick={() => addLayoutObject('stage')} className="p-3 bg-gray-50 dark:bg-white/5 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-xl cursor-pointer flex items-center gap-3">
+                                    <div className="w-3 h-3 bg-gray-400 rounded-sm"></div>
+                                    <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Pista / Stage</span>
+                                </div>
+                                <div draggable onDragStart={(e) => handleDragStartNew(e, 'dj-booth')} onClick={() => addLayoutObject('dj-booth')} className="p-3 bg-black dark:bg-[#111] border border-gray-800 rounded-xl cursor-pointer flex items-center gap-3">
+                                    <div className="w-3 h-3 bg-white/50 rounded-full animate-pulse"></div>
+                                    <span className="text-xs font-bold text-white">DJ Booth</span>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="pt-4 mt-auto">
-                            <button onClick={deleteSelectedObject} disabled={!selectedId} className={`w-full py-2 rounded font-bold text-sm mb-2 transition ${selectedId ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}>Eliminar Sel.</button>
-                            <button className="w-full bg-green-600 text-white py-2 rounded font-bold text-sm hover:brightness-110">Guardar</button>
+                        <div className="pt-4 mt-auto space-y-3">
+                            <button onClick={deleteSelectedObject} disabled={!selectedId} className={`w-full py-3 rounded-xl font-bold text-sm transition-all transform active:scale-95 ${selectedId ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-gray-100 dark:bg-white/5 text-gray-300 dark:text-gray-600 cursor-not-allowed'}`}>Eliminar Seleccionado</button>
+                            <button className="w-full btn-primary bg-gradient-to-r from-green-600 to-green-500 border-none shadow-green-500/30">Guardar Cambios</button>
                         </div>
                     </div>
 
                     {/* Canvas Container (Scrollable) */}
-                    <div className="flex-grow bg-gray-200 rounded shadow border-inner overflow-auto relative p-8 flex items-center justify-center">
+                    <div className="flex-grow bg-[#F5F5F7] dark:bg-black rounded-2xl shadow-inner border border-black/5 dark:border-white/5 overflow-auto relative p-8 flex items-center justify-center custom-scrollbar">
                         {/* Actual Canvas */}
                         <div
                             ref={canvasRef}
@@ -287,21 +310,32 @@ const ProductionDashboard: React.FC = () => {
                                 // Deselect if clicking on empty canvas area
                                 if (e.target === canvasRef.current) setSelectedId(null);
                             }}
-                            className="bg-white shadow-xl relative transition-all duration-300"
+                            className="bg-white dark:bg-[#111] shadow-2xl relative transition-all duration-300 rounded-lg"
                             style={{
                                 width: canvasWidth,
                                 height: canvasHeight,
-                                backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)',
-                                backgroundSize: '20px 20px',
+                                backgroundImage: `radial-gradient(var(--dot-color, #cbd5e1) 1px, transparent 1px)`,
+                                backgroundSize: '24px 24px',
                                 minWidth: canvasWidth, // Ensure it doesn't shrink
                                 minHeight: canvasHeight
                             }}
                         >
-                            <div className="absolute -top-6 left-0 text-xs text-gray-500 font-bold select-none whitespace-nowrap">
-                                Dimensiones: {canvasWidth}px x {canvasHeight}px
+                            <style>{`
+                                .dark .bg-white { --dot-color: #333; }
+                            `}</style>
+
+                            <div className="absolute -top-8 left-0 text-xs font-bold text-gray-400 uppercase tracking-widest select-none whitespace-nowrap">
+                                Canvas: {canvasWidth}px x {canvasHeight}px
                             </div>
 
-                            {layoutObjects.length === 0 && <div className="absolute inset-0 flex items-center justify-center text-gray-300 pointer-events-none text-xl font-bold select-none">Arrastra elementos aquí</div>}
+                            {layoutObjects.length === 0 && (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-40">
+                                    <div className="w-24 h-24 mb-4 rounded-3xl bg-gray-100 dark:bg-white/5 border-2 border-dashed border-gray-300 dark:border-gray-700 flex items-center justify-center">
+                                        <span className="text-4xl">✨</span>
+                                    </div>
+                                    <div className="text-xl font-bold text-gray-400 dark:text-gray-600">Arrastra elementos aquí</div>
+                                </div>
+                            )}
 
                             {layoutObjects.map(obj => (
                                 <div
@@ -315,7 +349,7 @@ const ProductionDashboard: React.FC = () => {
                                         e.stopPropagation();
                                         setSelectedId(obj.id);
                                     }}
-                                    className={`${renderObjectStyle(obj.type)} ${selectedId === obj.id ? 'ring-4 ring-yellow-400 shadow-xl z-50' : 'hover:shadow-md'}`}
+                                    className={`${renderObjectStyle(obj.type)} ${selectedId === obj.id ? 'ring-4 ring-primavera-gold shadow-[0_0_30px_rgba(212,175,55,0.4)] z-50 scale-105' : ''}`}
                                     style={{ left: obj.x, top: obj.y }}
                                 >
                                     {obj.label}
@@ -327,35 +361,39 @@ const ProductionDashboard: React.FC = () => {
             )}
 
             {view === 'timeline' && (
-                <div className="bg-white p-6 rounded shadow flex-grow">
-                    <div className="flex gap-4 mb-6 items-end">
-                        <div>
-                            <label className="block text-xs font-bold text-gray-500">Hora</label>
-                            <input type="time" className="border p-2 rounded" value={newItemTime} onChange={e => setNewItemTime(e.target.value)} />
+                <div className="apple-card p-8 rounded-3xl shadow-xl flex-grow dark:bg-[#1c1c1e] animate-fade-in-up">
+                    <div className="flex gap-4 mb-8 items-end bg-gray-50 dark:bg-white/5 p-6 rounded-2xl border border-gray-100 dark:border-white/5">
+                        <div className="w-48">
+                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Hora</label>
+                            <input type="time" className="apple-input bg-white dark:bg-black/50" value={newItemTime} onChange={e => setNewItemTime(e.target.value)} />
                         </div>
                         <div className="flex-grow">
-                            <label className="block text-xs font-bold text-gray-500">Actividad</label>
-                            <input type="text" className="border p-2 rounded w-full" placeholder="Ej. Entrada de Novios" value={newItemDesc} onChange={e => setNewItemDesc(e.target.value)} />
+                            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Actividad</label>
+                            <input type="text" className="apple-input bg-white dark:bg-black/50" placeholder="Ej. Entrada de Novios con pirotecnia..." value={newItemDesc} onChange={e => setNewItemDesc(e.target.value)} />
                         </div>
-                        <button onClick={addTimelineItem} className="bg-primavera-gold text-white px-4 py-2 rounded font-bold">Agregar</button>
+                        <button onClick={addTimelineItem} className="btn-primary h-[50px] px-8 bg-gradient-to-r from-primavera-gold to-[#B38728] border-none shadow-glow">
+                            AGREGAR
+                        </button>
                     </div>
 
-                    <div className="space-y-4 relative pl-8 border-l-2 border-gray-200">
+                    <div className="space-y-6 relative pl-8 border-l-2 border-dashed border-gray-200 dark:border-white/10 ml-4">
                         {timelineItems.map((item, idx) => (
-                            <div key={item.id} className="relative mb-6">
-                                <div className="absolute -left-[41px] bg-primavera-gold text-white w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ring-4 ring-white">
+                            <div key={item.id} className="relative group">
+                                <div className="absolute -left-[43px] bg-white dark:bg-[#1c1c1e] text-primavera-gold w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ring-4 ring-gray-100 dark:ring-white/5 shadow-lg group-hover:scale-110 transition-transform duration-300">
                                     {idx + 1}
                                 </div>
-                                <div className="bg-gray-50 p-4 rounded border border-gray-200 shadow-sm flex justify-between items-center">
-                                    <div>
-                                        <span className="text-xl font-bold text-gray-800 mr-4">{item.time}</span>
-                                        <span className="text-gray-700 font-medium">{item.description}</span>
+                                <div className="glass-panel p-6 flex justify-between items-center group-hover:border-primavera-gold/30 transition-colors bg-white dark:bg-[#2c2c2e]">
+                                    <div className="flex items-center gap-6">
+                                        <div className="text-2xl font-display font-bold text-gray-900 dark:text-white bg-gray-100 dark:bg-black/30 px-4 py-2 rounded-lg">{item.time}</div>
+                                        <div className="text-lg text-gray-600 dark:text-gray-300 font-medium">{item.description}</div>
                                     </div>
-                                    <button className="text-red-400 hover:text-red-600">×</button>
+                                    <button className="text-gray-300 hover:text-red-500 transition-colors p-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                                    </button>
                                 </div>
                             </div>
                         ))}
-                        {timelineItems.length === 0 && <div className="text-gray-400 italic">No hay actividades programadas.</div>}
+                        {timelineItems.length === 0 && <div className="text-gray-400 dark:text-gray-600 italic text-center py-12">No hay actividades programadas aún.</div>}
                     </div>
                 </div>
             )}
