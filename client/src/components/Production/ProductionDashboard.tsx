@@ -348,10 +348,11 @@ const ProductionDashboard: React.FC = () => {
                         </div>
 
                         {/* 3. FIXED FOOTER: Global Actions */}
-                        <div className="p-4 border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 shrink-0 z-20">
-                            <button className="w-full btn-primary bg-gradient-to-r from-green-600 to-green-500 border-none shadow-green-500/30 text-sm py-3">
+                        <div className="p-4 border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 shrink-0 z-20 flex flex-col items-center">
+                            <button className="w-full btn-primary bg-gradient-to-r from-green-600 to-green-500 border-none shadow-green-500/30 text-sm py-3 mb-2">
                                 Guardar Diseño Completo
                             </button>
+                            <span className="text-[10px] text-gray-400">v2.1.0 (Catalog Fix)</span>
                         </div>
                     </div>
 
