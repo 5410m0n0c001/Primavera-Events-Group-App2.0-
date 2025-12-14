@@ -25,7 +25,13 @@ const ProductionDashboard: React.FC = () => {
     const [newItemDesc, setNewItemDesc] = useState('');
 
     // --- LAYOUT STATE ---
-    const [layoutObjects, setLayoutObjects] = useState<LayoutObject[]>([]);
+    const [layoutObjects, setLayoutObjects] = useState<LayoutObject[]>([
+        { id: '1', type: 'stage', x: 300, y: 50, label: 'Pista Principal' },
+        { id: '2', type: 'table-main-wedding', x: 320, y: 180, label: 'Mesa Novios' },
+        { id: '3', type: 'table-round', x: 200, y: 300, label: 'Fam. Novio' },
+        { id: '4', type: 'table-round', x: 500, y: 300, label: 'Fam. Novia' },
+        { id: '5', type: 'dj-booth', x: 50, y: 50, label: 'DJ' }
+    ]);
     const [dragId, setDragId] = useState<string | null>(null);
     const [dragType, setDragType] = useState<LayoutObject['type'] | null>(null);
     const [canvasWidth, setCanvasWidth] = useState(800);
@@ -222,8 +228,8 @@ const ProductionDashboard: React.FC = () => {
                 <button
                     onClick={() => setView('layout')}
                     className={`text-sm font-bold pb-3 px-2 transition-all duration-300 relative ${view === 'layout'
-                            ? 'text-primavera-gold'
-                            : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                        ? 'text-primavera-gold'
+                        : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
                         }`}
                 >
                     Diseñador de Planos
@@ -232,8 +238,8 @@ const ProductionDashboard: React.FC = () => {
                 <button
                     onClick={() => setView('timeline')}
                     className={`text-sm font-bold pb-3 px-2 transition-all duration-300 relative ${view === 'timeline'
-                            ? 'text-primavera-gold'
-                            : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
+                        ? 'text-primavera-gold'
+                        : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'
                         }`}
                 >
                     Minuto a Minuto
