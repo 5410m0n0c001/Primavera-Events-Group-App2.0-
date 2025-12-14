@@ -15,6 +15,37 @@
   h6 {
     @apply font-display tracking-tight dark:text-white;
   }
+
+  /* Global Dark Mode Fixes */
+  p,
+  span,
+  div {
+    @apply dark:text-gray-300;
+  }
+
+  /* Table Resets */
+  table {
+    @apply w-full text-left dark:text-gray-300;
+  }
+
+  thead {
+    @apply dark:bg-white/5 dark:text-white;
+  }
+
+  tr {
+    @apply dark:border-white/5;
+  }
+
+  td {
+    @apply dark:text-gray-300;
+  }
+
+  /* Form Elements */
+  input,
+  select,
+  textarea {
+    @apply dark:bg-[#1c1c1e] dark:text-white dark:border-white/10;
+  }
 }
 
 @layer components {

@@ -1,5 +1,9 @@
-import express from 'express';
+console.log('🔍 [DEBUG] Starting server initialization...');
 import dotenv from 'dotenv';
+dotenv.config();
+console.log('🔍 [DEBUG] Environment variables loaded.');
+
+import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import clientRoutes from './routes/clients';
 import calendarRoutes from './routes/calendar';
@@ -19,13 +23,21 @@ import { corsMiddleware } from './middleware/cors';
 import { helmetMiddleware } from './middleware/helmet';
 import { apiLimiter } from './middleware/rateLimiter';
 import { errorHandler } from './middleware/errorHandler';
-// import { sanitizeMiddleware } from './middleware/sanitize'; // Optional, can enable if strict strict needed
 import { healthCheck } from './health';
 import { logger } from './utils/logger';
 
-dotenv.config();
+// Global Error Handlers for debugging (moved up)
+process.on('uncaughtException', (err) => {
+    console.error('❌ [FATAL] Uncaught Exception:', err);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ [FATAL] Unhandled Rejection at:', promise, 'reason:', reason);
+});
 
 const app = express();
+// Default to 3000 if PORT is not set
 const PORT = process.env.PORT || 3000;
 const prisma = new PrismaClient();
 
@@ -57,12 +69,15 @@ app.use('/api/finance', financeRoutes);
 app.use('/api/catering', cateringRoutes);
 app.use('/api/production', productionRoutes);
 app.use('/api/venues', venueRoutes);
+console.log('🔍 [DEBUG] Registering routes...');
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/quotes', quotesRoutes);
 
 // Error Handler (Must be last)
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+console.log(`🔍 [DEBUG] Attempting to listen on port ${PORT}...`);
+app.listen(Number(PORT), '0.0.0.0', () => {
+    console.log(`✅ [DEBUG] Server successfully bound to port ${PORT}`);
     logger.info(`Server running on http://localhost:${PORT}`);
 });

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { LAYOUT_CATEGORIES, type LayoutItemConfig } from '../../config/layoutConfig';
 
 // Types
 interface TimelineItem {
@@ -10,10 +11,14 @@ interface TimelineItem {
 
 interface LayoutObject {
     id: string;
-    type: 'table-round' | 'table-square' | 'table-main-wedding' | 'table-main-xv' | 'chair' | 'stage' | 'bar' | 'cocktail-table' | 'lounge' | 'dj-booth' | 'sound-area' | 'kitchen-cold' | 'kitchen-hot' | 'restroom' | 'garden-area' | 'tent';
+    type: string; // Dynamic type from config
     x: number;
     y: number;
     label: string;
+    width: number;
+    height: number;
+    shape: 'rect' | 'circle' | 'rounded';
+    colorClass: string;
 }
 
 const ProductionDashboard: React.FC = () => {
@@ -26,16 +31,17 @@ const ProductionDashboard: React.FC = () => {
 
     // --- LAYOUT STATE ---
     const [layoutObjects, setLayoutObjects] = useState<LayoutObject[]>([
-        { id: '1', type: 'stage', x: 300, y: 50, label: 'Pista Principal' },
-        { id: '2', type: 'table-main-wedding', x: 320, y: 180, label: 'Mesa Novios' },
-        { id: '3', type: 'table-round', x: 200, y: 300, label: 'Fam. Novio' },
-        { id: '4', type: 'table-round', x: 500, y: 300, label: 'Fam. Novia' },
-        { id: '5', type: 'dj-booth', x: 50, y: 50, label: 'DJ' }
+        { id: '1', type: 'stage-main', x: 300, y: 50, label: 'Pista Principal', width: 150, height: 80, shape: 'rect', colorClass: 'bg-gray-800 text-white' },
+        { id: '2', type: 'table-wedding', x: 320, y: 180, label: 'Mesa Novios', width: 100, height: 50, shape: 'rounded', colorClass: 'bg-yellow-100 border-yellow-500' },
+        { id: '3', type: 'table-round', x: 200, y: 300, label: 'Fam. Novio', width: 60, height: 60, shape: 'circle', colorClass: 'bg-blue-100 border-blue-400' },
+        { id: '4', type: 'table-round', x: 500, y: 300, label: 'Fam. Novia', width: 60, height: 60, shape: 'circle', colorClass: 'bg-blue-100 border-blue-400' },
+        { id: '5', type: 'dj-booth', x: 50, y: 50, label: 'DJ', width: 50, height: 30, shape: 'rect', colorClass: 'bg-black text-white' }
     ]);
     const [dragId, setDragId] = useState<string | null>(null);
-    const [dragType, setDragType] = useState<LayoutObject['type'] | null>(null);
-    const [canvasWidth, setCanvasWidth] = useState(800);
-    const [canvasHeight, setCanvasHeight] = useState(600);
+    const [dragItemConfig, setDragItemConfig] = useState<LayoutItemConfig | null>(null);
+
+    const [canvasWidth, setCanvasWidth] = useState(1200);
+    const [canvasHeight, setCanvasHeight] = useState(800);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -72,8 +78,7 @@ const ProductionDashboard: React.FC = () => {
 
     // --- LAYOUT HANDLERS ---
 
-    // 1. Click to Add (Fallback with Random Position)
-    const addLayoutObject = (type: LayoutObject['type']) => {
+    const addLayoutObject = (config: LayoutItemConfig) => {
         // Random pos within 200px range of center to avoid stacking
         const centerX = canvasWidth / 2;
         const centerY = canvasHeight / 2;
@@ -82,35 +87,40 @@ const ProductionDashboard: React.FC = () => {
 
         const newObj: LayoutObject = {
             id: Date.now().toString(),
-            type,
+            type: config.type,
             x: Math.max(0, Math.min(centerX + randomOffsetX, canvasWidth - 50)),
             y: Math.max(0, Math.min(centerY + randomOffsetY, canvasHeight - 50)),
-            label: getLabelForType(type)
+            label: config.label,
+            width: config.width,
+            height: config.height,
+            shape: config.shape,
+            colorClass: config.colorClass
         };
         setLayoutObjects([...layoutObjects, newObj]);
     };
 
-    const getLabelForType = (type: string) => {
-        switch (type) {
-            case 'table-round': return 'Redonda';
-            case 'table-square': return 'Cuadrada';
-            case 'table-main-wedding': return 'Novios';
-            case 'table-main-xv': return 'XV Años';
-            case 'chair': return 'Silla';
-            case 'stage': return 'Pista/Stage';
-            case 'bar': return 'Barra';
-            case 'cocktail-table': return 'Periquera';
-            case 'lounge': return 'Salas/Sillón';
-            case 'dj-booth': return 'DJ';
-            case 'sound-area': return 'Sonido';
-            case 'kitchen-cold': return 'C. Fría';
-            case 'kitchen-hot': return 'C. Caliente';
-            case 'restroom': return 'Baños';
-            case 'garden-area': return 'Jardín';
-            case 'tent': return 'Carpa';
-            default: return type;
-        }
-    };
+    const addCustomObject = () => {
+        const label = prompt("Nombre del elemento:");
+        if (!label) return;
+
+        const width = prompt("Ancho (px):", "50");
+        const height = prompt("Alto (px):", "50");
+
+        if (!width || !height) return;
+
+        const newObj: LayoutObject = {
+            id: Date.now().toString(),
+            type: 'custom',
+            x: canvasWidth / 2,
+            y: canvasHeight / 2,
+            label,
+            width: Number(width),
+            height: Number(height),
+            shape: 'rect',
+            colorClass: 'bg-white border-2 border-black dark:border-white text-black dark:text-white'
+        };
+        setLayoutObjects([...layoutObjects, newObj]);
+    }
 
     const deleteSelectedObject = () => {
         if (!selectedId) return;
@@ -122,21 +132,21 @@ const ProductionDashboard: React.FC = () => {
     const handleDragStartObject = (e: React.DragEvent, id: string) => {
         e.stopPropagation();
         setDragId(id);
-        setDragType(null);
+        setDragItemConfig(null);
         setSelectedId(id);
         e.dataTransfer.effectAllowed = "move";
     };
 
     // 3. Drag Start (New Item from Sidebar)
-    const handleDragStartNew = (e: React.DragEvent, type: LayoutObject['type']) => {
-        setDragType(type);
+    const handleDragStartNew = (e: React.DragEvent, config: LayoutItemConfig) => {
+        setDragItemConfig(config);
         setDragId(null);
         e.dataTransfer.effectAllowed = "copy";
     };
 
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
-        e.dataTransfer.dropEffect = dragType ? "copy" : "move";
+        e.dataTransfer.dropEffect = dragItemConfig ? "copy" : "move";
     };
 
     const handleDrop = (e: React.DragEvent) => {
@@ -148,25 +158,37 @@ const ProductionDashboard: React.FC = () => {
         const y = e.clientY - canvasRect.top;
 
         // Constrain to bounds
-        const constrainedX = Math.max(0, Math.min(x - (dragType ? 0 : 25), canvasWidth - 40));
-        const constrainedY = Math.max(0, Math.min(y - (dragType ? 0 : 25), canvasHeight - 40));
+        const constrainedX = Math.max(0, Math.min(x, canvasWidth - 10));
+        const constrainedY = Math.max(0, Math.min(y, canvasHeight - 10));
 
-        if (dragType) {
+        if (dragItemConfig) {
             // Case A: Dropping a NEW item from Sidebar
             const newObj: LayoutObject = {
                 id: Date.now().toString(),
-                type: dragType,
-                x: constrainedX - 20, // Center roughly
-                y: constrainedY - 20,
-                label: getLabelForType(dragType)
+                type: dragItemConfig.type,
+                x: constrainedX - (dragItemConfig.width / 2),
+                y: constrainedY - (dragItemConfig.height / 2),
+                label: dragItemConfig.label,
+                width: dragItemConfig.width,
+                height: dragItemConfig.height,
+                shape: dragItemConfig.shape,
+                colorClass: dragItemConfig.colorClass
             };
             setLayoutObjects(prev => [...prev, newObj]);
-            setDragType(null); // Reset
+            setDragItemConfig(null); // Reset
         } else if (dragId) {
             // Case B: Moving EXISTING item
-            setLayoutObjects(prev => prev.map(obj =>
-                obj.id === dragId ? { ...obj, x: constrainedX, y: constrainedY } : obj
-            ));
+            // Find existing obj to offset correctly (center drag)
+            const existing = layoutObjects.find(o => o.id === dragId);
+            if (existing) {
+                setLayoutObjects(prev => prev.map(obj =>
+                    obj.id === dragId ? {
+                        ...obj,
+                        x: constrainedX - (obj.width / 2),
+                        y: constrainedY - (obj.height / 2)
+                    } : obj
+                ));
+            }
             setDragId(null);
         }
     };
@@ -175,7 +197,6 @@ const ProductionDashboard: React.FC = () => {
     const handleTouchStart = (e: React.TouchEvent, id: string) => {
         e.stopPropagation();
         setSelectedId(id);
-        // We don't use dragId for touch, we move directly in TouchMove
     };
 
     const handleTouchMove = (e: React.TouchEvent, id: string) => {
@@ -188,36 +209,19 @@ const ProductionDashboard: React.FC = () => {
         const y = touch.clientY - canvasRect.top;
 
         // Constrain
-        const constrainedX = Math.max(0, Math.min(x - 25, canvasWidth - 40));
-        const constrainedY = Math.max(0, Math.min(y - 25, canvasHeight - 40));
+        const constrainedX = Math.max(0, Math.min(x, canvasWidth));
+        const constrainedY = Math.max(0, Math.min(y, canvasHeight));
 
         setLayoutObjects(prev => prev.map(obj =>
-            obj.id === id ? { ...obj, x: constrainedX, y: constrainedY } : obj
+            obj.id === id ? { ...obj, x: constrainedX - (obj.width / 2), y: constrainedY - (obj.height / 2) } : obj
         ));
     };
 
-    const renderObjectStyle = (type: LayoutObject['type']) => {
-        const baseStyle = "absolute cursor-move flex items-center justify-center text-xs font-bold transition-all hover:scale-105 active:scale-95 border-2 text-center overflow-hidden shadow-lg backdrop-blur-sm";
-        switch (type) {
-            case 'table-round': return `${baseStyle} w-16 h-16 rounded-full bg-blue-100/90 dark:bg-blue-900/50 border-blue-500 text-blue-800 dark:text-blue-100`;
-            case 'table-square': return `${baseStyle} w-16 h-16 rounded-lg bg-blue-100/90 dark:bg-blue-900/50 border-blue-500 text-blue-800 dark:text-blue-100`;
-            case 'table-main-wedding': return `${baseStyle} w-36 h-14 rounded-xl bg-gradient-to-r from-yellow-100 to-yellow-50 dark:from-yellow-900/50 dark:to-yellow-800/50 border-yellow-600 text-yellow-900 dark:text-yellow-100 border-double border-4 shadow-yellow-500/20`;
-            case 'table-main-xv': return `${baseStyle} w-36 h-14 rounded-xl bg-gradient-to-r from-pink-100 to-pink-50 dark:from-pink-900/50 dark:to-pink-800/50 border-pink-500 text-pink-800 dark:text-pink-100 border-double border-4 shadow-pink-500/20`;
-            case 'chair': return `${baseStyle} w-6 h-6 rounded bg-red-100 dark:bg-red-900/50 border-red-500 text-red-800 dark:text-red-100`;
-            case 'cocktail-table': return `${baseStyle} w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/50 border-orange-500 text-orange-800 dark:text-orange-100`;
-            case 'lounge': return `${baseStyle} w-20 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/50 border-purple-500 text-purple-800 dark:text-purple-100`;
-            case 'bar': return `${baseStyle} w-24 h-8 bg-amber-800 dark:bg-amber-900 border-amber-900 text-white`;
-            case 'stage': return `${baseStyle} w-32 h-24 bg-gray-300 dark:bg-gray-700/80 border-gray-600 text-gray-800 dark:text-white`;
-            case 'dj-booth': return `${baseStyle} w-16 h-12 bg-black dark:bg-[#111] text-white border-gray-600`;
-            case 'sound-area': return `${baseStyle} w-12 h-12 bg-gray-800 dark:bg-gray-900 text-white rounded border-gray-600`;
-            case 'kitchen-cold': return `${baseStyle} w-24 h-24 bg-teal-100 dark:bg-teal-900/50 border-teal-600 text-teal-900 dark:text-teal-100`;
-            case 'kitchen-hot': return `${baseStyle} w-24 h-24 bg-red-50 dark:bg-red-900/30 border-red-800 text-red-900 dark:text-red-100`;
-            case 'restroom': return `${baseStyle} w-20 h-20 bg-cyan-50 dark:bg-cyan-900/30 border-cyan-500 text-cyan-800 dark:text-cyan-100`;
-            case 'garden-area': return `${baseStyle} w-64 h-64 bg-green-100/50 dark:bg-green-900/20 border-green-500 text-green-800 dark:text-green-100 border-dashed z-0`;
-            case 'tent': return `${baseStyle} w-96 h-96 bg-white/50 dark:bg-white/5 border-gray-400 text-gray-400 dark:text-gray-500 border-dashed z-0`;
-            default: return baseStyle;
-        }
-    };
+    const getShapeStyle = (shape: string): string => {
+        if (shape === 'circle') return 'rounded-full';
+        if (shape === 'rounded') return 'rounded-xl';
+        return 'rounded-md';
+    }
 
     return (
         <div className="p-4 md:p-8 max-w-[1800px] mx-auto h-[calc(100vh-100px)] flex flex-col animate-fade-in-up">
@@ -250,54 +254,41 @@ const ProductionDashboard: React.FC = () => {
             {view === 'layout' && (
                 <div className="flex-grow flex flex-col md:flex-row gap-6 h-full overflow-hidden">
                     {/* Toolbar */}
-                    <div className="w-full md:w-72 glass-panel p-5 space-y-6 flex flex-col h-full overflow-y-auto shrink-0 custom-scrollbar dark:bg-[#1c1c1e]/90 dark:border-white/10">
+                    <div className="w-full md:w-80 glass-panel p-5 space-y-6 flex flex-col h-full overflow-y-auto shrink-0 custom-scrollbar dark:bg-[#1c1c1e]/90 dark:border-white/10">
                         <div>
                             <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Configuración</h3>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 gap-3 mb-4">
                                 <div><label className="text-[10px] font-bold text-gray-400 mb-1 block">Ancho (px)</label><input type="number" className="apple-input py-2 text-sm" value={canvasWidth} onChange={(e) => setCanvasWidth(Number(e.target.value))} /></div>
                                 <div><label className="text-[10px] font-bold text-gray-400 mb-1 block">Alto (px)</label><input type="number" className="apple-input py-2 text-sm" value={canvasHeight} onChange={(e) => setCanvasHeight(Number(e.target.value))} /></div>
                             </div>
+                            <button onClick={addCustomObject} className="w-full py-2 bg-gray-100 dark:bg-white/10 rounded-lg text-xs font-bold text-gray-600 dark:text-gray-300 border border-dashed border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors">
+                                + Elemento Personalizado
+                            </button>
                         </div>
 
-                        <div>
-                            <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Mobiliario</h3>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div draggable onDragStart={(e) => handleDragStartNew(e, 'table-round')} onClick={() => addLayoutObject('table-round')} className="p-3 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-xl cursor-pointer text-center text-xs transition-all duration-200 group">
-                                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/50 mx-auto border-2 border-blue-400/50 mb-2 group-hover:scale-110 transition-transform"></div>
-                                    <span className="font-medium text-gray-600 dark:text-gray-300">Redonda</span>
-                                </div>
-                                <div draggable onDragStart={(e) => handleDragStartNew(e, 'table-square')} onClick={() => addLayoutObject('table-square')} className="p-3 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-xl cursor-pointer text-center text-xs transition-all duration-200 group">
-                                    <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/50 mx-auto border-2 border-blue-400/50 mb-2 group-hover:scale-110 transition-transform"></div>
-                                    <span className="font-medium text-gray-600 dark:text-gray-300">Cuadrada</span>
-                                </div>
-                                <div draggable onDragStart={(e) => handleDragStartNew(e, 'chair')} onClick={() => addLayoutObject('chair')} className="p-3 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-xl cursor-pointer text-center text-xs transition-all duration-200 group">
-                                    <div className="w-5 h-5 bg-red-100 dark:bg-red-900/50 mx-auto border-2 border-red-400/50 mb-2 group-hover:scale-110 transition-transform"></div>
-                                    <span className="font-medium text-gray-600 dark:text-gray-300">Silla</span>
-                                </div>
-                                <div draggable onDragStart={(e) => handleDragStartNew(e, 'lounge')} onClick={() => addLayoutObject('lounge')} className="p-3 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-xl cursor-pointer text-center text-xs transition-all duration-200 group">
-                                    <div className="w-10 h-5 rounded bg-purple-100 dark:bg-purple-900/50 mx-auto border-2 border-purple-400/50 mb-2 group-hover:scale-110 transition-transform"></div>
-                                    <span className="font-medium text-gray-600 dark:text-gray-300">Sala</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Zonas Especiales</h3>
-                            <div className="space-y-2">
-                                <div draggable onDragStart={(e) => handleDragStartNew(e, 'table-main-wedding')} onClick={() => addLayoutObject('table-main-wedding')} className="p-3 bg-gradient-to-r from-yellow-50 to-white dark:from-yellow-900/20 dark:to-transparent border border-yellow-100 dark:border-yellow-900/30 rounded-xl cursor-pointer flex items-center gap-3">
-                                    <div className="w-3 h-3 rounded-full bg-yellow-400 shadow-glow"></div>
-                                    <span className="text-xs font-bold text-yellow-800 dark:text-yellow-200">Mesa Novios</span>
-                                </div>
-                                <div draggable onDragStart={(e) => handleDragStartNew(e, 'stage')} onClick={() => addLayoutObject('stage')} className="p-3 bg-gray-50 dark:bg-white/5 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-xl cursor-pointer flex items-center gap-3">
-                                    <div className="w-3 h-3 bg-gray-400 rounded-sm"></div>
-                                    <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Pista / Stage</span>
-                                </div>
-                                <div draggable onDragStart={(e) => handleDragStartNew(e, 'dj-booth')} onClick={() => addLayoutObject('dj-booth')} className="p-3 bg-black dark:bg-[#111] border border-gray-800 rounded-xl cursor-pointer flex items-center gap-3">
-                                    <div className="w-3 h-3 bg-white/50 rounded-full animate-pulse"></div>
-                                    <span className="text-xs font-bold text-white">DJ Booth</span>
+                        {/* DYNAMIC CATEGORIES */}
+                        {LAYOUT_CATEGORIES.map(cat => (
+                            <div key={cat.id}>
+                                <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">{cat.title}</h3>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {cat.items.map(item => (
+                                        <div
+                                            key={item.type}
+                                            draggable
+                                            onDragStart={(e) => handleDragStartNew(e, item)}
+                                            onClick={() => addLayoutObject(item)}
+                                            className="p-2 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-lg cursor-pointer text-center group flex flex-col items-center justify-center h-24"
+                                            title={item.label}
+                                        >
+                                            <div className={`mb-2 border border-black/10 dark:border-white/20 ${getShapeStyle(item.shape)} ${item.colorClass}`}
+                                                style={{ width: Math.min(item.width, 30), height: Math.min(item.height, 30) }}>
+                                            </div>
+                                            <span className="font-medium text-[10px] leading-tight text-gray-600 dark:text-gray-300 line-clamp-2">{item.label}</span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                        </div>
+                        ))}
 
                         <div className="pt-4 mt-auto space-y-3">
                             <button onClick={deleteSelectedObject} disabled={!selectedId} className={`w-full py-3 rounded-xl font-bold text-sm transition-all transform active:scale-95 ${selectedId ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-gray-100 dark:bg-white/5 text-gray-300 dark:text-gray-600 cursor-not-allowed'}`}>Eliminar Seleccionado</button>
@@ -355,8 +346,13 @@ const ProductionDashboard: React.FC = () => {
                                         e.stopPropagation();
                                         setSelectedId(obj.id);
                                     }}
-                                    className={`${renderObjectStyle(obj.type)} ${selectedId === obj.id ? 'ring-4 ring-primavera-gold shadow-[0_0_30px_rgba(212,175,55,0.4)] z-50 scale-105' : ''}`}
-                                    style={{ left: obj.x, top: obj.y }}
+                                    className={`absolute cursor-move flex items-center justify-center text-xs font-bold transition-all hover:scale-105 active:scale-95 border-2 text-center overflow-hidden shadow-lg backdrop-blur-sm ${getShapeStyle(obj.shape)} ${obj.colorClass} ${selectedId === obj.id ? 'ring-4 ring-primavera-gold shadow-[0_0_30px_rgba(212,175,55,0.4)] z-50 scale-105' : ''}`}
+                                    style={{
+                                        left: obj.x,
+                                        top: obj.y,
+                                        width: obj.width,
+                                        height: obj.height
+                                    }}
                                 >
                                     {obj.label}
                                 </div>
