@@ -260,10 +260,10 @@ const ProductionDashboard: React.FC = () => {
                     {/* Toolbar - FIXED STRUCTURE */}
                     <div className="w-full md:w-80 glass-panel flex flex-col h-full overflow-hidden shrink-0 dark:bg-[#1c1c1e]/90 dark:border-white/10 p-0">
 
-                        {/* 1. FIXED HEADER: Configuration & Custom Item */}
-                        <div className="p-5 border-b border-gray-200 dark:border-white/10 bg-white/50 dark:bg-black/20 backdrop-blur-sm z-10 shrink-0">
+                        {/* 1. FIXED HEADER: Configuration & Custom Item & Delete */}
+                        <div className="p-5 border-b border-gray-200 dark:border-white/10 bg-white/50 dark:bg-black/20 backdrop-blur-sm z-10 shrink-0 space-y-5">
                             {/* Canvas Size */}
-                            <div className="mb-4">
+                            <div>
                                 <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Tamaño Lienzo</h3>
                                 <div className="grid grid-cols-2 gap-2">
                                     <div className="relative">
@@ -294,19 +294,31 @@ const ProductionDashboard: React.FC = () => {
                                     </div>
                                     <button
                                         onClick={addCustomObject}
-                                        className="w-full py-1.5 bg-primavera-gold text-white rounded-lg text-xs font-bold shadow hover:bg-yellow-600 transition-colors"
+                                        className="w-full py-2 bg-primavera-gold text-white rounded-lg text-xs font-bold shadow hover:bg-yellow-600 transition-colors"
                                     >
                                         + AGREGAR
                                     </button>
                                 </div>
                             </div>
+
+                            {/* Delete Button (Moved here per request) */}
+                            <div>
+                                <button
+                                    onClick={deleteSelectedObject}
+                                    disabled={!selectedId}
+                                    className={`w-full py-2 rounded-lg font-bold text-xs transition-all ${selectedId ? 'bg-red-500 text-white shadow hover:bg-red-600' : 'bg-gray-100 dark:bg-white/5 text-gray-400 cursor-not-allowed'}`}
+                                >
+                                    {selectedId ? 'ELIMINAR SELECCIONADO' : 'SELECCIONA PARA ELIMINAR'}
+                                </button>
+                            </div>
                         </div>
 
                         {/* 2. SCROLLABLE BODY: Categories */}
                         <div className="flex-grow overflow-y-auto p-5 custom-scrollbar space-y-6">
+                            <h3 className="text-xs font-bold text-gray-800 dark:text-white uppercase tracking-widest mb-2 border-b border-gray-200 dark:border-white/10 pb-2">Catálogo de Elementos</h3>
                             {LAYOUT_CATEGORIES.map(cat => (
                                 <div key={cat.id}>
-                                    <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 stick top-0 bg-white/80 dark:bg-black/80 backdrop-blur-md py-1 z-10">{cat.title}</h3>
+                                    <h3 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 sticky top-0 bg-white/95 dark:bg-[#1c1c1e] py-1 z-10">{cat.title}</h3>
                                     <div className="grid grid-cols-3 gap-2">
                                         {cat.items.map(item => (
                                             <div
@@ -314,14 +326,14 @@ const ProductionDashboard: React.FC = () => {
                                                 draggable
                                                 onDragStart={(e) => handleDragStartNew(e, item)}
                                                 onClick={() => addLayoutObject(item)}
-                                                className="p-2 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-lg cursor-pointer text-center group flex flex-col items-center justify-center h-24 relative"
+                                                className="p-1 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-lg cursor-pointer text-center group flex flex-col items-center justify-center h-20 relative"
                                                 title={item.label}
                                             >
-                                                <div className={`mb-2 border border-black/10 dark:border-white/20 ${getShapeStyle(item.shape)} ${item.colorClass} shadow-sm`}
-                                                    style={{ width: Math.min(item.width, 30), height: Math.min(item.height, 30) }}>
+                                                <div className={`mb-1 border border-black/10 dark:border-white/20 ${getShapeStyle(item.shape)} ${item.colorClass} shadow-sm`}
+                                                    style={{ width: Math.min(item.width, 24), height: Math.min(item.height, 24) }}>
                                                 </div>
-                                                <span className="font-medium text-[9px] leading-tight text-gray-600 dark:text-gray-300 line-clamp-2">{item.label}</span>
-                                                <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 text-[8px] text-gray-400">+</div>
+                                                <span className="font-medium text-[8px] leading-tight text-gray-600 dark:text-gray-300 line-clamp-2">{item.label}</span>
+                                                <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 text-[10px] text-gray-400 p-1">+</div>
                                             </div>
                                         ))}
                                     </div>
@@ -329,13 +341,10 @@ const ProductionDashboard: React.FC = () => {
                             ))}
                         </div>
 
-                        {/* 3. FIXED FOOTER: Actions */}
-                        <div className="p-4 border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 space-y-2 mt-auto shrink-0 z-20">
-                            <button onClick={deleteSelectedObject} disabled={!selectedId} className={`w-full py-3 rounded-xl font-bold text-sm transition-all transform active:scale-95 ${selectedId ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-white dark:bg-white/5 text-gray-300 dark:text-gray-600 cursor-not-allowed border border-gray-200 dark:border-white/5'}`}>
-                                {selectedId ? 'Eliminar Seleccionado' : 'Selecciona un elemento'}
-                            </button>
-                            <button className="w-full btn-primary bg-gradient-to-r from-green-600 to-green-500 border-none shadow-green-500/30">
-                                Guardar Diseño
+                        {/* 3. FIXED FOOTER: Global Actions */}
+                        <div className="p-4 border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 shrink-0 z-20">
+                            <button className="w-full btn-primary bg-gradient-to-r from-green-600 to-green-500 border-none shadow-green-500/30 text-sm py-3">
+                                Guardar Diseño Completo
                             </button>
                         </div>
                     </div>
