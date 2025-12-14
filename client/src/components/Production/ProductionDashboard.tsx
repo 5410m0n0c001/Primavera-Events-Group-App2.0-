@@ -40,9 +40,14 @@ const ProductionDashboard: React.FC = () => {
     const [dragId, setDragId] = useState<string | null>(null);
     const [dragItemConfig, setDragItemConfig] = useState<LayoutItemConfig | null>(null);
 
+    // Canvas & Custom Item State
     const [canvasWidth, setCanvasWidth] = useState(1200);
     const [canvasHeight, setCanvasHeight] = useState(800);
     const [selectedId, setSelectedId] = useState<string | null>(null);
+    const [customLabel, setCustomLabel] = useState('');
+    const [customWidth, setCustomWidth] = useState(50);
+    const [customHeight, setCustomHeight] = useState(50);
+
     const canvasRef = useRef<HTMLDivElement>(null);
 
     // MOCK DATA LOADING
@@ -56,6 +61,8 @@ const ProductionDashboard: React.FC = () => {
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if ((e.key === 'Delete' || e.key === 'Backspace') && selectedId) {
+                // Ignore if typing in an input
+                if (document.activeElement?.tagName === 'INPUT') return;
                 deleteSelectedObject();
             }
         };
@@ -100,26 +107,24 @@ const ProductionDashboard: React.FC = () => {
     };
 
     const addCustomObject = () => {
-        const label = prompt("Nombre del elemento:");
-        if (!label) return;
-
-        const width = prompt("Ancho (px):", "50");
-        const height = prompt("Alto (px):", "50");
-
-        if (!width || !height) return;
+        if (!customLabel.trim()) {
+            alert("Por favor ingresa un nombre para el elemento.");
+            return;
+        }
 
         const newObj: LayoutObject = {
             id: Date.now().toString(),
             type: 'custom',
             x: canvasWidth / 2,
             y: canvasHeight / 2,
-            label,
-            width: Number(width),
-            height: Number(height),
+            label: customLabel,
+            width: Number(customWidth) || 50,
+            height: Number(customHeight) || 50,
             shape: 'rect',
             colorClass: 'bg-white border-2 border-black dark:border-white text-black dark:text-white'
         };
         setLayoutObjects([...layoutObjects, newObj]);
+        setCustomLabel(''); // Reset input
     }
 
     const deleteSelectedObject = () => {
@@ -162,7 +167,7 @@ const ProductionDashboard: React.FC = () => {
         const constrainedY = Math.max(0, Math.min(y, canvasHeight - 10));
 
         if (dragItemConfig) {
-            // Case A: Dropping a NEW item from Sidebar
+            // Drop New Item
             const newObj: LayoutObject = {
                 id: Date.now().toString(),
                 type: dragItemConfig.type,
@@ -175,10 +180,9 @@ const ProductionDashboard: React.FC = () => {
                 colorClass: dragItemConfig.colorClass
             };
             setLayoutObjects(prev => [...prev, newObj]);
-            setDragItemConfig(null); // Reset
+            setDragItemConfig(null);
         } else if (dragId) {
-            // Case B: Moving EXISTING item
-            // Find existing obj to offset correctly (center drag)
+            // Move Existing Item
             const existing = layoutObjects.find(o => o.id === dragId);
             if (existing) {
                 setLayoutObjects(prev => prev.map(obj =>
@@ -228,7 +232,7 @@ const ProductionDashboard: React.FC = () => {
             <h1 className="text-4xl font-display font-bold text-gray-900 dark:text-white mb-2 tracking-tight">Producción y Logística</h1>
             <p className="text-gray-500 dark:text-gray-400 mb-6 font-medium">Diseña el plano del evento y coordina cada momento.</p>
 
-            <div className="flex gap-6 mb-6 border-b border-gray-200 dark:border-white/10 pb-1">
+            <div className="flex gap-6 mb-6 border-b border-gray-200 dark:border-white/10 pb-1 shrink-0">
                 <button
                     onClick={() => setView('layout')}
                     className={`text-sm font-bold pb-3 px-2 transition-all duration-300 relative ${view === 'layout'
@@ -253,46 +257,86 @@ const ProductionDashboard: React.FC = () => {
 
             {view === 'layout' && (
                 <div className="flex-grow flex flex-col md:flex-row gap-6 h-full overflow-hidden">
-                    {/* Toolbar */}
-                    <div className="w-full md:w-80 glass-panel p-5 space-y-6 flex flex-col h-full overflow-y-auto shrink-0 custom-scrollbar dark:bg-[#1c1c1e]/90 dark:border-white/10">
-                        <div>
-                            <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Configuración</h3>
-                            <div className="grid grid-cols-2 gap-3 mb-4">
-                                <div><label className="text-[10px] font-bold text-gray-400 mb-1 block">Ancho (px)</label><input type="number" className="apple-input py-2 text-sm" value={canvasWidth} onChange={(e) => setCanvasWidth(Number(e.target.value))} /></div>
-                                <div><label className="text-[10px] font-bold text-gray-400 mb-1 block">Alto (px)</label><input type="number" className="apple-input py-2 text-sm" value={canvasHeight} onChange={(e) => setCanvasHeight(Number(e.target.value))} /></div>
-                            </div>
-                            <button onClick={addCustomObject} className="w-full py-2 bg-gray-100 dark:bg-white/10 rounded-lg text-xs font-bold text-gray-600 dark:text-gray-300 border border-dashed border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors">
-                                + Elemento Personalizado
-                            </button>
-                        </div>
+                    {/* Toolbar - FIXED STRUCTURE */}
+                    <div className="w-full md:w-80 glass-panel flex flex-col h-full overflow-hidden shrink-0 dark:bg-[#1c1c1e]/90 dark:border-white/10 p-0">
 
-                        {/* DYNAMIC CATEGORIES */}
-                        {LAYOUT_CATEGORIES.map(cat => (
-                            <div key={cat.id}>
-                                <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">{cat.title}</h3>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {cat.items.map(item => (
-                                        <div
-                                            key={item.type}
-                                            draggable
-                                            onDragStart={(e) => handleDragStartNew(e, item)}
-                                            onClick={() => addLayoutObject(item)}
-                                            className="p-2 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-lg cursor-pointer text-center group flex flex-col items-center justify-center h-24"
-                                            title={item.label}
-                                        >
-                                            <div className={`mb-2 border border-black/10 dark:border-white/20 ${getShapeStyle(item.shape)} ${item.colorClass}`}
-                                                style={{ width: Math.min(item.width, 30), height: Math.min(item.height, 30) }}>
-                                            </div>
-                                            <span className="font-medium text-[10px] leading-tight text-gray-600 dark:text-gray-300 line-clamp-2">{item.label}</span>
-                                        </div>
-                                    ))}
+                        {/* 1. FIXED HEADER: Configuration & Custom Item */}
+                        <div className="p-5 border-b border-gray-200 dark:border-white/10 bg-white/50 dark:bg-black/20 backdrop-blur-sm z-10 shrink-0">
+                            {/* Canvas Size */}
+                            <div className="mb-4">
+                                <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Tamaño Lienzo</h3>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="relative">
+                                        <label className="absolute -top-1.5 left-2 text-[8px] bg-white dark:bg-[#2c2c2e] px-1 text-gray-400 font-bold">ANCHO</label>
+                                        <input type="number" className="apple-input py-1 text-sm h-8" value={canvasWidth} onChange={(e) => setCanvasWidth(Number(e.target.value))} />
+                                    </div>
+                                    <div className="relative">
+                                        <label className="absolute -top-1.5 left-2 text-[8px] bg-white dark:bg-[#2c2c2e] px-1 text-gray-400 font-bold">ALTO</label>
+                                        <input type="number" className="apple-input py-1 text-sm h-8" value={canvasHeight} onChange={(e) => setCanvasHeight(Number(e.target.value))} />
+                                    </div>
                                 </div>
                             </div>
-                        ))}
 
-                        <div className="pt-4 mt-auto space-y-3">
-                            <button onClick={deleteSelectedObject} disabled={!selectedId} className={`w-full py-3 rounded-xl font-bold text-sm transition-all transform active:scale-95 ${selectedId ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-gray-100 dark:bg-white/5 text-gray-300 dark:text-gray-600 cursor-not-allowed'}`}>Eliminar Seleccionado</button>
-                            <button className="w-full btn-primary bg-gradient-to-r from-green-600 to-green-500 border-none shadow-green-500/30">Guardar Cambios</button>
+                            {/* Custom Object Creator */}
+                            <div>
+                                <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Crear Elemento</h3>
+                                <div className="space-y-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Nombre (ej. Mesa Dulces)"
+                                        className="apple-input py-1 text-sm h-8 w-full"
+                                        value={customLabel}
+                                        onChange={(e) => setCustomLabel(e.target.value)}
+                                    />
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <input type="number" placeholder="W" className="apple-input py-1 text-sm h-8" value={customWidth} onChange={(e) => setCustomWidth(Number(e.target.value))} />
+                                        <input type="number" placeholder="H" className="apple-input py-1 text-sm h-8" value={customHeight} onChange={(e) => setCustomHeight(Number(e.target.value))} />
+                                    </div>
+                                    <button
+                                        onClick={addCustomObject}
+                                        className="w-full py-1.5 bg-primavera-gold text-white rounded-lg text-xs font-bold shadow hover:bg-yellow-600 transition-colors"
+                                    >
+                                        + AGREGAR
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 2. SCROLLABLE BODY: Categories */}
+                        <div className="flex-grow overflow-y-auto p-5 custom-scrollbar space-y-6">
+                            {LAYOUT_CATEGORIES.map(cat => (
+                                <div key={cat.id}>
+                                    <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 stick top-0 bg-white/80 dark:bg-black/80 backdrop-blur-md py-1 z-10">{cat.title}</h3>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {cat.items.map(item => (
+                                            <div
+                                                key={item.type}
+                                                draggable
+                                                onDragStart={(e) => handleDragStartNew(e, item)}
+                                                onClick={() => addLayoutObject(item)}
+                                                className="p-2 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-lg cursor-pointer text-center group flex flex-col items-center justify-center h-24 relative"
+                                                title={item.label}
+                                            >
+                                                <div className={`mb-2 border border-black/10 dark:border-white/20 ${getShapeStyle(item.shape)} ${item.colorClass} shadow-sm`}
+                                                    style={{ width: Math.min(item.width, 30), height: Math.min(item.height, 30) }}>
+                                                </div>
+                                                <span className="font-medium text-[9px] leading-tight text-gray-600 dark:text-gray-300 line-clamp-2">{item.label}</span>
+                                                <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 text-[8px] text-gray-400">+</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* 3. FIXED FOOTER: Actions */}
+                        <div className="p-4 border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5 space-y-2 mt-auto shrink-0 z-20">
+                            <button onClick={deleteSelectedObject} disabled={!selectedId} className={`w-full py-3 rounded-xl font-bold text-sm transition-all transform active:scale-95 ${selectedId ? 'bg-red-500 text-white shadow-lg shadow-red-500/30' : 'bg-white dark:bg-white/5 text-gray-300 dark:text-gray-600 cursor-not-allowed border border-gray-200 dark:border-white/5'}`}>
+                                {selectedId ? 'Eliminar Seleccionado' : 'Selecciona un elemento'}
+                            </button>
+                            <button className="w-full btn-primary bg-gradient-to-r from-green-600 to-green-500 border-none shadow-green-500/30">
+                                Guardar Diseño
+                            </button>
                         </div>
                     </div>
 
