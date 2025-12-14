@@ -21,6 +21,15 @@ interface Transaction {
 }
 
 const FinanceDashboard: React.FC = () => {
+    const [stats, setStats] = useState<FinanceStats>({
+        totalIncome: 0,
+        totalExpenses: 0,
+        netProfit: 0,
+        pendingIncome: 0,
+        pendingExpenses: 0
+    });
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [loading, setLoading] = useState(true);
     const [projections, setProjections] = useState({ potential: 0, confirmed: 0, lost: 0 });
     const [showModal, setShowModal] = useState(false);
     const [formType, setFormType] = useState<'INCOME' | 'EXPENSE'>('EXPENSE');
@@ -41,6 +50,7 @@ const FinanceDashboard: React.FC = () => {
 
     const loadData = async () => {
         try {
+            setLoading(true);
             const statsRes = await fetch('/api/finance/stats');
             if (statsRes.ok) setStats(await statsRes.json());
 
@@ -57,7 +67,7 @@ const FinanceDashboard: React.FC = () => {
             const merged = [
                 ...payments.map((p: any) => ({ ...p, type: 'INCOME', category: 'Ingreso' })),
                 ...expenses.map((e: any) => ({ ...e, type: 'EXPENSE' }))
-            ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            ].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
             setTransactions(merged);
         } catch (error) {
