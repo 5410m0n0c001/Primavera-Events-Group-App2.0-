@@ -57,21 +57,24 @@ const ServiceSelector: React.FC<Props> = ({ draft, setDraft, onBack, onNext }) =
                 <h2 className="text-xl font-bold mb-4">Catálogo de Servicios</h2>
                 <div className="space-y-4">
                     {categories.map(cat => (
-                        <div key={cat.id} className="border rounded-lg overflow-hidden">
+                        <div key={cat.id} className="border border-gray-100 dark:border-white/10 rounded-2xl overflow-hidden bg-white dark:bg-[#1c1c1e] shadow-sm transition-all hover:shadow-md">
                             <button
-                                className={`w-full text-left p-4 font-bold flex justify-between ${activeCategory === cat.id ? 'bg-primavera-gold text-white' : 'bg-gray-50 hover:bg-gray-100'}`}
+                                className={`w-full text-left p-5 font-bold flex justify-between items-center transition-colors ${activeCategory === cat.id
+                                        ? 'bg-black text-white dark:bg-white dark:text-black'
+                                        : 'bg-white text-gray-900 hover:bg-gray-50 dark:bg-[#1c1c1e] dark:text-white dark:hover:bg-[#2c2c2e]'
+                                    }`}
                                 onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
                             >
-                                <span>{cat.name}</span>
-                                <span>{activeCategory === cat.id ? '−' : '+'}</span>
+                                <span className="text-lg tracking-tight">{cat.name}</span>
+                                <span className="text-2xl font-light">{activeCategory === cat.id ? '−' : '+'}</span>
                             </button>
 
                             {activeCategory === cat.id && (
-                                <div className="p-4 bg-white border-t space-y-6">
+                                <div className="p-5 bg-gray-50 dark:bg-[#000000]/20 border-t border-gray-100 dark:border-white/5 space-y-8 animate-fade-in-up">
                                     {cat.subCategories.map(sub => (
                                         <div key={sub.id}>
-                                            <h4 className="text-sm uppercase tracking-wide text-gray-500 mb-3 font-semibold">{sub.name}</h4>
-                                            <div className="grid grid-cols-2 gap-3">
+                                            <h4 className="text-xs uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 mb-4 font-bold ml-1">{sub.name}</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 {sub.items.map(item => {
                                                     let options: any = {};
                                                     try {
@@ -79,28 +82,35 @@ const ServiceSelector: React.FC<Props> = ({ draft, setDraft, onBack, onNext }) =
                                                     } catch (e) { options = {}; }
 
                                                     return (
-                                                        <div key={item.id} className="border p-3 rounded hover:shadow-md transition flex flex-col justify-between group cursor-pointer bg-white" onClick={() => addItem(item)}>
-                                                            <div>
-                                                                <div className="font-bold text-gray-800 text-lg">{item.name}</div>
+                                                        <div key={item.id}
+                                                            className="bg-white dark:bg-[#2c2c2e] p-5 rounded-xl shadow-sm border border-black/5 dark:border-white/5 hover:scale-[1.02] transition-all cursor-pointer group relative overflow-hidden"
+                                                            onClick={() => addItem(item)}
+                                                        >
+                                                            <div className="relative z-10">
+                                                                <div className="font-bold text-gray-900 dark:text-white text-xl mb-2">{item.name}</div>
 
                                                                 {/* Attribute Chips */}
-                                                                <div className="mt-2 space-y-1">
+                                                                <div className="mb-4 space-y-1">
                                                                     {Object.entries(options).map(([key, val]) => (
-                                                                        <div key={key} className="text-xs text-gray-600">
-                                                                            <span className="font-semibold capitalize">{key}: </span>
+                                                                        <div key={key} className="text-xs text-gray-500 dark:text-gray-400">
+                                                                            <span className="font-bold capitalize text-gray-700 dark:text-gray-300">{key}: </span>
                                                                             {Array.isArray(val) ? val.join(', ') : String(val)}
                                                                         </div>
                                                                     ))}
                                                                 </div>
-                                                            </div>
-                                                            <div className="mt-3 flex justify-between items-center border-t pt-2">
-                                                                <span className="text-primavera-gold font-bold text-lg">${item.price} <span className="text-xs text-gray-400 font-normal">/{item.unit}</span></span>
-                                                                <button
-                                                                    className="bg-gray-100 px-3 py-1 rounded-full text-xs font-bold hover:bg-primavera-gold hover:text-white transition uppercase tracking-wider"
-                                                                    onClick={(e) => { e.stopPropagation(); addItem(item); }}
-                                                                >
-                                                                    Agregar
-                                                                </button>
+
+                                                                <div className="flex justify-between items-end mt-2">
+                                                                    <div className="flex items-baseline gap-1">
+                                                                        <span className="text-primavera-gold font-bold text-2xl">${item.price}</span>
+                                                                        <span className="text-[10px] uppercase text-gray-400 font-bold tracking-wider">/{item.unit}</span>
+                                                                    </div>
+                                                                    <button
+                                                                        className="bg-black text-white dark:bg-white dark:text-black px-4 py-2 rounded-full text-xs font-bold hover:opacity-80 transition transform active:scale-95 shadow-lg"
+                                                                        onClick={(e) => { e.stopPropagation(); addItem(item); }}
+                                                                    >
+                                                                        AGREGAR +
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     );

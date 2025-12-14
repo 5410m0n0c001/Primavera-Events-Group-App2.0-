@@ -112,31 +112,31 @@ const FinanceDashboard: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="apple-card p-6 relative overflow-hidden group">
                     <div className="absolute right-0 top-0 p-4 opacity-[0.03] group-hover:opacity-10 transition-opacity text-green-500 text-8xl font-bold font-display">$</div>
-                    <div className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">Ingresos Totales</div>
-                    <div className="text-3xl font-display font-bold text-gray-900">${stats?.totalIncome.toLocaleString()}</div>
-                    <div className="text-xs text-gray-400 mt-2 font-medium">Por cobrar: <span className="text-gray-600">${stats?.pendingIncome.toLocaleString()}</span></div>
+                    <div className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Ingresos Totales</div>
+                    <div className="text-3xl font-display font-bold text-gray-900 dark:text-white">${stats?.totalIncome.toLocaleString()}</div>
+                    <div className="text-xs text-gray-400 mt-2 font-medium">Por cobrar: <span className="text-gray-600 dark:text-gray-300">${stats?.pendingIncome.toLocaleString()}</span></div>
                 </div>
                 <div className="apple-card p-6 relative overflow-hidden group">
                     <div className="absolute right-0 top-0 p-4 opacity-[0.03] group-hover:opacity-10 transition-opacity text-red-500 text-8xl font-bold font-display">↓</div>
-                    <div className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">Gastos Totales</div>
-                    <div className="text-3xl font-display font-bold text-gray-900">${stats?.totalExpenses.toLocaleString()}</div>
-                    <div className="text-xs text-gray-400 mt-2 font-medium">Por pagar: <span className="text-gray-600">${stats?.pendingExpenses.toLocaleString()}</span></div>
+                    <div className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Gastos Totales</div>
+                    <div className="text-3xl font-display font-bold text-gray-900 dark:text-white">${stats?.totalExpenses.toLocaleString()}</div>
+                    <div className="text-xs text-gray-400 mt-2 font-medium">Por pagar: <span className="text-gray-600 dark:text-gray-300">${stats?.pendingExpenses.toLocaleString()}</span></div>
                 </div>
                 <div className="apple-card p-6 relative overflow-hidden group">
                     <div className="absolute right-0 top-0 p-4 opacity-[0.03] group-hover:opacity-10 transition-opacity text-blue-500 text-8xl font-bold font-display">%</div>
-                    <div className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">Utilidad Neta</div>
-                    <div className={`text-3xl font-display font-bold ${stats?.netProfit! >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                    <div className="text-gray-500 dark:text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Utilidad Neta</div>
+                    <div className={`text-3xl font-display font-bold ${stats?.netProfit! >= 0 ? 'text-blue-500 dark:text-blue-400' : 'text-red-500 dark:text-red-400'}`}>
                         ${stats?.netProfit.toLocaleString()}
                     </div>
                 </div>
-                <div className="bg-[#1D1D1F] text-white p-6 rounded-2xl shadow-xl shadow-black/20 relative overflow-hidden">
+                <div className="bg-[#1D1D1F] dark:bg-black text-white p-6 rounded-2xl shadow-xl shadow-black/20 relative overflow-hidden border border-white/10">
                     <div className="relative z-10">
                         <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Proyección (Pipeline)</div>
                         <div className="text-3xl font-display font-bold">${(projections.potential + projections.confirmed).toLocaleString()}</div>
                         <div className="text-xs text-gray-400 mt-2">Potential: ${projections.potential.toLocaleString()}</div>
                     </div>
                     {/* Decorative gradient blob */}
-                    <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-blue-500/30 rounded-full blur-2xl"></div>
+                    <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-blue-500/30 rounded-full blur-2xl animate-pulse-slow"></div>
                 </div>
             </div>
 
@@ -221,8 +221,8 @@ const FinanceDashboard: React.FC = () => {
                                 </td>
                                 <td className="p-4 text-sm">
                                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase border ${t.type === 'INCOME'
-                                            ? 'bg-green-50 text-green-700 border-green-100'
-                                            : 'bg-orange-50 text-orange-700 border-orange-100'
+                                        ? 'bg-green-50 text-green-700 border-green-100'
+                                        : 'bg-orange-50 text-orange-700 border-orange-100'
                                         }`}>
                                         {t.category || (t.type === 'INCOME' ? 'Venta' : 'Gasto')}
                                     </span>
