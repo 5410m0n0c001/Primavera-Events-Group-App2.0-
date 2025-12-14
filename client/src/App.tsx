@@ -14,92 +14,77 @@ function App() {
   const [view, setView] = useState<'quote' | 'crm' | 'calendar' | 'inventory' | 'suppliers' | 'finance' | 'catering' | 'production' | 'analytics' | 'venues'>('quote');
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Navigation Bar */}
-      <nav className="bg-primavera-black text-white p-4 shadow-md sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-xl font-serif text-primavera-gold font-bold flex-shrink-0">Primavera Events Group</div>
+    <div className="min-h-screen bg-[#F5F5F7] flex text-[#1D1D1F]">
 
-          {/* Mobile Scrollable Nav (Desktop: Grid/Wrap) */}
-          <div className="w-full md:w-auto overflow-x-auto md:overflow-visible pb-2 md:pb-0">
-            <div className="flex md:flex-wrap space-x-4 md:space-x-2 min-w-max md:min-w-0 px-2 md:px-0">
-              <button
-                onClick={() => setView('quote')}
-                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'quote' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-              >
-                Cotizador
-              </button>
-              <button
-                onClick={() => setView('venues')}
-                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'venues' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-              >
-                Locaciones
-              </button>
-              <button
-                onClick={() => setView('crm')}
-                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'crm' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-              >
-                CRM Clientes
-              </button>
-              <button
-                onClick={() => setView('calendar')}
-                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'calendar' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-              >
-                Calendario
-              </button>
-              <button
-                onClick={() => setView('inventory')}
-                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'inventory' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-              >
-                Inventario
-              </button>
-              <button
-                onClick={() => setView('suppliers')}
-                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'suppliers' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-              >
-                Proveedores
-              </button>
-              <button
-                onClick={() => setView('finance')}
-                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'finance' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-              >
-                Finanzas
-              </button>
-              <button
-                onClick={() => setView('catering')}
-                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'catering' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-              >
-                Catering
-              </button>
-              <button
-                onClick={() => setView('production')}
-                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'production' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-              >
-                Producción
-              </button>
-              <button
-                onClick={() => setView('analytics')}
-                className={`px-3 py-1 rounded transition whitespace-nowrap ${view === 'analytics' ? 'bg-primavera-gold text-white' : 'text-gray-300 hover:text-white'}`}
-              >
-                Analytics
-              </button>
+      {/* Sidebar (Desktop) */}
+      <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 bg-white/60 backdrop-blur-xl border-r border-white/20 shadow-[0_0_15px_rgba(0,0,0,0.03)] z-50 transition-all">
+        <div className="p-6">
+          <h1 className="text-xl font-display font-bold tracking-tight bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Primavera Events</h1>
+        </div>
+
+        <nav className="flex-1 px-3 space-y-1 overflow-y-auto custom-scrollbar">
+          {[
+            { id: 'quote', label: 'Cotizador', icon: '📝' },
+            { id: 'crm', label: 'CRM Clientes', icon: '👥' },
+            { id: 'calendar', label: 'Calendario', icon: '📅' },
+            { id: 'venues', label: 'Locaciones', icon: '🏰' },
+            { id: 'inventory', label: 'Inventario', icon: '📦' },
+            { id: 'suppliers', label: 'Proveedores', icon: '🚚' },
+            { id: 'finance', label: 'Finanzas', icon: '📊' },
+            { id: 'catering', label: 'Catering', icon: '🍽️' },
+            { id: 'production', label: 'Producción', icon: '🎭' },
+            { id: 'analytics', label: 'Analytics', icon: '📈' },
+          ].map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setView(item.id as any)}
+              className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group flex items-center gap-3 ${view === item.id
+                  ? 'bg-white shadow-[0_2px_10px_rgba(0,0,0,0.06)] text-black'
+                  : 'text-gray-500 hover:bg-white/50 hover:text-gray-900'
+                }`}
+            >
+              <span className={`transition-transform duration-300 ${view === item.id ? 'scale-110' : 'scale-100 group-hover:scale-110'}`}>{item.icon}</span>
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        <div className="p-4 border-t border-gray-100/50">
+          <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/50 transition cursor-pointer">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primavera-gold to-yellow-100 flex items-center justify-center text-xs font-bold text-white">PE</div>
+            <div className="text-xs font-medium">
+              <p className="text-gray-900">Admin User</p>
+              <p className="text-gray-400">Online</p>
             </div>
           </div>
         </div>
-      </nav>
+      </aside>
 
-      {/* Main Content */}
-      <main className="flex-grow flex items-center justify-center p-4">
-        {view === 'quote' && <QuoteWizard />}
-        {view === 'crm' && <ClientList />}
-        {view === 'calendar' && <CalendarView />}
-        {view === 'inventory' && <InventoryDashboard />}
-        {view === 'suppliers' && <SupplierList />}
-        {view === 'finance' && <FinanceDashboard />}
-        {view === 'catering' && <CateringDashboard />}
-        {view === 'production' && <ProductionDashboard />}
-        {view === 'analytics' && <AnalyticsDashboard />}
-        {view === 'venues' && <VenuesManager />}
+      {/* Mobile Nav (Top) */}
+      <div className="md:hidden fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 p-4 flex justify-between items-center">
+        <span className="font-bold text-lg">Primavera Events</span>
+        <button className="text-2xl">☰</button>
+      </div>
+
+      {/* Main Content Area */}
+      <main className="flex-1 min-w-0 overflow-y-auto h-screen relative">
+        {/* Header Glass for Content */}
+        <header className="sticky top-0 z-40 px-8 py-3 bg-[#F5F5F7]/80 backdrop-blur-xl flex justify-between items-center border-b border-white/0 md:hidden">
+          {/* Mobile header spacer */}
+        </header>
+
+        <div className="p-4 md:p-8 max-w-[1600px] mx-auto animate-fade-in-up mt-14 md:mt-0">
+          {view === 'quote' && <QuoteWizard />}
+          {view === 'crm' && <ClientList />}
+          {view === 'calendar' && <CalendarView />}
+          {view === 'inventory' && <InventoryDashboard />}
+          {view === 'suppliers' && <SupplierList />}
+          {view === 'finance' && <FinanceDashboard />}
+          {view === 'catering' && <CateringDashboard />}
+          {view === 'production' && <ProductionDashboard />}
+          {view === 'analytics' && <AnalyticsDashboard />}
+          {view === 'venues' && <VenuesManager />}
+        </div>
       </main>
     </div>
   );

@@ -97,91 +97,99 @@ const FinanceDashboard: React.FC = () => {
     const maxVal = Math.max(stats?.totalIncome || 1, stats?.totalExpenses || 1);
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-8 pb-20">
+        <div className="space-y-8 pb-20">
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-serif font-bold text-gray-800">Finanzas y Reportes</h1>
+                <h1 className="text-4xl font-display font-bold text-gray-900 tracking-tight">Finanzas</h1>
                 <button
                     onClick={() => setShowModal(true)}
-                    className="bg-primavera-gold text-white px-6 py-2 rounded-lg shadow hover:bg-yellow-600 transition font-medium"
+                    className="btn-primary flex items-center gap-2"
                 >
-                    + Nuevo Movimiento
+                    <span className="text-lg">+</span> Nuevo Movimiento
                 </button>
             </div>
 
             {/* KPI Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-4 opacity-10 text-green-500 text-6xl font-bold">$</div>
-                    <div className="text-gray-500 text-xs font-bold uppercase tracking-wider">Ingresos Totales</div>
-                    <div className="text-3xl font-bold text-green-600 mt-2">${stats?.totalIncome.toLocaleString()}</div>
-                    <div className="text-xs text-gray-400 mt-1">Por cobrar: ${stats?.pendingIncome.toLocaleString()}</div>
+                <div className="apple-card p-6 relative overflow-hidden group">
+                    <div className="absolute right-0 top-0 p-4 opacity-[0.03] group-hover:opacity-10 transition-opacity text-green-500 text-8xl font-bold font-display">$</div>
+                    <div className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">Ingresos Totales</div>
+                    <div className="text-3xl font-display font-bold text-gray-900">${stats?.totalIncome.toLocaleString()}</div>
+                    <div className="text-xs text-gray-400 mt-2 font-medium">Por cobrar: <span className="text-gray-600">${stats?.pendingIncome.toLocaleString()}</span></div>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-4 opacity-10 text-red-500 text-6xl font-bold">↓</div>
-                    <div className="text-gray-500 text-xs font-bold uppercase tracking-wider">Gastos Totales</div>
-                    <div className="text-3xl font-bold text-red-600 mt-2">${stats?.totalExpenses.toLocaleString()}</div>
-                    <div className="text-xs text-gray-400 mt-1">Por pagar: ${stats?.pendingExpenses.toLocaleString()}</div>
+                <div className="apple-card p-6 relative overflow-hidden group">
+                    <div className="absolute right-0 top-0 p-4 opacity-[0.03] group-hover:opacity-10 transition-opacity text-red-500 text-8xl font-bold font-display">↓</div>
+                    <div className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">Gastos Totales</div>
+                    <div className="text-3xl font-display font-bold text-gray-900">${stats?.totalExpenses.toLocaleString()}</div>
+                    <div className="text-xs text-gray-400 mt-2 font-medium">Por pagar: <span className="text-gray-600">${stats?.pendingExpenses.toLocaleString()}</span></div>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 relative overflow-hidden">
-                    <div className="absolute right-0 top-0 p-4 opacity-10 text-blue-500 text-6xl font-bold">%</div>
-                    <div className="text-gray-500 text-xs font-bold uppercase tracking-wider">Utilidad Neta</div>
-                    <div className={`text-3xl font-bold mt-2 ${stats?.netProfit! >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+                <div className="apple-card p-6 relative overflow-hidden group">
+                    <div className="absolute right-0 top-0 p-4 opacity-[0.03] group-hover:opacity-10 transition-opacity text-blue-500 text-8xl font-bold font-display">%</div>
+                    <div className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">Utilidad Neta</div>
+                    <div className={`text-3xl font-display font-bold ${stats?.netProfit! >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
                         ${stats?.netProfit.toLocaleString()}
                     </div>
                 </div>
-                <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-6 rounded-xl shadow-md">
-                    <div className="text-indigo-100 text-xs font-bold uppercase tracking-wider">Proyección (Cotizaciones)</div>
-                    <div className="text-3xl font-bold mt-2">${(projections.potential + projections.confirmed).toLocaleString()}</div>
-                    <div className="text-xs text-indigo-200 mt-1">Potential: ${projections.potential.toLocaleString()}</div>
+                <div className="bg-[#1D1D1F] text-white p-6 rounded-2xl shadow-xl shadow-black/20 relative overflow-hidden">
+                    <div className="relative z-10">
+                        <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Proyección (Pipeline)</div>
+                        <div className="text-3xl font-display font-bold">${(projections.potential + projections.confirmed).toLocaleString()}</div>
+                        <div className="text-xs text-gray-400 mt-2">Potential: ${projections.potential.toLocaleString()}</div>
+                    </div>
+                    {/* Decorative gradient blob */}
+                    <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-blue-500/30 rounded-full blur-2xl"></div>
                 </div>
             </div>
 
             {/* Analysis & Comparisons */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Chart: Income vs Expense */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="font-bold text-gray-700 mb-6">Comparativa de Flujo</h3>
-                    <div className="h-40 flex items-end justify-center gap-16 px-10">
-                        <div className="w-24 bg-green-100 rounded-t-lg relative group transition-all hover:bg-green-200" style={{ height: `${(stats?.totalIncome || 0) / maxVal * 100}%` }}>
-                            <div className="absolute -top-8 w-full text-center font-bold text-green-700">${stats?.totalIncome.toLocaleString()}</div>
-                            <div className="absolute bottom-2 w-full text-center text-xs text-green-800 font-bold">INGRESOS</div>
+                <div className="apple-card p-8">
+                    <h3 className="text-lg font-bold text-gray-900 mb-8">Flujo de Efectivo</h3>
+                    <div className="h-48 flex items-end justify-center gap-16 px-10 border-b border-gray-100 pb-4">
+                        <div className="w-24 bg-green-500/10 rounded-t-2xl relative group transition-all duration-500 hover:bg-green-500/20" style={{ height: `${(stats?.totalIncome || 0) / maxVal * 100}%` }}>
+                            <div className="absolute -top-8 w-full text-center font-bold text-green-600 text-sm">${stats?.totalIncome.toLocaleString()}</div>
+                            <div className="absolute bottom-2 w-full text-center text-[10px] text-green-700 font-bold tracking-wider">INGRESOS</div>
+                            {/* Inner bar */}
+                            <div className="absolute bottom-0 w-full bg-green-500 h-1.5 rounded-b-none opacity-40"></div>
                         </div>
-                        <div className="w-24 bg-red-100 rounded-t-lg relative group transition-all hover:bg-red-200" style={{ height: `${(stats?.totalExpenses || 0) / maxVal * 100}%` }}>
-                            <div className="absolute -top-8 w-full text-center font-bold text-red-700">${stats?.totalExpenses.toLocaleString()}</div>
-                            <div className="absolute bottom-2 w-full text-center text-xs text-red-800 font-bold">GASTOS</div>
+                        <div className="w-24 bg-red-500/10 rounded-t-2xl relative group transition-all duration-500 hover:bg-red-500/20" style={{ height: `${(stats?.totalExpenses || 0) / maxVal * 100}%` }}>
+                            <div className="absolute -top-8 w-full text-center font-bold text-red-600 text-sm">${stats?.totalExpenses.toLocaleString()}</div>
+                            <div className="absolute bottom-2 w-full text-center text-[10px] text-red-700 font-bold tracking-wider">GASTOS</div>
+                            {/* Inner bar */}
+                            <div className="absolute bottom-0 w-full bg-red-500 h-1.5 rounded-b-none opacity-40"></div>
                         </div>
                     </div>
                 </div>
 
                 {/* Projections Detail */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h3 className="font-bold text-gray-700 mb-4">Proyecciones de Venta</h3>
-                    <div className="space-y-4">
+                <div className="apple-card p-8">
+                    <h3 className="text-lg font-bold text-gray-900 mb-6">Proyecciones de Venta</h3>
+                    <div className="space-y-6">
                         <div>
-                            <div className="flex justify-between text-sm mb-1">
-                                <span className="text-gray-600">Confirmado (Ganado)</span>
-                                <span className="font-bold text-gray-800">${projections.confirmed.toLocaleString()}</span>
+                            <div className="flex justify-between text-sm mb-2 font-medium">
+                                <span className="text-gray-600">Ganado (Confirmado)</span>
+                                <span className="text-gray-900">${projections.confirmed.toLocaleString()}</span>
                             </div>
-                            <div className="w-full bg-gray-100 rounded-full h-2">
-                                <div className="bg-green-500 h-2 rounded-full" style={{ width: '100%' }}></div>
+                            <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                                <div className="bg-[#34C759] h-full rounded-full transition-all duration-1000 ease-out" style={{ width: '100%' }}></div>
                             </div>
                         </div>
                         <div>
-                            <div className="flex justify-between text-sm mb-1">
-                                <span className="text-gray-600">En Negociación (Pipeline)</span>
-                                <span className="font-bold text-gray-800">${projections.potential.toLocaleString()}</span>
+                            <div className="flex justify-between text-sm mb-2 font-medium">
+                                <span className="text-gray-600">En Negociación</span>
+                                <span className="text-gray-900">${projections.potential.toLocaleString()}</span>
                             </div>
-                            <div className="w-full bg-gray-100 rounded-full h-2">
-                                <div className="bg-blue-400 h-2 rounded-full" style={{ width: '60%' }}></div>
+                            <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                                <div className="bg-[#007AFF] h-full rounded-full transition-all duration-1000 ease-out" style={{ width: '60%' }}></div>
                             </div>
                         </div>
                         <div>
-                            <div className="flex justify-between text-sm mb-1">
+                            <div className="flex justify-between text-sm mb-2 font-medium">
                                 <span className="text-gray-600">Perdido</span>
-                                <span className="font-bold text-gray-800">${projections.lost.toLocaleString()}</span>
+                                <span className="text-gray-900">${projections.lost.toLocaleString()}</span>
                             </div>
-                            <div className="w-full bg-gray-100 rounded-full h-2">
-                                <div className="bg-red-300 h-2 rounded-full" style={{ width: '20%' }}></div>
+                            <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+                                <div className="bg-[#FF3B30] h-full rounded-full transition-all duration-1000 ease-out" style={{ width: '20%' }}></div>
                             </div>
                         </div>
                     </div>
@@ -189,44 +197,48 @@ const FinanceDashboard: React.FC = () => {
             </div>
 
             {/* Transactions List */}
-            <div className="bg-white rounded-lg shadow overflow-hidden border border-gray-100">
-                <div className="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
-                    <h3 className="font-bold text-gray-700">Movimientos Recientes</h3>
-                    <span className="text-xs text-gray-500">Mostrando últimos {transactions.length} registros</span>
+            <div className="apple-card overflow-hidden">
+                <div className="px-8 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/30">
+                    <h3 className="font-bold text-gray-900 text-sm uppercase tracking-wide">Movimientos Recientes</h3>
+                    <span className="text-xs font-medium text-gray-400 bg-white px-2 py-1 rounded-md shadow-sm border border-gray-100">{transactions.length} registros</span>
                 </div>
-                <table className="w-full text-left">
-                    <thead className="text-xs uppercase text-gray-500 border-b">
+                <table className="w-full text-left border-collapse">
+                    <thead className="bg-gray-50/50 text-[11px] uppercase text-gray-400 font-bold tracking-wider">
                         <tr>
-                            <th className="p-4 font-medium">Fecha</th>
-                            <th className="p-4 font-medium">Descripción</th>
-                            <th className="p-4 font-medium">Categoría</th>
-                            <th className="p-4 text-right font-medium">Monto</th>
-                            <th className="p-4 text-center font-medium">Acciones</th>
+                            <th className="p-4 pl-8">Fecha</th>
+                            <th className="p-4">Descripción</th>
+                            <th className="p-4">Categoría</th>
+                            <th className="p-4 text-right">Monto</th>
+                            <th className="p-4 text-center pr-8">Acciones</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
                         {transactions.map(t => (
-                            <tr key={t.id} className="hover:bg-gray-50 transition">
-                                <td className="p-4 text-sm text-gray-600">{new Date(t.date).toLocaleDateString()}</td>
-                                <td className="p-4 font-medium text-gray-800">
+                            <tr key={t.id} className="hover:bg-blue-50/30 transition-colors group">
+                                <td className="p-4 pl-8 text-sm text-gray-500 font-medium">{new Date(t.date).toLocaleDateString()}</td>
+                                <td className="p-4 font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
                                     {t.type === 'INCOME' ? `Ingreso: ${t.reference || 'General'}` : t.description}
                                 </td>
                                 <td className="p-4 text-sm">
-                                    <span className={`px-2 py-1 rounded text-xs font-bold ${t.type === 'INCOME' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase border ${t.type === 'INCOME'
+                                            ? 'bg-green-50 text-green-700 border-green-100'
+                                            : 'bg-orange-50 text-orange-700 border-orange-100'
                                         }`}>
                                         {t.category || (t.type === 'INCOME' ? 'Venta' : 'Gasto')}
                                     </span>
                                 </td>
-                                <td className={`p-4 text-right font-bold ${t.type === 'INCOME' ? 'text-green-600' : 'text-red-600'}`}>
+                                <td className={`p-4 text-right font-bold text-sm ${t.type === 'INCOME' ? 'text-green-600' : 'text-gray-900'}`}>
                                     {t.type === 'INCOME' ? '+' : '-'}${t.amount.toLocaleString()}
                                 </td>
-                                <td className="p-4 text-center">
+                                <td className="p-4 text-center pr-8">
                                     <button
                                         onClick={() => handleDelete(t.id, t.type)}
-                                        className="text-gray-400 hover:text-red-500 transition"
-                                        title="Eliminar"
+                                        className="text-gray-300 hover:text-red-500 transition p-2 rounded-full hover:bg-red-50"
+                                        title="Eliminar registro"
                                     >
-                                        🗑️
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
                                     </button>
                                 </td>
                             </tr>
@@ -235,52 +247,53 @@ const FinanceDashboard: React.FC = () => {
                 </table>
             </div>
 
-            {/* Modal */}
+            {/* Modal - Glassmorphism */}
             {showModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in-up">
-                        <div className="flex border-b">
+                <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-[100] p-4 animate-fade-in-up">
+                    <div className="apple-card w-full max-w-md overflow-hidden shadow-2xl scale-100 ring-1 ring-black/5">
+                        <div className="flex bg-gray-50/80 backdrop-blur-md p-1">
                             <button
                                 onClick={() => setFormType('EXPENSE')}
-                                className={`flex-1 p-4 font-bold text-center transition ${formType === 'EXPENSE' ? 'bg-red-50 text-red-600 border-b-2 border-red-500' : 'text-gray-500 hover:bg-gray-50'}`}
+                                className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all shadow-sm ${formType === 'EXPENSE' ? 'bg-white text-gray-900 shadow' : 'text-gray-500 hover:text-gray-700'}`}
                             >
                                 Registrar Gasto
                             </button>
                             <button
                                 onClick={() => setFormType('INCOME')}
-                                className={`flex-1 p-4 font-bold text-center transition ${formType === 'INCOME' ? 'bg-green-50 text-green-600 border-b-2 border-green-500' : 'text-gray-500 hover:bg-gray-50'}`}
+                                className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all shadow-sm ${formType === 'INCOME' ? 'bg-white text-gray-900 shadow' : 'text-gray-500 hover:text-gray-700'}`}
                             >
                                 Registrar Ingreso
                             </button>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                            <div>
-                                <label className="block text-xs font-bold text-gray-500 mb-1">Monto</label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-2 text-gray-500">$</span>
+                        <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                            <div className="text-center">
+                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Monto del Movimiento</label>
+                                <div className="relative inline-block w-full">
+                                    <span className="absolute left-0 top-1/2 -translate-y-1/2 pl-4 text-gray-400 text-2xl">$</span>
                                     <input
                                         type="number"
-                                        className="w-full pl-8 p-2 border rounded bg-gray-50 focus:bg-white transition outline-none focus:ring-2 focus:ring-primavera-gold"
+                                        className="w-full pl-10 pr-4 py-3 text-3xl font-bold text-center border-b-2 border-gray-100 bg-transparent focus:border-black outline-none transition-colors placeholder-gray-200 text-gray-900"
                                         value={formData.amount}
                                         onChange={e => setFormData({ ...formData, amount: e.target.value })}
                                         required
                                         placeholder="0.00"
+                                        autoFocus
                                     />
                                 </div>
                             </div>
 
                             {formType === 'EXPENSE' ? (
-                                <>
+                                <div className="space-y-4">
                                     <input
-                                        className="w-full p-2 border rounded"
-                                        placeholder="Descripción del Gasto"
+                                        className="apple-input w-full"
+                                        placeholder="Descripción"
                                         value={formData.description}
                                         onChange={e => setFormData({ ...formData, description: e.target.value })}
                                         required
                                     />
                                     <select
-                                        className="w-full p-2 border rounded"
+                                        className="apple-input w-full appearance-none bg-no-repeat bg-right"
                                         value={formData.category}
                                         onChange={e => setFormData({ ...formData, category: e.target.value })}
                                     >
@@ -292,17 +305,17 @@ const FinanceDashboard: React.FC = () => {
                                         <option value="Mantenimiento">Mantenimiento</option>
                                         <option value="Otros">Otros</option>
                                     </select>
-                                </>
+                                </div>
                             ) : (
-                                <>
+                                <div className="space-y-4">
                                     <input
-                                        className="w-full p-2 border rounded"
+                                        className="apple-input w-full"
                                         placeholder="Referencia / Cliente"
                                         value={formData.description} // Mapped to reference
                                         onChange={e => setFormData({ ...formData, description: e.target.value })}
                                     />
                                     <select
-                                        className="w-full p-2 border rounded"
+                                        className="apple-input w-full"
                                         value={formData.method}
                                         onChange={e => setFormData({ ...formData, method: e.target.value })}
                                     >
@@ -310,21 +323,20 @@ const FinanceDashboard: React.FC = () => {
                                         <option value="Transferencia">Transferencia</option>
                                         <option value="Tarjeta">Tarjeta</option>
                                     </select>
-                                </>
+                                </div>
                             )}
 
-                            <div className="flex gap-3 pt-4">
+                            <div className="flex gap-4 pt-4">
                                 <button
                                     type="button"
                                     onClick={() => setShowModal(false)}
-                                    className="flex-1 text-gray-500 hover:text-gray-800 font-medium"
+                                    className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
-                                    className={`flex-1 py-2 rounded font-bold text-white shadow-lg transform active:scale-95 transition ${formType === 'EXPENSE' ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
-                                        }`}
+                                    className="flex-1 py-3 bg-[#1D1D1F] text-white rounded-xl font-bold shadow-lg shadow-black/20 hover:bg-black transition transform active:scale-95"
                                 >
                                     Guardar
                                 </button>
