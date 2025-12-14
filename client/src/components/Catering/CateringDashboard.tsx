@@ -50,23 +50,23 @@ const CateringDashboard: React.FC = () => {
     const loadData = async () => {
         setLoading(true);
         try {
-            if (view === 'ingredients') {
-                const res = await fetch('http://localhost:3000/api/catering/ingredients');
-                setIngredients(await res.json());
-            } else if (view === 'dishes') {
-                const res = await fetch('http://localhost:3000/api/catering/dishes');
-                setDishes(await res.json());
-            } else {
-                const res = await fetch('http://localhost:3000/api/catering/menus');
-                setMenus(await res.json());
-            }
-        } catch (e) { console.error(e); }
-        finally { setLoading(false); }
+            // Fetch basic data
+            const res = await fetch('/api/catering/ingredients');
+            if (res.ok) setIngredients(await res.json());
+
+            const res2 = await fetch('/api/catering/dishes');
+            if (res2.ok) setDishes(await res2.json());
+
+            const res3 = await fetch('/api/catering/menus');
+            if (res3.ok) setMenus(await res3.json());
+        } catch (e) {
+            console.error(e);
+        } finally { setLoading(false); }
     };
 
     const createIngredient = async (e: React.FormEvent) => {
         e.preventDefault();
-        await fetch('http://localhost:3000/api/catering/ingredients', {
+        await fetch('/api/catering/ingredients', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: newIngName, unit: newIngUnit, costPerUnit: newIngCost, stock: 0 })

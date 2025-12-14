@@ -26,7 +26,7 @@ const VenuesManager: React.FC = () => {
 
     const fetchVenues = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/venues');
+            const response = await fetch('/api/venues');
             if (response.ok) {
                 const data = await response.json();
                 if (Array.isArray(data) && data.length > 0) {
@@ -59,7 +59,7 @@ const VenuesManager: React.FC = () => {
     const handleDelete = async (id: string) => {
         if (!confirm('¿Estás seguro de eliminar esta locación?')) return;
         try {
-            const response = await fetch(`http://localhost:3000/api/venues/${id}`, { method: 'DELETE' });
+            const response = await fetch(`/api/venues/${id}`, { method: 'DELETE' });
             if (response.ok) {
                 setVenues(prev => prev.filter(v => v.id !== id));
             }
@@ -72,8 +72,8 @@ const VenuesManager: React.FC = () => {
         try {
             const method = editingVenue ? 'PUT' : 'POST';
             const url = editingVenue
-                ? `http://localhost:3000/api/venues/${editingVenue.id}`
-                : 'http://localhost:3000/api/venues';
+                ? `/api/venues/${editingVenue.id}`
+                : '/api/venues';
 
             const response = await fetch(url, {
                 method,

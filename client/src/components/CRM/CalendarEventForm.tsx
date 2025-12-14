@@ -24,8 +24,8 @@ const CalendarEventForm: React.FC<CalendarEventFormProps> = ({ event, selectedDa
 
     useEffect(() => {
         // Fetch Clients and Venues for dropdowns
-        fetch('http://localhost:3000/api/clients').then(res => res.json()).then(setClients);
-        fetch('http://localhost:3000/api/venues').then(res => res.json()).then(setVenues);
+        fetch('/api/clients').then(res => res.json()).then(setClients);
+        fetch('/api/venues').then(res => res.json()).then(setVenues);
 
         if (event) {
             setFormData({

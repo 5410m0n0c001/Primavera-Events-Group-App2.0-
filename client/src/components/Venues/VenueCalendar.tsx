@@ -28,7 +28,8 @@ const VenueCalendar: React.FC<VenueCalendarProps> = ({ venueId, venueName, onClo
             // Note: In a real app we would fetch range-based events. 
             // Here we rely on the backend returning all or filtered future events in the venue object or separate endpoint.
             // For MVP we just fetch the venue details which includes events.
-            const response = await fetch(`http://localhost:3000/api/venues/${venueId}`);
+            if (!venueId) return;
+            const response = await fetch(`/api/venues/${venueId}`);
             if (response.ok) {
                 const data = await response.json();
                 setEvents(data.events || []);

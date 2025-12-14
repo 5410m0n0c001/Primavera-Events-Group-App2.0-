@@ -31,14 +31,14 @@ const FinanceDashboard: React.FC = () => {
 
     const loadData = async () => {
         try {
-            const statsRes = await fetch('http://localhost:3000/api/finance/stats');
+            const statsRes = await fetch('/api/finance/stats');
             const statsData = await statsRes.json();
             setStats(statsData);
 
-            const paymentsRes = await fetch('http://localhost:3000/api/finance/payments');
+            const paymentsRes = await fetch('/api/finance/payments');
             const payments = await paymentsRes.json();
 
-            const expensesRes = await fetch('http://localhost:3000/api/finance/expenses');
+            const expensesRes = await fetch('/api/finance/expenses');
             const expenses = await expensesRes.json();
 
             // Merge and sort

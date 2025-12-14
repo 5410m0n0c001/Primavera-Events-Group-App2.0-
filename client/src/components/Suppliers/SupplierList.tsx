@@ -27,7 +27,7 @@ const SupplierList: React.FC = () => {
 
     const loadSuppliers = async () => {
         try {
-            const res = await fetch('http://localhost:3000/api/suppliers');
+            const res = await fetch('/api/suppliers');
             const data = await res.json();
             setSuppliers(data);
         } catch (error) {
@@ -40,7 +40,7 @@ const SupplierList: React.FC = () => {
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await fetch('http://localhost:3000/api/suppliers', {
+            await fetch('/api/suppliers', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

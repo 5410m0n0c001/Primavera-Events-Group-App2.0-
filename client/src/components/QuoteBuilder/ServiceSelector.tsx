@@ -15,7 +15,7 @@ const ServiceSelector: React.FC<Props> = ({ draft, setDraft, onBack, onNext }) =
 
     useEffect(() => {
         // Fetch generic catalog
-        fetch('http://localhost:3000/api/catalog')
+        fetch('/api/catalog')
             .then(res => res.json())
             .then(data => {
                 setCategories(data);
