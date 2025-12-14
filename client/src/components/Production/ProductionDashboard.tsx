@@ -352,7 +352,7 @@ const ProductionDashboard: React.FC = () => {
                             <button className="w-full btn-primary bg-gradient-to-r from-green-600 to-green-500 border-none shadow-green-500/30 text-sm py-3 mb-2">
                                 Guardar Diseño Completo
                             </button>
-                            <span className="text-[10px] text-gray-400">v2.1.0 (Catalog Fix)</span>
+                            <span className="text-[10px] text-red-500 font-bold">v2.2.0 (Emergency Fix)</span>
                         </div>
                     </div>
 
