@@ -313,36 +313,42 @@ const ProductionDashboard: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* 2. SCROLLABLE BODY: Categories (SEPARATE MODULE) */}
-                        <div className="flex-grow overflow-hidden p-4">
-                            <div className="h-full flex flex-col bg-white dark:bg-black/30 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden">
-                                <div className="p-3 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5">
+                        {/* 2. SCROLLABLE BODY: Categories (SEPARATE MODULE - SIMPLIFIED) */}
+                        <div className="flex-grow overflow-hidden p-4 flex flex-col min-h-0">
+                            <div className="flex-grow flex flex-col bg-white dark:bg-black/30 rounded-xl border border-gray-200 dark:border-white/10 shadow-sm overflow-hidden h-full min-h-0">
+                                <div className="p-3 border-b border-gray-100 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 shrink-0">
                                     <h3 className="text-xs font-bold text-gray-800 dark:text-white uppercase tracking-widest text-center">Catálogo de Elementos</h3>
                                 </div>
                                 <div className="flex-grow overflow-y-auto p-3 custom-scrollbar space-y-6">
-                                    {LAYOUT_CATEGORIES.map(cat => (
-                                        <div key={cat.id}>
-                                            <h3 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 sticky top-0 bg-white/95 dark:bg-[#1c1c1e] py-1 z-10">{cat.title}</h3>
-                                            <div className="grid grid-cols-3 gap-2">
-                                                {cat.items.map(item => (
-                                                    <div
-                                                        key={item.type}
-                                                        draggable
-                                                        onDragStart={(e) => handleDragStartNew(e, item)}
-                                                        onClick={() => addLayoutObject(item)}
-                                                        className="p-1 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-lg cursor-pointer text-center group flex flex-col items-center justify-center h-20 relative"
-                                                        title={item.label}
-                                                    >
-                                                        <div className={`mb-1 border border-black/10 dark:border-white/20 ${getShapeStyle(item.shape)} ${item.colorClass} shadow-sm`}
-                                                            style={{ width: Math.min(item.width, 24), height: Math.min(item.height, 24) }}>
-                                                        </div>
-                                                        <span className="font-medium text-[7px] leading-tight text-gray-600 dark:text-gray-300 line-clamp-2">{item.label}</span>
-                                                        <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 text-[10px] text-gray-400 p-1">+</div>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                    {(!LAYOUT_CATEGORIES || LAYOUT_CATEGORIES.length === 0) ? (
+                                        <div className="p-4 text-center text-red-500 font-bold text-xs">
+                                            ¡ERROR: No hay categorías cargadas!
                                         </div>
-                                    ))}
+                                    ) : (
+                                        LAYOUT_CATEGORIES.map(cat => (
+                                            <div key={cat.id}>
+                                                <h3 className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2 sticky top-0 bg-white/95 dark:bg-[#1c1c1e] py-1 z-10 shadow-sm px-1">{cat.title}</h3>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {cat.items.map(item => (
+                                                        <div
+                                                            key={item.type}
+                                                            draggable
+                                                            onDragStart={(e) => handleDragStartNew(e, item)}
+                                                            onClick={() => addLayoutObject(item)}
+                                                            className="p-1 bg-gray-50 dark:bg-white/5 hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-black/5 dark:hover:border-white/10 rounded-lg cursor-pointer text-center group flex flex-col items-center justify-center h-20 relative transition-all"
+                                                            title={item.label}
+                                                        >
+                                                            <div className={`mb-1 border border-black/10 dark:border-white/20 ${getShapeStyle(item.shape)} ${item.colorClass} shadow-sm`}
+                                                                style={{ width: Math.min(item.width, 24), height: Math.min(item.height, 24) }}>
+                                                            </div>
+                                                            <span className="font-medium text-[7px] leading-tight text-gray-600 dark:text-gray-300 line-clamp-2">{item.label}</span>
+                                                            <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 text-[10px] text-gray-400 p-1">+</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
                                 </div>
                             </div>
                         </div>
