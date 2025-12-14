@@ -77,7 +77,28 @@ app.use('/api/quotes', quotesRoutes);
 app.use(errorHandler);
 
 console.log(`🔍 [DEBUG] Attempting to listen on port ${PORT}...`);
-app.listen(Number(PORT), '0.0.0.0', () => {
+const server = app.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`✅ [DEBUG] Server successfully bound to port ${PORT}`);
     logger.info(`Server running on http://localhost:${PORT}`);
 });
+
+// Graceful Shutdown Implementation
+const gracefulShutdown = async (signal: string) => {
+    console.log(`🛑 [INFO] ${signal} received. Shutting down gracefully...`);
+
+    server.close(() => {
+        console.log('✅ [INFO] HTTP server closed.');
+    });
+
+    try {
+        await prisma.$disconnect();
+        console.log('✅ [INFO] Database connection closed.');
+        process.exit(0);
+    } catch (err) {
+        console.error('❌ [ERROR] Error during database disconnection:', err);
+        process.exit(1);
+    }
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
