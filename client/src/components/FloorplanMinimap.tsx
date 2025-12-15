@@ -1,14 +1,24 @@
 import React from 'react';
-import { FloorplanElement } from '../data/floorplanElements';
+
+// Define a simplified interface for what the minimap needs to render
+export interface MinimapItem {
+    id: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    colorClass?: string;
+    shape?: string;
+}
 
 interface FloorplanMinimapProps {
-    elements: FloorplanElement[];
+    items: MinimapItem[]; // Use live items, not static elements
     canvasWidth: number;
     canvasHeight: number;
 }
 
 export const FloorplanMinimap: React.FC<FloorplanMinimapProps> = ({
-    elements,
+    items,
     canvasWidth,
     canvasHeight
 }) => {
@@ -22,42 +32,37 @@ export const FloorplanMinimap: React.FC<FloorplanMinimapProps> = ({
 
     return (
         <div className="bg-white rounded-lg shadow-lg p-3">
-            <h4 className="font-semibold text-xs text-gray-500 uppercase tracking-wide mb-2">🗺️ Vista General</h4>
+            <h4 className="font-semibold text-xs text-gray-500 uppercase tracking-wide mb-2">🗺️ Vista General (En Vivo)</h4>
             <div
                 className="relative border border-gray-200 rounded bg-gray-50 mx-auto overflow-hidden"
                 style={{ width: minimapWidth, height: minimapHeight }}
             >
-                {/* Render a simplified view of elements */}
-                {elements.length === 0 ? (
+                {items.length === 0 ? (
                     <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-300">Vacío</div>
                 ) : (
-                    elements.slice().map((element, index) => (
+                    items.map((item) => (
                         <div
-                            key={`${element.id}-${index}`} // Use index as part of key since simplified elements might share ID
-                            className="absolute bg-blue-500 rounded-sm"
+                            key={item.id}
+                            className={`absolute ${item.shape === 'circle' ? 'rounded-full' : 'rounded-sm'} transition-all duration-75`}
                             style={{
-                                width: Math.max(2, (element.width || 50) * scaleX),
-                                height: Math.max(2, (element.height || 50) * scaleY),
-                                // Note: Real position is stored in 'layoutObjects' in parent, 
-                                // but 'selectedElements' just lists WHAT is selected. 
-                                // TO FIX: The minimap needs 'layoutObjects' (positions) to be accurate.
-                                // However, the prompt specifically passed 'elements: FloorplanElement[]' to this component.
-                                // I will render them in a grid logic for now as a "pallet display" IF positions aren't available, 
-                                // OR since the user prompt implies 'elements' are the *placed* ones, 
-                                // I will assume for this step I am just rendering dots based on index to show *count* visually,
-                                // as I cannot access 'x' and 'y' from 'FloorplanElement' (it's in 'layoutObjects').
-                                // WAIT: The prompt code provided: `left: (index * 30) * scaleX`. This confirms it's just a demo visual.
-                                left: (index * 30 * scaleX) % minimapWidth,
-                                top: Math.floor((index * 30 * scaleX) / minimapWidth) * 20 * scaleY + 10,
-                                opacity: 0.6
+                                width: Math.max(3, item.width * scaleX),
+                                height: Math.max(3, item.height * scaleY),
+                                left: item.x * scaleX,
+                                top: item.y * scaleY,
+                                backgroundColor: item.colorClass?.includes('bg-') ? undefined : '#3b82f6', // Fallback color
+                                opacity: 0.7
                             }}
-                            title={element.name}
-                        />
+                        >
+                            {/* Try to extract color from tailwind class if possible, or just use CSS var. 
+                    For now, simple blue block for clarity in minimap. 
+                 */}
+                            <div className="w-full h-full bg-blue-500/80"></div>
+                        </div>
                     ))
                 )}
             </div>
             <p className="text-[10px] font-bold text-gray-400 mt-2 text-center uppercase tracking-wider">
-                {elements.length} OBJETOS TOTALES
+                {items.length} OBJETOS EN LIENZO
             </p>
         </div>
     );

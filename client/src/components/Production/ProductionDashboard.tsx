@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FloorplanCatalog } from '../FloorplanCatalog';
 import { FloorplanControls } from '../FloorplanControls';
-import { FloorplanMinimap } from '../FloorplanMinimap';
+import { FloorplanMinimap, MinimapItem } from '../FloorplanMinimap'; // Updated Import
 import { FloorplanElement } from '../../data/floorplanElements';
 
 // Types
@@ -61,8 +61,8 @@ const ProductionDashboard: React.FC = () => {
             id: Date.now().toString(),
             catalogueId: element.id,
             type: element.category,
-            x: 100 + (layoutObjects.length * 20), // Cascade positioning
-            y: 100 + (layoutObjects.length * 20),
+            x: 100 + (Math.random() * 50), // Slight random offset to avoid exact stacking
+            y: 100 + (Math.random() * 50),
             label: element.name,
             width: element.width || 60,
             height: element.height || 60,
@@ -73,20 +73,17 @@ const ProductionDashboard: React.FC = () => {
     };
 
     const handleRemoveElement = (elementId: string) => {
+        // Remove from list
         setSelectedElements(selectedElements.filter(el => el.id !== elementId));
-        // Optional: remove all instances from canvas? Or just remove from list?
-        // User prompt implies removing from selection list. 
-        // I'll keep objects on canvas to avoid accidental data loss, unless strictly requested.
-        // Step 765 prompt: "El botón 'Eliminar' quita elementos". 
-        // I will remove them from canvas too for consistency with "Clear All" logic.
+        // Remove from canvas
         setLayoutObjects(prev => prev.filter(obj => obj.catalogueId !== elementId));
     };
 
     const handleClearAll = () => {
-        if (window.confirm(`¿Eliminar todos los ${selectedElements.length} elementos de la lista y del plano?`)) {
+        if (window.confirm(`¿Eliminar todos los elementos del plano?`)) {
             setSelectedElements([]);
-            // Keep the initial "Pista Principal" if it doesn't have a catalogueId, or clear everything?
-            // Safer to clear only catalogue items.
+            // Keep default items (no catalogueId) or clear all? 
+            // Clearing only catalogue items to be safe, user can delete others manually if needed.
             setLayoutObjects(prev => prev.filter(obj => !obj.catalogueId));
         }
     };
@@ -134,8 +131,23 @@ const ProductionDashboard: React.FC = () => {
         setDragId(null);
     };
 
-    // --- TIMELINE LOGIC ---
-    const addTimelineItem = () => { /* ... existing logic ... */ };
+    // --- TIMELINE LOGIC (Restored) ---
+    const addTimelineItem = () => {
+        if (!newItemTime || !newItemDesc) return;
+        const newItem: TimelineItem = {
+            id: Date.now().toString(),
+            time: newItemTime,
+            description: newItemDesc,
+            order: timelineItems.length + 1
+        };
+        setTimelineItems([...timelineItems, newItem].sort((a, b) => a.time.localeCompare(b.time)));
+        setNewItemTime('');
+        setNewItemDesc('');
+    };
+
+    const removeTimelineItem = (id: string) => {
+        setTimelineItems(items => items.filter(item => item.id !== id));
+    };
 
     return (
         <div className="h-screen flex flex-col bg-gray-100 overflow-hidden font-sans">
@@ -143,7 +155,7 @@ const ProductionDashboard: React.FC = () => {
             <div className="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center shrink-0 z-20 shadow-sm">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Producción y Logística</h1>
-                    <p className="text-xs text-gray-500 font-medium">Diseñador de Planos v3.0</p>
+                    <p className="text-xs text-gray-500 font-medium">Diseñador de Planos & Itinerario</p>
                 </div>
                 <div className="flex bg-gray-100/50 p-1 rounded-lg">
                     <button onClick={() => setView('layout')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${view === 'layout' ? 'bg-white shadow text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}>Plano</button>
@@ -227,8 +239,9 @@ const ProductionDashboard: React.FC = () => {
                             onZoomChange={setZoom}
                             onCreateCustomElement={handleCreateCustomElement}
                         />
+                        {/* UPDATE: Pass 'layoutObjects' instead of 'selectedElements' for LIVE position updates */}
                         <FloorplanMinimap
-                            elements={selectedElements} // Passing selection list for demo visualization
+                            items={layoutObjects}
                             canvasWidth={canvasWidth}
                             canvasHeight={canvasHeight}
                         />
@@ -237,13 +250,85 @@ const ProductionDashboard: React.FC = () => {
             )}
 
             {view === 'timeline' && (
-                <div className="p-8 overflow-y-auto">
+                <div className="p-8 overflow-y-auto h-full bg-[#FAFAFA]">
                     <div className="max-w-4xl mx-auto">
-                        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-                            <h2 className="text-2xl font-bold mb-6">Minuto a Minuto</h2>
-                            {/* Placeholder for timeline logic to focus on Floorplan task */}
-                            <div className="p-12 text-center text-gray-400 bg-gray-50 rounded-xl border-dashed border-2 border-gray-200">
-                                Timeline Module (Preserved)
+                        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 animate-fade-in-up">
+                            <div className="flex justify-between items-center mb-8">
+                                <div>
+                                    <h2 className="text-3xl font-bold text-gray-800">Minuto a Minuto</h2>
+                                    <p className="text-gray-500">Planifica la secuencia exacta del evento.</p>
+                                </div>
+                                <div className="bg-blue-50 text-blue-600 px-4 py-2 rounded-lg text-sm font-bold">
+                                    {timelineItems.length} Actividades
+                                </div>
+                            </div>
+
+                            {/* ADD NEW ITEM FORM */}
+                            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-8 flex gap-4 items-end">
+                                <div className="w-40">
+                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Hora</label>
+                                    <input
+                                        type="time"
+                                        className="w-full h-12 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-lg"
+                                        value={newItemTime}
+                                        onChange={e => setNewItemTime(e.target.value)}
+                                    />
+                                </div>
+                                <div className="flex-grow">
+                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Actividad</label>
+                                    <input
+                                        type="text"
+                                        className="w-full h-12 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Ej. Entrada de Novios con pirotecnia..."
+                                        value={newItemDesc}
+                                        onChange={e => setNewItemDesc(e.target.value)}
+                                        onKeyDown={e => e.key === 'Enter' && addTimelineItem()}
+                                    />
+                                </div>
+                                <button
+                                    onClick={addTimelineItem}
+                                    disabled={!newItemTime || !newItemDesc}
+                                    className="h-12 px-8 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:transform-none"
+                                >
+                                    AGREGAR
+                                </button>
+                            </div>
+
+                            {/* TIMELINE LIST */}
+                            <div className="relative pl-8 border-l-2 border-dashed border-gray-200 space-y-8">
+                                {timelineItems.length === 0 ? (
+                                    <div className="text-center py-12 text-gray-400 italic">
+                                        No hay actividades programadas. Agrega una arriba.
+                                    </div>
+                                ) : (
+                                    timelineItems.map((item, idx) => (
+                                        <div key={item.id} className="relative group">
+                                            {/* Index Bubble */}
+                                            <div className="absolute -left-[42px] top-1/2 -translate-y-1/2 bg-white text-blue-600 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ring-4 ring-gray-100 shadow-sm z-10">
+                                                {idx + 1}
+                                            </div>
+
+                                            {/* Card */}
+                                            <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all flex justify-between items-center group-hover:border-blue-200">
+                                                <div className="flex items-center gap-6">
+                                                    <div className="bg-gray-100 px-4 py-2 rounded-lg text-xl font-bold text-gray-800 font-mono">
+                                                        {item.time}
+                                                    </div>
+                                                    <div className="text-lg text-gray-700 font-medium">
+                                                        {item.description}
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => removeTimelineItem(item.id)}
+                                                    className="w-8 h-8 flex items-center justify-center rounded-full text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors"
+                                                    title="Eliminar actividad"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
                     </div>
