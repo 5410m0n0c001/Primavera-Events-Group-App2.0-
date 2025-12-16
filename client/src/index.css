@@ -120,3 +120,70 @@
     background-position: 0% 50%;
   }
 }
+
+/* ============================================
+   ESTILOS MÓVILES - AGREGADOS AL FINAL
+   ============================================ */
+
+/* Responsive layout para móvil */
+@media (max-width: 1023px) {
+
+  /* Ocultar sidebar desktop en móvil */
+  aside.hidden.md\:flex {
+    display: none !important;
+  }
+
+  /* Ajustar main para móvil */
+  main {
+    margin-left: 0 !important;
+    padding: 1rem;
+  }
+
+  /* Agregar padding superior para el botón hamburguesa */
+  .min-h-screen {
+    padding-top: 4rem;
+  }
+}
+
+/* Optimizaciones para pantallas pequeñas */
+@media (max-width: 640px) {
+
+  /* Prevenir scroll horizontal */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Hacer tablas responsive */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  /* Ajustar tamaños de fuente */
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  /* Botones más táctiles en móvil */
+  button:not(.lg\:hidden button) {
+    min-height: 44px;
+  }
+
+  /* Cards más compactos */
+  .card,
+  .bg-white {
+    padding: 1rem;
+  }
+}
+
+/* Smooth scroll en móvil */
+@media (max-width: 1023px) {
+  html {
+    scroll-behavior: smooth;
+  }
+}

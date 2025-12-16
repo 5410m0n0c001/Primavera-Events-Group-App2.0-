@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import QuoteWizard from './components/QuoteBuilder/Wizard';
+import { MobileNavigation } from './components/MobileNavigation';
 import ClientList from './components/CRM/ClientList';
 import CalendarView from './components/CRM/CalendarView';
 import InventoryDashboard from './components/Inventory/InventoryDashboard';
@@ -106,6 +107,9 @@ function App() {
           {view === 'venues' && <VenuesManager />}
         </div>
       </main>
+
+      {/* Navegación móvil - NUEVO */}
+      <MobileNavigation currentView={view} onViewChange={(v) => setView(v as any)} />
     </div>
   );
 }
