@@ -52,7 +52,7 @@ const ClientList: React.FC = () => {
     };
 
     return (
-        <div className="p-6 max-w-6xl mx-auto animate-fade-in-up">
+        <div className="p-4 md:p-6 max-w-6xl mx-auto animate-fade-in-up w-full">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-3xl font-serif text-primavera-gold font-bold">Gestión de Clientes</h2>
                 <button

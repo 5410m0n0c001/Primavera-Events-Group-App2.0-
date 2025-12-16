@@ -264,8 +264,8 @@ const ProductionDashboard: React.FC = () => {
                             </div>
 
                             {/* ADD NEW ITEM FORM */}
-                            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-8 flex gap-4 items-end">
-                                <div className="w-40">
+                            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-8 flex flex-col md:flex-row gap-4 items-stretch md:items-end">
+                                <div className="w-full md:w-40">
                                     <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Hora</label>
                                     <input
                                         type="time"
