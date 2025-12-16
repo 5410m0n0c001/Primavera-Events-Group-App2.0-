@@ -14,9 +14,12 @@ const ClientList: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [newClient, setNewClient] = useState({ firstName: '', lastName: '', email: '', phone: '', type: 'LEAD' });
+    const isMounted = React.useRef(true);
 
     useEffect(() => {
+        isMounted.current = true;
         fetchClients();
+        return () => { isMounted.current = false; };
     }, []);
 
     const fetchClients = async () => {
@@ -24,11 +27,15 @@ const ClientList: React.FC = () => {
             const res = await fetch('/api/clients');
             if (!res.ok) throw new Error('Error fetching clients');
             const data = await res.json();
-            setClients(data);
+            if (isMounted.current) {
+                setClients(data);
+            }
         } catch (error) {
             console.error('Error fetching clients:', error);
         } finally {
-            setLoading(false);
+            if (isMounted.current) {
+                setLoading(false);
+            }
         }
     };
 

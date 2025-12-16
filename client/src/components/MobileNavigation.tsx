@@ -19,7 +19,6 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
     const navItems: NavItem[] = [
         { view: 'quote', emoji: '📋', label: 'Cotizador' },
-        { view: 'clients', emoji: '👥', label: 'Clientes' },
         { view: 'venues', emoji: '🏛️', label: 'Locaciones' },
         { view: 'calendar', emoji: '📅', label: 'Calendario' },
         { view: 'finance', emoji: '💰', label: 'Finanzas' },
@@ -77,8 +76,8 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
                                     key={item.view}
                                     onClick={() => handleViewChange(item.view)}
                                     className={`w-full flex items-center gap-3 px-6 py-4 transition-colors text-left ${isActive
-                                            ? 'bg-yellow-50 text-yellow-700 border-l-4 border-yellow-500'
-                                            : 'text-gray-700 hover:bg-gray-50'
+                                        ? 'bg-yellow-50 text-yellow-700 border-l-4 border-yellow-500'
+                                        : 'text-gray-700 hover:bg-gray-50'
                                         }`}
                                 >
                                     <span className="text-2xl">{item.emoji}</span>
