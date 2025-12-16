@@ -132,8 +132,10 @@ const ProductionDashboard: React.FC = () => {
     };
 
     // --- TIMELINE LOGIC (Restored) ---
+    const canAdd = Boolean(newItemTime && newItemDesc);
+
     const addTimelineItem = () => {
-        if (!newItemTime || !newItemDesc) return;
+        if (!canAdd) return;
         const newItem: TimelineItem = {
             id: Date.now().toString(),
             time: newItemTime,
@@ -287,7 +289,7 @@ const ProductionDashboard: React.FC = () => {
                                 </div>
                                 <button
                                     onClick={addTimelineItem}
-                                    disabled={!newItemTime || !newItemDesc}
+                                    disabled={!canAdd}
                                     className="h-12 px-8 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:transform-none"
                                 >
                                     AGREGAR
