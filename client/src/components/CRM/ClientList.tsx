@@ -108,8 +108,8 @@ const ClientList: React.FC = () => {
                 </div>
             )}
 
-            <div className="bg-white dark:bg-[#1c1c1e] rounded-lg shadow overflow-hidden border border-gray-200 dark:border-white/10">
-                <table className="w-full text-left">
+            <div className="bg-white dark:bg-[#1c1c1e] rounded-lg shadow border border-gray-200 dark:border-white/10 overflow-x-auto md:overflow-hidden h-auto min-h-0 w-full">
+                <table className="w-full text-left min-w-[800px] md:min-w-0">
                     <thead className="bg-gray-50 dark:bg-white/5 text-gray-600 dark:text-gray-400 font-semibold border-b dark:border-white/10">
                         <tr>
                             <th className="p-4">Nombre</th>

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FloorplanCatalog } from '../FloorplanCatalog';
 import { FloorplanControls } from '../FloorplanControls';
-import { FloorplanMinimap, MinimapItem } from '../FloorplanMinimap'; // Updated Import
-import { FloorplanElement } from '../../data/floorplanElements';
+import { FloorplanMinimap, type MinimapItem } from '../FloorplanMinimap'; // Updated Import
+import type { FloorplanElement } from '../../data/floorplanElements';
 
 // Types
 interface TimelineItem {
@@ -165,9 +165,9 @@ const ProductionDashboard: React.FC = () => {
 
             {/* MAIN CONTENT AREA */}
             {view === 'layout' && (
-                <div className="flex-1 flex overflow-hidden">
+                <div className="flex-1 flex flex-col md:flex-row overflow-hidden md:overflow-hidden overflow-y-auto">
                     {/* LEFT PANEL: CATALOG */}
-                    <div className={`border-r border-gray-200 bg-white z-10 transition-all duration-300 ease-in-out flex flex-col ${isCatalogExpanded ? 'w-96' : 'w-72'}`}>
+                    <div className={`border-b md:border-b-0 md:border-r border-gray-200 bg-white z-10 transition-all duration-300 ease-in-out flex flex-col w-full ${isCatalogExpanded ? 'md:w-96' : 'md:w-72'} shrink-0 order-1`}>
                         <FloorplanCatalog
                             onAddElement={handleAddElement}
                             selectedElements={selectedElements}
@@ -179,8 +179,8 @@ const ProductionDashboard: React.FC = () => {
                     </div>
 
                     {/* CENTER PANEL: CANVAS */}
-                    <div className="flex-1 bg-[#F5F5F7] overflow-hidden relative flex flex-col">
-                        <div className="flex-1 overflow-auto custom-scrollbar p-8 relative flex items-start justify-center">
+                    <div className="flex-1 bg-[#F5F5F7] overflow-hidden relative flex flex-col order-2 min-h-[500px]">
+                        <div className="flex-1 overflow-auto custom-scrollbar p-4 md:p-8 relative flex items-start justify-center">
                             <div
                                 style={{
                                     transform: `scale(${zoom})`,
@@ -230,7 +230,7 @@ const ProductionDashboard: React.FC = () => {
                     </div>
 
                     {/* RIGHT PANEL: CONTROLS */}
-                    <div className="w-72 bg-white border-l border-gray-200 flex flex-col overflow-y-auto z-10 p-4 space-y-4 shadow-lg shrink-0">
+                    <div className="w-full md:w-72 bg-white border-t md:border-t-0 md:border-l border-gray-200 flex flex-col overflow-y-auto z-10 p-4 space-y-4 shadow-lg shrink-0 order-3 h-auto md:h-auto">
                         <FloorplanControls
                             canvasWidth={canvasWidth}
                             canvasHeight={canvasHeight}
