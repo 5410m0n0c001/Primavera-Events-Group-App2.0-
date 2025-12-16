@@ -43,6 +43,7 @@ app.get("/", (_req, res) => {
     res.status(200).send("OK");
 });
 // Default to 3000 if PORT is not set
+console.log('🔍 [DEBUG] Env PORT:', process.env.PORT);
 const PORT = process.env.PORT || 3000;
 const prisma = new PrismaClient();
 
