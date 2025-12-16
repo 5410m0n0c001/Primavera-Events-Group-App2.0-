@@ -37,6 +37,11 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 const app = express();
+
+// 🔒 Emergency Root Check - MUST BE FIRST
+app.get("/", (_req, res) => {
+    res.status(200).send("OK");
+});
 // Default to 3000 if PORT is not set
 const PORT = process.env.PORT || 3000;
 const prisma = new PrismaClient();
