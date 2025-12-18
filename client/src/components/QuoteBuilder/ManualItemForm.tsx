@@ -1,24 +1,34 @@
 import React, { useState } from 'react';
 
 interface ManualItemFormProps {
+    categories: string[];
     onSave: (item: any) => void;
     onClose: () => void;
 }
 
-const ManualItemForm: React.FC<ManualItemFormProps> = ({ onSave, onClose }) => {
+const ManualItemForm: React.FC<ManualItemFormProps> = ({ categories, onSave, onClose }) => {
     const [formData, setFormData] = useState({
         name: '',
         price: 0,
         unit: 'pza',
-        category: 'Personalizado',
+        category: '', // Startup empty or first? Let's use empty
         description: ''
     });
+    const [isCustomCategory, setIsCustomCategory] = useState(false);
+    const [customCategory, setCustomCategory] = useState('');
+
+    React.useEffect(() => {
+        if (categories.length > 0) {
+            setFormData(prev => ({ ...prev, category: categories[0] }));
+        }
+    }, [categories]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSave({
             id: `manual_${Date.now()}`,
-            ...formData
+            ...formData,
+            category: isCustomCategory ? customCategory : formData.category
         });
         onClose();
     };
@@ -69,14 +79,31 @@ const ManualItemForm: React.FC<ManualItemFormProps> = ({ onSave, onClose }) => {
                         <label className="block text-sm font-medium mb-1">Categoría</label>
                         <select
                             className="w-full border rounded px-3 py-2"
-                            value={formData.category}
-                            onChange={e => setFormData({ ...formData, category: e.target.value })}
+                            value={isCustomCategory ? 'custom' : formData.category}
+                            onChange={(e) => {
+                                if (e.target.value === 'custom') {
+                                    setIsCustomCategory(true);
+                                } else {
+                                    setIsCustomCategory(false);
+                                    setFormData({ ...formData, category: e.target.value });
+                                }
+                            }}
                         >
-                            <option value="Personalizado">Personalizado</option>
-                            <option value="Servicios Extra">Servicios Extra</option>
-                            <option value="Viáticos">Viáticos</option>
-                            <option value="Descuentos">Descuentos</option>
+                            {categories.map(cat => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                            <option value="custom">+ Nueva Categoría</option>
                         </select>
+                        {isCustomCategory && (
+                            <input
+                                type="text"
+                                className="w-full border rounded px-3 py-2 mt-2"
+                                placeholder="Escribe el nombre de la nueva categoría"
+                                value={customCategory}
+                                onChange={(e) => setCustomCategory(e.target.value)}
+                                autoFocus
+                            />
+                        )}
                     </div>
 
                     <div>

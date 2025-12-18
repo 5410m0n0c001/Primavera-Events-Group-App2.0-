@@ -391,6 +391,7 @@ const QuoteWizard: React.FC = () => {
             {/* Modals */}
             {showManualForm && (
                 <ManualItemForm
+                    categories={DATA_CATEGORIES.map(c => c.title)}
                     onSave={handleAddManualItem}
                     onClose={() => setShowManualForm(false)}
                 />
