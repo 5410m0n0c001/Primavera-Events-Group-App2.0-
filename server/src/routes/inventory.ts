@@ -60,10 +60,11 @@ router.get('/availability', async (req, res) => {
 
             return {
                 ...item,
-                options: parsedOptions, // Return as object
+                options: parsedOptions,
                 reserved,
-                available: item.stock - reserved,
-                status: (item.stock - reserved) <= 0 ? 'UNAVAILABLE' : 'AVAILABLE'
+                stockDamaged: item.stockDamaged || 0,
+                available: item.stock - (item.stockDamaged || 0) - reserved,
+                status: (item.stock - (item.stockDamaged || 0) - reserved) <= 0 ? 'UNAVAILABLE' : 'AVAILABLE'
             };
         });
 
@@ -177,9 +178,8 @@ router.post('/', async (req, res) => {
                 name,
                 unit,
                 stock: Number(stock),
-                subCategoryId: subCategoryId || undefined, // Prisma will fail if undefined needed? No, let's look up or fail.
-                // Actually, we should find a default if missing, or require it. 
-                // For now, let's assume UI sends a valid ID or we fail.
+                stockDamaged: 0,
+                subCategoryId: subCategoryId || undefined,
                 price: Number(price || 0),
                 options: options ? JSON.stringify(options) : null
             }
@@ -195,7 +195,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, unit, stock, price, options } = req.body;
+        const { name, unit, stock, stockDamaged, price, options } = req.body;
 
         const item = await prisma.catalogItem.update({
             where: { id },
@@ -203,6 +203,7 @@ router.put('/:id', async (req, res) => {
                 name,
                 unit,
                 stock: Number(stock),
+                stockDamaged: stockDamaged !== undefined ? Number(stockDamaged) : undefined,
                 price: Number(price),
                 options: options ? JSON.stringify(options) : undefined
             }

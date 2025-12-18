@@ -14,7 +14,8 @@ const InventoryDashboard: React.FC = () => {
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [searchTerm, setSearchTerm] = useState('');
     const [viewMode, setViewMode] = useState<'compact' | 'detailed'>('detailed');
-    const [filterStatus, setFilterStatus] = useState<'ALL' | 'AVAILABLE' | 'LOW_STOCK' | 'UNAVAILABLE'>('ALL');
+    const [filterStatus, setFilterStatus] = useState<'ALL' | 'AVAILABLE' | 'LOW_STOCK' | 'UNAVAILABLE' | 'DAMAGED'>('ALL');
+
 
     // Categories
     const [categories, setCategories] = useState<Category[]>([]);
@@ -69,7 +70,9 @@ const InventoryDashboard: React.FC = () => {
         const matchesStatus = filterStatus === 'ALL' ||
             (filterStatus === 'AVAILABLE' && item.available! > 0) ||
             (filterStatus === 'UNAVAILABLE' && item.available! <= 0) ||
-            (filterStatus === 'LOW_STOCK' && item.available! > 0 && item.available! < 10);
+            (filterStatus === 'LOW_STOCK' && item.available! > 0 && item.available! < 10) ||
+            (filterStatus === 'DAMAGED' && (item.stockDamaged || 0) > 0);
+
         return matchesSearch && matchesStatus;
     });
 
@@ -274,6 +277,7 @@ const InventoryDashboard: React.FC = () => {
                         <option value="AVAILABLE">Disponible</option>
                         <option value="LOW_STOCK">Bajo Stock</option>
                         <option value="UNAVAILABLE">Agotado</option>
+                        <option value="DAMAGED">Con Daños</option>
                     </select>
                 </div>
 
@@ -311,7 +315,8 @@ const InventoryDashboard: React.FC = () => {
                         <tr>
                             <th className="p-4">Artículo</th>
                             <th className="p-4 text-center">Unidad</th>
-                            <th className="p-4 text-center">Total</th>
+                            <th className="p-4 text-center">Total Existente</th>
+                            <th className="p-4 text-center text-red-600">Mal Estado</th>
                             <th className="p-4 text-center">Reservado</th>
                             <th className="p-4 text-center">Disponible</th>
                             {viewMode === 'detailed' && (
@@ -351,6 +356,13 @@ const InventoryDashboard: React.FC = () => {
                                         {isEditing ? (
                                             <input type="number" className="border rounded px-2 py-1 w-20 text-center" value={editForm.stock} onChange={e => handleEditChange('stock', e.target.value)} />
                                         ) : item.stock}
+                                    </td>
+
+                                    {/* Mal Estado */}
+                                    <td className="p-4 text-center text-red-600 font-medium">
+                                        {isEditing ? (
+                                            <input type="number" className="border rounded px-2 py-1 w-20 text-center text-red-600" value={editForm.stockDamaged || 0} onChange={e => handleEditChange('stockDamaged', e.target.value)} />
+                                        ) : (item.stockDamaged || 0)}
                                     </td>
 
                                     {/* Reserved */}

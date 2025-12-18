@@ -11,6 +11,7 @@ export interface InventoryItem {
     name: string;
     unit: string;
     stock: number;
+    stockDamaged?: number;
     price: number;
     subCategoryId?: string;
     options?: InventoryOptions; // Parsed object

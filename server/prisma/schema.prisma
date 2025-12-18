@@ -177,6 +177,7 @@ model CatalogItem {
   cost            Decimal? // Internal cost
   unit            String   // "pieza", "persona", "evento"
   stock           Int      @default(0) // Inventory tracking
+  stockDamaged    Int      @default(0) // Items in bad condition (still part of stock count, or separate? Plan: Part of total stock, but unavailable)
   
   options         String?  // JSON stringified: colors, sizes, etc.
   
