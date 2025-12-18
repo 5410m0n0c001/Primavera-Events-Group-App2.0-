@@ -82,6 +82,60 @@ const QuoteWizard: React.FC = () => {
     // Use the centralized calculation hook
     const totals = useQuoteCalculations(draft);
 
+    // Leads Management
+    const [showLeads, setShowLeads] = useState(false);
+    const [leads, setLeads] = useState<any[]>([]);
+
+    React.useEffect(() => {
+        if (showLeads) fetchLeads();
+    }, [showLeads]);
+
+    const fetchLeads = async () => {
+        try {
+            const res = await fetch('/api/clients');
+            if (res.ok) {
+                const data = await res.json();
+                setLeads(data.filter((c: any) => c.type === 'LEAD'));
+            }
+        } catch (e) { console.error(e); }
+    };
+
+    const handleDeleteLead = async (id: string) => {
+        if (!confirm('¿Eliminar este lead?')) return;
+        try {
+            const res = await fetch(`/api/clients/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                setLeads(prev => prev.filter(l => l.id !== id));
+            }
+        } catch (e) { console.error(e); }
+    };
+
+    const handleResumeLead = (lead: any) => {
+        setDraft(prev => ({
+            ...prev,
+            eventName: `${lead.firstName} ${lead.lastName}`,
+            guestCount: 100 // Default or if captured in lead
+        }));
+        setShowLeads(false);
+        alert(`Lead ${lead.firstName} cargado. Puedes comenzar a cotizar.`);
+    };
+
+    const handleEditLead = async (lead: any) => {
+        const newName = prompt('Editar Nombre:', lead.firstName);
+        if (newName && newName !== lead.firstName) {
+            try {
+                // Simple update for MVP
+                const res = await fetch(`/api/clients/${lead.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...lead, firstName: newName })
+                });
+                if (res.ok) fetchLeads();
+            } catch (e) { console.error(e); }
+        }
+    };
+
+
     // Capacity Validation
     const selectedLocation = draft.selectedItems.find(i => i.item?.category === 'Locaciones');
     const locationCapacity = selectedLocation ? (selectedLocation.item?.description?.match(/\d+/)?.[0] ? parseInt(selectedLocation.item.description.match(/\d+/)[0]) : 0) : 0;
@@ -189,7 +243,15 @@ const QuoteWizard: React.FC = () => {
                     <h1 className="text-3xl md:text-4xl font-serif text-primavera-gold font-bold mb-2 break-words">
                         Nueva Cotización Inteligente
                     </h1>
-                    <p className="text-gray-500">Diseña el evento perfecto con cálculos automáticos.</p>
+                    <div className="flex justify-between items-end">
+                        <p className="text-gray-500">Diseña el evento perfecto con cálculos automáticos.</p>
+                        <button
+                            onClick={() => setShowLeads(true)}
+                            className="text-sm bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-bold hover:bg-purple-200 transition flex items-center gap-1"
+                        >
+                            📋 Leads Pendientes
+                        </button>
+                    </div>
                 </div>
 
                 {/* Progress */}
@@ -332,6 +394,58 @@ const QuoteWizard: React.FC = () => {
                     onSave={handleAddManualItem}
                     onClose={() => setShowManualForm(false)}
                 />
+            )}
+
+            {/* Leads Drawer */}
+            {showLeads && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-end">
+                    <div className="bg-white w-full max-w-md h-full shadow-2xl p-6 overflow-y-auto animate-slide-in-right">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold">Leads Pendientes</h2>
+                            <button onClick={() => setShowLeads(false)} className="text-gray-500 text-2xl">&times;</button>
+                        </div>
+
+                        <div className="space-y-4">
+                            {leads.length === 0 ? (
+                                <p className="text-gray-500 text-center py-8">No hay leads pendientes.</p>
+                            ) : leads.map(lead => (
+                                <div key={lead.id} className="border rounded-lg p-4 hover:shadow-md transition bg-gray-50">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            <h3 className="font-bold text-lg">{lead.firstName} {lead.lastName}</h3>
+                                            <p className="text-sm text-gray-500">{lead.email}</p>
+                                            <p className="text-xs text-gray-400">{new Date(lead.createdAt).toLocaleDateString()}</p>
+                                        </div>
+                                        <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">Pendiente</span>
+                                    </div>
+
+                                    <div className="flex gap-2 mt-4 border-t pt-3">
+                                        <button
+                                            onClick={() => handleResumeLead(lead)}
+                                            className="flex-1 bg-primavera-gold text-white px-2 py-1 rounded text-sm font-bold hover:brightness-105"
+                                        >
+                                            Cotizar
+                                        </button>
+                                        <button
+                                            onClick={() => handleEditLead(lead)}
+                                            className="px-3 py-1 border rounded text-sm hover:bg-white"
+                                            title="Modificar Nombre"
+                                        >
+                                            ✏️
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteLead(lead.id)}
+                                            className="px-3 py-1 border border-red-200 text-red-500 rounded text-sm hover:bg-red-50"
+                                            title="Eliminar"
+                                        >
+                                            🗑️
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
             )}
 
 
