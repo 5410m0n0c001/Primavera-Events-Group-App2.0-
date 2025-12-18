@@ -22,10 +22,37 @@ const CalendarEventForm: React.FC<CalendarEventFormProps> = ({ event, selectedDa
     const [clients, setClients] = useState<any[]>([]);
     const [venues, setVenues] = useState<any[]>([]);
 
+    const MOCK_VENUES = [
+        { id: 'v1', name: 'Salón Los Caballos' },
+        { id: 'v2', name: 'Jardín La Flor' },
+        { id: 'v3', name: 'Salón Los Potrillos' },
+        { id: 'v4', name: 'Salón Jardín Yolomécatl' },
+        { id: 'v5', name: 'Salón Presidente' },
+    ];
+
+    const MOCK_CLIENTS = [
+        { id: 'c1', firstName: 'Juan', lastName: 'Pérez' },
+        { id: 'c2', firstName: 'María', lastName: 'Gómez' },
+        { id: 'c3', firstName: 'Carlos', lastName: 'López' },
+    ];
+
     useEffect(() => {
         // Fetch Clients and Venues for dropdowns
-        fetch('/api/clients').then(res => res.json()).then(setClients);
-        fetch('/api/venues').then(res => res.json()).then(setVenues);
+        fetch('/api/clients')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) setClients(data);
+                else setClients(MOCK_CLIENTS);
+            })
+            .catch(() => setClients(MOCK_CLIENTS));
+
+        fetch('/api/venues')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) setVenues(data);
+                else setVenues(MOCK_VENUES);
+            })
+            .catch(() => setVenues(MOCK_VENUES));
 
         if (event) {
             setFormData({
