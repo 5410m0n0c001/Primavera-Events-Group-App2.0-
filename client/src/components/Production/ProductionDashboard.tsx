@@ -34,13 +34,12 @@ const ProductionDashboard: React.FC = () => {
     const [isCatalogExpanded, setIsCatalogExpanded] = useState(false);
 
     // --- CANVAS STATE ---
-    const [layoutObjects, setLayoutObjects] = useState<LayoutObject[]>([
-        { id: '1', type: 'stage-main', x: 300, y: 50, label: 'Pista Principal', width: 150, height: 80, shape: 'rect', colorClass: 'bg-gray-800 text-white' },
-    ]);
+    // --- CANVAS STATE ---
+    const [layoutObjects, setLayoutObjects] = useState<LayoutObject[]>([]); // Empty initial state
     const [dragId, setDragId] = useState<string | null>(null);
     const [canvasWidth, setCanvasWidth] = useState(1200);
     const [canvasHeight, setCanvasHeight] = useState(800);
-    const [zoom, setZoom] = useState(1);
+    const [zoom, setZoom] = useState(0.25); // Initial zoom 25%
 
     const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -56,16 +55,19 @@ const ProductionDashboard: React.FC = () => {
             setSelectedElements([...selectedElements, element]);
         }
 
-        // 2. Add visual object to canvas
+        const width = element.width || 60;
+        const height = element.height || 60;
+
+        // 2. Add visual object to canvas (CENTERED)
         const newObj: LayoutObject = {
             id: Date.now().toString(),
             catalogueId: element.id,
             type: element.category,
-            x: 100 + (Math.random() * 50), // Slight random offset to avoid exact stacking
-            y: 100 + (Math.random() * 50),
+            x: (canvasWidth / 2) - (width / 2), // Center X
+            y: (canvasHeight / 2) - (height / 2), // Center Y
             label: element.name,
-            width: element.width || 60,
-            height: element.height || 60,
+            width: width,
+            height: height,
             shape: 'rect',
             colorClass: 'bg-white border-2 border-gray-800 text-gray-900 shadow-sm'
         };
@@ -82,9 +84,7 @@ const ProductionDashboard: React.FC = () => {
     const handleClearAll = () => {
         if (window.confirm(`¿Eliminar todos los elementos del plano?`)) {
             setSelectedElements([]);
-            // Keep default items (no catalogueId) or clear all? 
-            // Clearing only catalogue items to be safe, user can delete others manually if needed.
-            setLayoutObjects(prev => prev.filter(obj => !obj.catalogueId));
+            setLayoutObjects([]); // Clear EVERYTHING
         }
     };
 

@@ -50,4 +50,30 @@ router.put('/:id/rating', async (req, res) => {
     }
 });
 
+// PUT update details
+router.put('/:id', async (req, res) => {
+    try {
+        const { name, category, contactName, email, phone, terms } = req.body;
+        const supplier = await prisma.supplier.update({
+            where: { id: req.params.id },
+            data: { name, category, contactName, email, phone, terms }
+        });
+        res.json(supplier);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update supplier' });
+    }
+});
+
+// DELETE supplier
+router.delete('/:id', async (req, res) => {
+    try {
+        await prisma.supplier.delete({
+            where: { id: req.params.id }
+        });
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete supplier' });
+    }
+});
+
 export default router;
