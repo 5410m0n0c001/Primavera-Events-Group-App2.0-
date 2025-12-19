@@ -8,7 +8,7 @@ interface QuoteBreakdownProps {
 }
 
 const QuoteBreakdown: React.FC<QuoteBreakdownProps> = ({ draft, onRemove }) => {
-    const { subtotal, iva, total, costPerPerson } = useQuoteCalculations(draft);
+    const { subtotal, discount, iva, total, costPerPerson, downPaymentAmount, downPaymentPercentage } = useQuoteCalculations(draft);
 
     // Formato de moneda mexicana
     const formatCurrency = (amount: number) => {
@@ -78,6 +78,14 @@ const QuoteBreakdown: React.FC<QuoteBreakdownProps> = ({ draft, onRemove }) => {
                     <span>Total parcial</span>
                     <span className="font-medium">{formatCurrency(subtotal)}</span>
                 </div>
+
+                {discount > 0 && (
+                    <div className="flex justify-between text-green-600">
+                        <span>Descuento</span>
+                        <span>- {formatCurrency(discount)}</span>
+                    </div>
+                )}
+
                 <div className="flex justify-between text-sm text-gray-500">
                     <span>IVA (16%)</span>
                     <span>{formatCurrency(iva)}</span>
@@ -92,6 +100,27 @@ const QuoteBreakdown: React.FC<QuoteBreakdownProps> = ({ draft, onRemove }) => {
                         <span className="font-bold">{formatCurrency(costPerPerson)}</span>
                     </div>
                 )}
+
+                {/* Payment Conditions */}
+                <div className="mt-6 pt-4 border-t">
+                    <h4 className="font-bold text-gray-700 mb-2 text-sm">Condiciones de Pago</h4>
+                    <div className="bg-gray-50 p-3 rounded text-sm space-y-2">
+                        <div className="flex justify-between items-center">
+                            <span className="text-gray-600">Anticipo ({downPaymentPercentage}%)</span>
+                            <span className="font-bold text-gray-800">{formatCurrency(downPaymentAmount)}</span>
+                        </div>
+                        {draft.paymentLimitDate && (
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-600">Fecha Límite</span>
+                                <span className="font-bold text-gray-800">{new Date(draft.paymentLimitDate).toLocaleDateString()}</span>
+                            </div>
+                        )}
+                        <div className="flex justify-between items-center pt-2 border-t border-gray-200 mt-2">
+                            <span className="text-gray-600">Pendiente a Liquidar</span>
+                            <span className="font-bold text-gray-800">{formatCurrency(total - downPaymentAmount)}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

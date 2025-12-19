@@ -41,4 +41,9 @@ export interface QuoteDraft {
     date: string;
 
     selectedItems: QuoteItem[];
+
+    // Financial Settings
+    downPaymentPercentage?: number;
+    paymentLimitDate?: string;
+    discount?: number;     // Fixed amount
 }

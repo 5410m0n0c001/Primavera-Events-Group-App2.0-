@@ -6,7 +6,6 @@ export const useQuoteCalculations = (draft: QuoteDraft) => {
         let subtotal = 0;
 
         // Filter items by category/logic to match user's requested domain logic
-        // ADAPTATION: Mapping current 'QuoteItem[]' to logic domains
         const items = draft.selectedItems || [];
 
         // Sum all items
@@ -19,8 +18,13 @@ export const useQuoteCalculations = (draft: QuoteDraft) => {
             subtotal += unitPrice * quantity;
         });
 
-        const iva = Number((subtotal * 0.16).toFixed(2));
-        const total = Number((subtotal + iva).toFixed(2));
+        const discount = Number(draft.discount) || 0;
+        const subtotalAfterDiscount = Math.max(0, subtotal - discount);
+        const iva = Number((subtotalAfterDiscount * 0.16).toFixed(2));
+        const total = Number((subtotalAfterDiscount + iva).toFixed(2));
+
+        const downPaymentPercentage = Number(draft.downPaymentPercentage) || 0;
+        const downPaymentAmount = Number((total * (downPaymentPercentage / 100)).toFixed(2));
 
         const costPerPerson = (draft.guestCount > 0 && total > 0)
             ? total / draft.guestCount
@@ -28,13 +32,19 @@ export const useQuoteCalculations = (draft: QuoteDraft) => {
 
         return {
             subtotal,
+            discount,
+            subtotalAfterDiscount,
             iva,
             tax: iva, // Backward compatibility alias
             total,
+            downPaymentPercentage,
+            downPaymentAmount,
             costPerPerson
         };
     }, [
         draft.selectedItems,
-        draft.guestCount
+        draft.guestCount,
+        draft.discount,
+        draft.downPaymentPercentage
     ]);
 };

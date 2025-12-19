@@ -74,7 +74,10 @@ const QuoteWizard: React.FC = () => {
         eventName: '',
         guestCount: 100,
         date: '',
-        selectedItems: [] // { item: any, quantity: number }
+        selectedItems: [], // { item: any, quantity: number }
+        discount: 0,
+        downPaymentPercentage: 30, // Default 30%
+        paymentLimitDate: ''
     });
     const [budget, setBudget] = useState(0);
     const [showManualForm, setShowManualForm] = useState(false);
@@ -302,6 +305,39 @@ const QuoteWizard: React.FC = () => {
                                     value={budget}
                                     onChange={e => setBudget(parseInt(e.target.value) || 0)}
                                 />
+                            </div>
+
+                            {/* Financial Settings */}
+                            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-gray-100 mt-2">
+                                <div>
+                                    <label className="block text-sm font-medium mb-1 text-gray-600">Descuento ($)</label>
+                                    <input
+                                        type="number"
+                                        className="w-full border-gray-300 rounded-lg p-3 border"
+                                        placeholder="0.00"
+                                        value={draft.discount || ''}
+                                        onChange={e => setDraft({ ...draft, discount: parseFloat(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1 text-gray-600">Anticipo Mínimo (%)</label>
+                                    <input
+                                        type="number"
+                                        className="w-full border-gray-300 rounded-lg p-3 border"
+                                        placeholder="30"
+                                        value={draft.downPaymentPercentage || ''}
+                                        onChange={e => setDraft({ ...draft, downPaymentPercentage: parseFloat(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1 text-gray-600">Fecha Límite de Pago</label>
+                                    <input
+                                        type="date"
+                                        className="w-full border-gray-300 rounded-lg p-3 border"
+                                        value={draft.paymentLimitDate || ''}
+                                        onChange={e => setDraft({ ...draft, paymentLimitDate: e.target.value })}
+                                    />
+                                </div>
                             </div>
                         </div>
                         <div className="mt-8 flex justify-end">
