@@ -45,11 +45,47 @@ router.get('/dashboard', async (req, res) => {
         }));
 
         // 4. Key Metrics
+        // 4. Key Metrics & Extended BI Data
+
+        // --- Finance ---
         const totalRevenue = monthlyRevenue.reduce((a, b) => a + b, 0);
+        const expenseRecords = await prisma.expense.findMany();
+        const totalExpenses = expenseRecords.reduce((acc, curr) => acc + Number(curr.amount), 0);
+        const netProfit = totalRevenue - totalExpenses;
+
+        // --- Operations (Projects) ---
         const activeProjects = await prisma.event.count({
             where: { status: { notIn: ['CANCELLED', 'COMPLETED'] } }
         });
+        const completedProjects = await prisma.event.count({
+            where: { status: 'COMPLETED' }
+        });
+
+        // --- CRM ---
         const pendingLeads = await prisma.client.count({ where: { type: 'LEAD' } });
+        const totalClients = await prisma.client.count();
+
+        // --- Quotes ---
+        const totalQuotes = await prisma.quote.count();
+        const acceptedQuotes = await prisma.quote.count({ where: { status: 'ACCEPTED' } });
+        const quoteConversionRate = totalQuotes > 0 ? ((acceptedQuotes / totalQuotes) * 100).toFixed(1) : '0';
+
+        // --- Inventory ---
+        const inventoryItems = await prisma.catalogItem.findMany();
+        const totalStockValue = inventoryItems.reduce((acc, item) => acc + (Number(item.price) * item.stock), 0);
+        const lowStockItems = inventoryItems.filter(i => i.stock <= 5).length;
+        const damagedItems = inventoryItems.reduce((acc, item) => acc + item.stockDamaged, 0);
+
+        // --- Venues ---
+        const totalVenues = await prisma.venue.count();
+        // Ideally we count events per venue, simpler metric for now:
+        const mostBookedVenue = "N/A"; // Placeholder for complex aggregation
+
+        // --- Suppliers ---
+        const totalSuppliers = await prisma.supplier.count();
+
+        // --- Catering ---
+        const totalDishes = await prisma.dish.count();
 
         res.json({
             revenue: {
@@ -63,8 +99,21 @@ router.get('/dashboard', async (req, res) => {
             pipeline: pipeline,
             metrics: {
                 totalRevenue,
+                totalExpenses,
+                netProfit,
                 activeProjects,
-                pendingLeads
+                completedProjects,
+                pendingLeads,
+                totalClients,
+                totalQuotes,
+                acceptedQuotes,
+                quoteConversionRate,
+                totalStockValue,
+                lowStockItems,
+                damagedItems,
+                totalVenues,
+                totalSuppliers,
+                totalDishes
             }
         });
 
