@@ -132,13 +132,14 @@ const ProductionDashboard: React.FC = () => {
     };
 
     // --- TIMELINE LOGIC (Restored) ---
-    const canAdd = Boolean(newItemTime && newItemDesc);
+    const canAdd = Boolean(newItemDesc); // Only description is strict required to enable
 
     const addTimelineItem = () => {
-        if (!canAdd) return;
+        if (!newItemDesc) return;
+
         const newItem: TimelineItem = {
             id: Date.now().toString(),
-            time: newItemTime,
+            time: newItemTime || '00:00', // Default if missing
             description: newItemDesc,
             order: timelineItems.length + 1
         };
