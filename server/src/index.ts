@@ -4,7 +4,6 @@ dotenv.config();
 console.log('🔍 [DEBUG] Environment variables loaded.');
 
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
 import clientRoutes from './routes/clients';
 import calendarRoutes from './routes/calendar';
 import catalogRoutes from './routes/catalog';
@@ -17,6 +16,9 @@ import productionRoutes from './routes/production';
 import analyticsRoutes from './routes/analytics';
 import venueRoutes from './routes/venue.routes';
 import quotesRoutes from './routes/quotes';
+import exportsRoutes from './routes/exports'; // Added exports route
+
+import { prisma } from './prisma'; // Use singleton
 
 // Middlewares & Utils
 import { corsMiddleware } from './middleware/cors';
@@ -45,7 +47,7 @@ app.get("/", (_req, res) => {
 // Default to 3000 if PORT is not set
 console.log('🔍 [DEBUG] Env PORT:', process.env.PORT);
 const PORT = process.env.PORT || 3000;
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient(); // Removed local instance
 
 // Global Middlewares
 app.use(helmetMiddleware);
@@ -78,6 +80,7 @@ app.use('/api/venues', venueRoutes);
 console.log('🔍 [DEBUG] Registering routes...');
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/quotes', quotesRoutes);
+app.use('/api/events', exportsRoutes); // Register exports route
 
 // Error Handler (Must be last)
 app.use(errorHandler);

@@ -1,14 +1,14 @@
 import { Router } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../prisma';
 
 const router = Router();
-const prisma = new PrismaClient();
 
 // GET all clients
 router.get('/', async (req, res) => {
     try {
         const clients = await prisma.client.findMany({
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: 'desc' },
+            include: { events: false } // Optimize: don't include events list in main table
         });
         res.json(clients);
     } catch (error) {
@@ -34,7 +34,8 @@ router.get('/:id', async (req, res) => {
 // POST create client
 router.post('/', async (req, res) => {
     try {
-        const { firstName, lastName, email, phone, address, notes, type } = req.body;
+        const { firstName, lastName, email, phone, address, notes, company, type } = req.body;
+
         const client = await prisma.client.create({
             data: {
                 firstName,
@@ -43,19 +44,24 @@ router.post('/', async (req, res) => {
                 phone,
                 address,
                 notes,
+                company, // Assuming schema supports company? If not, schema update needed.
                 type: type || 'LEAD'
             }
         });
         res.status(201).json(client);
-    } catch (error) {
-        res.status(500).json({ error: 'Error creating client' });
+    } catch (error: any) {
+        console.error('Error creating client:', error);
+        if (error.code === 'P2002') {
+            return res.status(400).json({ error: 'El email ya está registrado.' });
+        }
+        res.status(500).json({ error: 'Error creating client', details: error.message });
     }
 });
 
 // PUT update client
 router.put('/:id', async (req, res) => {
     try {
-        const { firstName, lastName, email, phone, address, notes, type } = req.body;
+        const { firstName, lastName, email, phone, address, notes, company, type } = req.body;
         const client = await prisma.client.update({
             where: { id: req.params.id },
             data: {
@@ -65,6 +71,7 @@ router.put('/:id', async (req, res) => {
                 phone,
                 address,
                 notes,
+                company,
                 type
             }
         });
@@ -77,9 +84,11 @@ router.put('/:id', async (req, res) => {
 // DELETE client
 router.delete('/:id', async (req, res) => {
     try {
+        // Optional: Check dependencies (events)
         await prisma.client.delete({ where: { id: req.params.id } });
         res.json({ message: 'Client deleted' });
     } catch (error) {
+        console.error('Error deleting client:', error);
         res.status(500).json({ error: 'Error deleting client' });
     }
 });

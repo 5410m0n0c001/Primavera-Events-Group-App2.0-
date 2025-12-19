@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { EventExportButton } from '../EventExportButton';
 
 interface CalendarEventFormProps {
     event?: any;
@@ -79,7 +80,12 @@ const CalendarEventForm: React.FC<CalendarEventFormProps> = ({ event, selectedDa
                     <h2 className="text-2xl font-bold text-gray-800">
                         {event ? 'Editar Evento' : 'Nuevo Evento'}
                     </h2>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700">&times;</button>
+                    <div className="flex items-center gap-2">
+                        {event && (
+                            <EventExportButton eventId={event.id} eventName={event.name} />
+                        )}
+                        <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl leading-none">&times;</button>
+                    </div>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-4">

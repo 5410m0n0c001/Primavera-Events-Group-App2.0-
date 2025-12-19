@@ -1,19 +1,13 @@
 import React, { useEffect, useState } from 'react';
-
-interface Client {
-    id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone?: string;
-    type: string;
-}
+import { ClientDetailsModal, type Client } from './ClientDetailsModal';
+import { ClientEditModal } from './ClientEditModal';
 
 const ClientList: React.FC = () => {
     const [clients, setClients] = useState<Client[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showForm, setShowForm] = useState(false);
-    const [newClient, setNewClient] = useState({ firstName: '', lastName: '', email: '', phone: '', type: 'LEAD' });
+    const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const isMounted = React.useRef(true);
 
     useEffect(() => {
@@ -39,22 +33,36 @@ const ClientList: React.FC = () => {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            const res = await fetch('/api/clients', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newClient)
-            });
-            if (!res.ok) throw new Error('Error creating client');
+    const handleViewDetails = (client: Client) => {
+        setSelectedClient(client);
+        setShowDetailsModal(true);
+    };
 
-            setShowForm(false);
-            setNewClient({ firstName: '', lastName: '', email: '', phone: '', type: 'LEAD' });
-            fetchClients();
+    const handleEdit = (client: Client) => {
+        setSelectedClient(client);
+        setShowEditModal(true);
+    };
+
+    const handleDelete = async (clientId: string) => {
+        try {
+            const res = await fetch(`/api/clients/${clientId}`, {
+                method: 'DELETE',
+            });
+            if (!res.ok) throw new Error('Error deleting client');
+            setClients(clients.filter((c) => c.id !== clientId));
+            // alert('Cliente eliminado');
         } catch (error) {
-            console.error('Error creating client:', error);
-            alert('Error al guardar el cliente');
+            alert('Error al eliminar cliente');
+            console.error(error);
+        }
+    };
+
+    const handleSaveClient = (savedClient: Client) => {
+        const exists = clients.some(c => c.id === savedClient.id);
+        if (exists) {
+            setClients(clients.map(c => c.id === savedClient.id ? savedClient : c));
+        } else {
+            setClients([savedClient, ...clients]);
         }
     };
 
@@ -63,57 +71,15 @@ const ClientList: React.FC = () => {
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-3xl font-serif text-primavera-gold font-bold">Gestión de Clientes</h2>
                 <button
-                    onClick={() => setShowForm(!showForm)}
-                    className="bg-primavera-green text-white px-4 py-2 rounded shadow hover:bg-green-600 border border-white/10"
+                    onClick={() => {
+                        setSelectedClient(null);
+                        setShowEditModal(true);
+                    }}
+                    className="bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600 border border-white/10 font-medium"
                 >
-                    {showForm ? 'Cancelar' : '+ Nuevo Cliente'}
+                    + Nuevo Cliente
                 </button>
             </div>
-
-            {showForm && (
-                <div className="bg-white dark:bg-[#1c1c1e] p-6 rounded-lg shadow-md mb-6 border border-gray-200 dark:border-white/10">
-                    <h3 className="text-lg font-bold mb-4 dark:text-white">Registrar Cliente</h3>
-                    <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-                        <input
-                            placeholder="Nombre"
-                            className="p-2 border rounded apple-input"
-                            value={newClient.firstName}
-                            onChange={e => setNewClient({ ...newClient, firstName: e.target.value })}
-                            required
-                        />
-                        <input
-                            placeholder="Apellido"
-                            className="p-2 border rounded apple-input"
-                            value={newClient.lastName}
-                            onChange={e => setNewClient({ ...newClient, lastName: e.target.value })}
-                            required
-                        />
-                        <input
-                            placeholder="Email"
-                            className="p-2 border rounded apple-input"
-                            value={newClient.email}
-                            onChange={e => setNewClient({ ...newClient, email: e.target.value })}
-                            required
-                        />
-                        <input
-                            placeholder="Teléfono"
-                            className="p-2 border rounded apple-input"
-                            value={newClient.phone}
-                            onChange={e => setNewClient({ ...newClient, phone: e.target.value })}
-                        />
-                        <select
-                            className="p-2 border rounded apple-input"
-                            value={newClient.type}
-                            onChange={e => setNewClient({ ...newClient, type: e.target.value })}
-                        >
-                            <option value="LEAD">Lead (Interesado)</option>
-                            <option value="PROSPECT">Prospecto (Cotizando)</option>
-                            <option value="ACTIVE">Cliente Activo</option>
-                        </select>
-                        <button type="submit" className="bg-primavera-gold text-white p-2 rounded col-span-2 shadow-lg">Guardar</button>
-                    </form>
-                </div>
-            )}
 
             <div className="bg-white dark:bg-[#1c1c1e] rounded-lg shadow border border-gray-200 dark:border-white/10 overflow-x-auto md:overflow-hidden h-auto min-h-0 w-full">
                 <table className="w-full text-left min-w-[800px] md:min-w-0">
@@ -141,7 +107,30 @@ const ClientList: React.FC = () => {
                                     </span>
                                 </td>
                                 <td className="p-4">
-                                    <button className="text-primavera-gold hover:text-yellow-600 dark:hover:text-yellow-300 font-medium">Ver Detalles</button>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => handleViewDetails(client)}
+                                            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                                        >
+                                            👁️ Ver
+                                        </button>
+                                        <button
+                                            onClick={() => handleEdit(client)}
+                                            className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 text-sm"
+                                        >
+                                            ✏️ Editar
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                if (window.confirm(`¿Eliminar a ${client.firstName}?`)) {
+                                                    handleDelete(client.id);
+                                                }
+                                            }}
+                                            className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                                        >
+                                            🗑️ Eliminar
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -151,6 +140,24 @@ const ClientList: React.FC = () => {
                     </tbody>
                 </table>
             </div>
+
+            <ClientDetailsModal
+                client={selectedClient}
+                isOpen={showDetailsModal}
+                onClose={() => setShowDetailsModal(false)}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+            />
+
+            <ClientEditModal
+                client={selectedClient}
+                isOpen={showEditModal}
+                onClose={() => {
+                    setShowEditModal(false);
+                    setSelectedClient(null);
+                }}
+                onSave={handleSaveClient}
+            />
         </div>
     );
 };
