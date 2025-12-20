@@ -23,38 +23,91 @@ export const FloorplanCatalog: React.FC<FloorplanCatalogProps> = ({
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const res = await fetch('/api/production/categories');
-                if (res.ok) {
-                    const data = await res.json();
-                    // Map API response to match interface (categoryId -> category)
-                    const mappedData = data.map((cat: any) => ({
-                        ...cat,
-                        elements: cat.elements.map((el: any) => ({
-                            ...el,
-                            category: el.categoryId,
-                            width: el.width || 100, // Ensure defaults
-                            height: el.height || 100
-                        }))
-                    }));
-                    setCategories(mappedData);
-                } else {
-                    console.error('Failed to fetch categories');
-                }
-            } catch (error) {
-                console.error('Error loading floorplan categories:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    // Management State
+    const [showManage, setShowManage] = useState(false);
+    const [manageTab, setManageTab] = useState<'category' | 'element'>('element');
 
+    // New Category Form
+    const [newCatName, setNewCatName] = useState('');
+    const [newCatEmoji, setNewCatEmoji] = useState('📦');
+
+    // New Element Form
+    const [newElName, setNewElName] = useState('');
+    const [newElCatId, setNewElCatId] = useState('');
+    const [newElWidth, setNewElWidth] = useState(100);
+    const [newElHeight, setNewElHeight] = useState(100);
+
+    const fetchCategories = async () => {
+        try {
+            const res = await fetch('/api/production/categories');
+            if (res.ok) {
+                const data = await res.json();
+                // Map API response to match interface (categoryId -> category)
+                const mappedData = data.map((cat: any) => ({
+                    ...cat,
+                    elements: cat.elements.map((el: any) => ({
+                        ...el,
+                        category: el.categoryId,
+                        width: el.width || 100,
+                        height: el.height || 100
+                    }))
+                }));
+                setCategories(mappedData);
+            } else {
+                console.error('Failed to fetch categories');
+            }
+        } catch (error) {
+            console.error('Error loading floorplan categories:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchCategories();
     }, []);
 
     const toggleCategory = (categoryId: string) => {
         setExpandedCategory(expandedCategory === categoryId ? null : categoryId);
+    };
+
+    const handleCreateCategory = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const res = await fetch('/api/production/categories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newCatName, emoji: newCatEmoji })
+            });
+            if (res.ok) {
+                setNewCatName('');
+                setNewCatEmoji('📦');
+                setShowManage(false);
+                fetchCategories();
+            }
+        } catch (error) { console.error(error); }
+    };
+
+    const handleCreateElement = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const res = await fetch('/api/production/elements', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: newElName,
+                    categoryId: newElCatId,
+                    width: Number(newElWidth),
+                    height: Number(newElHeight)
+                })
+            });
+            if (res.ok) {
+                setNewElName('');
+                setNewElWidth(100);
+                setShowManage(false);
+                fetchCategories();
+            }
+        } catch (error) { console.error(error); }
     };
 
     const filteredCategories = categories.map(category => ({
@@ -66,19 +119,91 @@ export const FloorplanCatalog: React.FC<FloorplanCatalogProps> = ({
 
     return (
         <div
-            className={`bg-white rounded-lg shadow-lg p-4 h-full flex flex-col transition-all duration-300 ${isExpanded ? 'w-full' : 'w-full' /* controlled by container width in parent */
-                }`}
+            className={`bg-white rounded-lg shadow-lg p-4 h-full flex flex-col transition-all duration-300 ${isExpanded ? 'w-full' : 'w-full'}`}
         >
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-gray-800 tracking-tight">Catálogo</h2>
-                <button
-                    onClick={onToggleExpand}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
-                    title={isExpanded ? "Minimizar" : "Expandir"}
-                >
-                    {isExpanded ? '⛔' : '➡️'}
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setShowManage(!showManage)}
+                        className={`p-2 rounded-lg transition-colors ${showManage ? 'bg-primavera-gold text-white' : 'hover:bg-gray-100 text-gray-500'}`}
+                        title="Gestionar Catálogo"
+                    >
+                        ⚙️
+                    </button>
+                    <button
+                        onClick={onToggleExpand}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+                        title={isExpanded ? "Minimizar" : "Expandir"}
+                    >
+                        {isExpanded ? '⛔' : '➡️'}
+                    </button>
+                </div>
             </div>
+
+            {/* Management Form Area */}
+            {showManage && (
+                <div className="mb-4 bg-gray-50 p-3 rounded border border-primavera-gold/30">
+                    <div className="flex gap-2 mb-3 border-b border-gray-200 pb-2">
+                        <button
+                            onClick={() => setManageTab('element')}
+                            className={`text-xs font-bold px-3 py-1 rounded ${manageTab === 'element' ? 'bg-white shadow text-primavera-gold' : 'text-gray-500'}`}
+                        >
+                            Nuevo Elemento
+                        </button>
+                        <button
+                            onClick={() => setManageTab('category')}
+                            className={`text-xs font-bold px-3 py-1 rounded ${manageTab === 'category' ? 'bg-white shadow text-primavera-gold' : 'text-gray-500'}`}
+                        >
+                            Nueva Categoría
+                        </button>
+                    </div>
+
+                    {manageTab === 'element' ? (
+                        <form onSubmit={handleCreateElement} className="space-y-2">
+                            <div>
+                                <label className="block text-[10px] uppercase font-bold text-gray-400">Categoría</label>
+                                <select
+                                    className="w-full text-sm border p-1 rounded"
+                                    value={newElCatId}
+                                    onChange={e => setNewElCatId(e.target.value)}
+                                    required
+                                >
+                                    <option value="">Seleccionar...</option>
+                                    {categories.map(c => <option key={c.id} value={c.id}>{c.emoji} {c.name}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-[10px] uppercase font-bold text-gray-400">Nombre</label>
+                                <input className="w-full text-sm border p-1 rounded" value={newElName} onChange={e => setNewElName(e.target.value)} placeholder="Ej. Mesa Hexagonal" required />
+                            </div>
+                            <div className="flex gap-2">
+                                <div className="w-1/2">
+                                    <label className="block text-[10px] uppercase font-bold text-gray-400">Ancho (px)</label>
+                                    <input type="number" className="w-full text-sm border p-1 rounded" value={newElWidth} onChange={e => setNewElWidth(Number(e.target.value))} required />
+                                </div>
+                                <div className="w-1/2">
+                                    <label className="block text-[10px] uppercase font-bold text-gray-400">Alto (px)</label>
+                                    <input type="number" className="w-full text-sm border p-1 rounded" value={newElHeight} onChange={e => setNewElHeight(Number(e.target.value))} required />
+                                </div>
+                            </div>
+                            <button className="w-full bg-blue-600 text-white text-xs font-bold py-2 rounded hover:bg-blue-700">Crear Elemento</button>
+                        </form>
+                    ) : (
+                        <form onSubmit={handleCreateCategory} className="space-y-2">
+                            <div>
+                                <label className="block text-[10px] uppercase font-bold text-gray-400">Nombre Categoría</label>
+                                <input className="w-full text-sm border p-1 rounded" value={newCatName} onChange={e => setNewCatName(e.target.value)} placeholder="Ej. ZONA GAMER" required />
+                            </div>
+                            <div>
+                                <label className="block text-[10px] uppercase font-bold text-gray-400">Emoji / Icono</label>
+                                <input className="w-full text-sm border p-1 rounded" value={newCatEmoji} onChange={e => setNewCatEmoji(e.target.value)} placeholder="🎮" />
+                            </div>
+                            <button className="w-full bg-green-600 text-white text-xs font-bold py-2 rounded hover:bg-green-700">Crear Categoría</button>
+                        </form>
+                    )}
+                </div>
+            )}
 
             <input
                 type="text"
@@ -112,8 +237,6 @@ export const FloorplanCatalog: React.FC<FloorplanCatalogProps> = ({
                             {expandedCategory === category.id && (
                                 <div className="px-3 py-2 bg-white space-y-1">
                                     {category.elements.map((element) => {
-                                        // const isSelected = selectedElements.some(el => el.id === element.id);
-
                                         return (
                                             <div
                                                 key={element.id}
@@ -122,7 +245,6 @@ export const FloorplanCatalog: React.FC<FloorplanCatalogProps> = ({
                                                 <span className="text-xs text-gray-700 font-medium">{element.name}</span>
                                                 <button
                                                     onClick={() => onAddElement(element)}
-                                                    // disabled={isSelected} // Allow adding multiple instances!
                                                     className={`px-2 py-1 rounded text-[10px] font-bold transition-all ${'bg-blue-500 text-white hover:bg-blue-600 shadow-sm hover:shadow-md active:scale-95'
                                                         }`}
                                                 >
