@@ -37,8 +37,7 @@ services:
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
     depends_on:
-      database:
-        condition: service_healthy
+      - database
     networks:
       - app-network
     healthcheck:
@@ -59,6 +58,8 @@ services:
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
       - "coolify.managed=true"
     restart: unless-stopped
+    depends_on:
+      - backend
     networks:
       - app-network
     healthcheck:
