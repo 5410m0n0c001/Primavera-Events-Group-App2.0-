@@ -39,4 +39,34 @@ router.put('/items/:id', async (req, res) => {
     }
 });
 
+// POST Create Category
+router.post('/categories', async (req, res) => {
+    try {
+        const { name } = req.body;
+        if (!name) return res.status(400).json({ error: 'Name is required' });
+
+        const category = await prisma.catalogCategory.create({
+            data: { name }
+        });
+        res.status(201).json(category);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to create category' });
+    }
+});
+
+// POST Create SubCategory
+router.post('/subcategories', async (req, res) => {
+    try {
+        const { name, categoryId } = req.body;
+        if (!name || !categoryId) return res.status(400).json({ error: 'Name and CategoryId are required' });
+
+        const subCategory = await prisma.catalogSubCategory.create({
+            data: { name, categoryId }
+        });
+        res.status(201).json(subCategory);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to create subcategory' });
+    }
+});
+
 export default router;

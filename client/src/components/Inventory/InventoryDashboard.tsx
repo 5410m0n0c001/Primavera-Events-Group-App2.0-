@@ -20,9 +20,16 @@ const InventoryDashboard: React.FC = () => {
     // Categories
     const [categories, setCategories] = useState<Category[]>([]);
 
-    // Modal State
+    // Item Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newItem, setNewItem] = useState({ name: '', unit: 'pieza', stock: 0, price: 0, subCategoryId: '' });
+
+    // Category Management Modal State
+    const [isCatModalOpen, setIsCatModalOpen] = useState(false);
+    const [catTab, setCatTab] = useState<'category' | 'subcategory'>('category');
+    const [newCatName, setNewCatName] = useState('');
+    const [newSubCatName, setNewSubCatName] = useState('');
+    const [scParentId, setScParentId] = useState('');
 
     // File Upload
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -129,6 +136,41 @@ const InventoryDashboard: React.FC = () => {
         }
     };
 
+    // --- Category Management ---
+    const handleCreateCategory = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const res = await fetch('/api/catalog/categories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newCatName })
+            });
+            if (res.ok) {
+                setNewCatName('');
+                loadCategories();
+                alert('Categoría creada');
+            }
+        } catch (error) { console.error(error); }
+    };
+
+    const handleCreateSubCategory = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!scParentId) return alert('Selecciona una categoría padre');
+        try {
+            const res = await fetch('/api/catalog/subcategories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newSubCatName, categoryId: scParentId })
+            });
+            if (res.ok) {
+                setNewSubCatName('');
+                loadCategories();
+                alert('Subcategoría creada');
+            }
+        } catch (error) { console.error(error); }
+    };
+
+    // --- Item Creation ---
     const handleCreateWrapper = () => {
         setIsModalOpen(true);
     };
@@ -252,6 +294,9 @@ const InventoryDashboard: React.FC = () => {
                 <div className="flex gap-2">
                     <button onClick={handleImportClick} className="px-4 py-2 bg-green-600 text-white rounded shadow hover:bg-green-700">
                         📥 Importar Excel
+                    </button>
+                    <button onClick={() => setIsCatModalOpen(true)} className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700">
+                        🏷️ Gestionar Categorías
                     </button>
                     <button onClick={exportCSV} className="px-4 py-2 border bg-white rounded shadow-sm text-gray-600 hover:bg-gray-50">Exportar CSV</button>
                     <button onClick={handleCreateWrapper} className="px-4 py-2 bg-purple-600 text-white rounded shadow hover:bg-purple-700">+ Nuevo Artículo</button>
@@ -493,6 +538,85 @@ const InventoryDashboard: React.FC = () => {
                                 className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 font-bold"
                             >
                                 Crear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Manage Categories Modal */}
+            {isCatModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+                        <h2 className="text-xl font-bold mb-4">Gestionar Categorías</h2>
+
+                        <div className="flex gap-4 mb-4 border-b">
+                            <button
+                                className={`pb-2 px-1 ${catTab === 'category' ? 'border-b-2 border-purple-600 font-bold text-purple-600' : 'text-gray-500'}`}
+                                onClick={() => setCatTab('category')}
+                            >
+                                Categorías
+                            </button>
+                            <button
+                                className={`pb-2 px-1 ${catTab === 'subcategory' ? 'border-b-2 border-purple-600 font-bold text-purple-600' : 'text-gray-500'}`}
+                                onClick={() => setCatTab('subcategory')}
+                            >
+                                Subcategorías
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            {catTab === 'category' ? (
+                                <form onSubmit={handleCreateCategory}>
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700">Nombre de la Categoría</label>
+                                        <input
+                                            type="text"
+                                            className="w-full border rounded px-3 py-2 mt-1"
+                                            value={newCatName}
+                                            onChange={e => setNewCatName(e.target.value)}
+                                            placeholder="Ej. Mobiliario"
+                                            required
+                                        />
+                                    </div>
+                                    <button className="w-full bg-green-600 text-white py-2 rounded font-bold hover:bg-green-700">Crear Categoría</button>
+                                </form>
+                            ) : (
+                                <form onSubmit={handleCreateSubCategory}>
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700">Categoría Padre</label>
+                                        <select
+                                            className="w-full border rounded px-3 py-2 mt-1"
+                                            value={scParentId}
+                                            onChange={e => setScParentId(e.target.value)}
+                                            required
+                                        >
+                                            <option value="">Selecciona una categoría...</option>
+                                            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                        </select>
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700">Nombre de Subcategoría</label>
+                                        <input
+                                            type="text"
+                                            className="w-full border rounded px-3 py-2 mt-1"
+                                            value={newSubCatName}
+                                            onChange={e => setNewSubCatName(e.target.value)}
+                                            placeholder="Ej. Sillas Tiffany"
+                                            required
+                                        />
+                                    </div>
+                                    <button className="w-full bg-blue-600 text-white py-2 rounded font-bold hover:bg-blue-700">Crear Subcategoría</button>
+                                </form>
+                            )}
+                        </div>
+
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                onClick={() => setIsCatModalOpen(false)}
+                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                            >
+                                Cerrar
                             </button>
                         </div>
                     </div>
