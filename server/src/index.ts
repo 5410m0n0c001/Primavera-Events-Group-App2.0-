@@ -16,7 +16,7 @@ import productionRoutes from './routes/production';
 import analyticsRoutes from './routes/analytics';
 import venueRoutes from './routes/venue.routes';
 import quotesRoutes from './routes/quotes';
-// import exportsRoutes from './routes/exports'; // Added exports route (DISABLED FOR DEBUG)
+import exportsRoutes from './routes/exports';
 
 import { prisma } from './prisma'; // Use singleton
 
@@ -80,7 +80,7 @@ app.use('/api/venues', venueRoutes);
 console.log('🔍 [DEBUG] Registering routes...');
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/quotes', quotesRoutes);
-// app.use('/api/events', exportsRoutes); // Register exports route (DISABLED FOR DEBUG)
+app.use('/api/events', exportsRoutes);
 
 // Error Handler (Must be last)
 app.use(errorHandler);
