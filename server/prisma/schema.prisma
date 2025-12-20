@@ -305,3 +305,20 @@ model TimelineItem {
   description String   // "Recepción de invitados"
   order       Int      @default(0)
 }
+
+model ProductionCategory {
+  id        String              @id @default(uuid())
+  name      String              // "ACCESO Y RECEPCIÓN"
+  emoji     String?             // "🚪"
+  elements  ProductionElement[]
+}
+
+model ProductionElement {
+  id         String             @id @default(uuid())
+  name       String             // "Acceso principal"
+  categoryId String
+  category   ProductionCategory @relation(fields: [categoryId], references: [id])
+  width      Int                @default(100)
+  height     Int                @default(100)
+  icon       String?            // Optional custom icon
+}

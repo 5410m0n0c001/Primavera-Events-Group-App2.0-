@@ -85,4 +85,111 @@ router.delete('/timeline/item/:id', async (req, res) => {
     }
 });
 
+// --- CATEGORIES ---
+
+// GET All Categories with Elements
+router.get('/categories', async (req, res) => {
+    try {
+        const categories = await prisma.productionCategory.findMany({
+            include: { elements: true },
+            orderBy: { name: 'asc' } // Or add an 'order' field later if needed
+        });
+        res.json(categories);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch categories' });
+    }
+});
+
+// CREATE Category
+router.post('/categories', async (req, res) => {
+    try {
+        const { name, emoji } = req.body;
+        const category = await prisma.productionCategory.create({
+            data: { name, emoji }
+        });
+        res.json(category);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to create category' });
+    }
+});
+
+// UPDATE Category
+router.put('/categories/:id', async (req, res) => {
+    try {
+        const { name, emoji } = req.body;
+        const category = await prisma.productionCategory.update({
+            where: { id: req.params.id },
+            data: { name, emoji }
+        });
+        res.json(category);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update category' });
+    }
+});
+
+// DELETE Category
+router.delete('/categories/:id', async (req, res) => {
+    try {
+        await prisma.productionCategory.delete({
+            where: { id: req.params.id }
+        });
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete category' });
+    }
+});
+
+// --- ELEMENTS ---
+
+// CREATE Element
+router.post('/elements', async (req, res) => {
+    try {
+        const { name, width, height, categoryId, icon } = req.body;
+        const element = await prisma.productionElement.create({
+            data: {
+                name,
+                width: parseInt(width),
+                height: parseInt(height),
+                categoryId,
+                icon
+            }
+        });
+        res.json(element);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to create element' });
+    }
+});
+
+// UPDATE Element
+router.put('/elements/:id', async (req, res) => {
+    try {
+        const { name, width, height, categoryId, icon } = req.body;
+        const element = await prisma.productionElement.update({
+            where: { id: req.params.id },
+            data: {
+                name,
+                width: parseInt(width),
+                height: parseInt(height),
+                categoryId,
+                icon
+            }
+        });
+        res.json(element);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update element' });
+    }
+});
+
+// DELETE Element
+router.delete('/elements/:id', async (req, res) => {
+    try {
+        await prisma.productionElement.delete({
+            where: { id: req.params.id }
+        });
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to delete element' });
+    }
+});
+
 export default router;
