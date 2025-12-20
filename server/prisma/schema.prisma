@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" 
+  provider = "postgresql"
   // I will use "sqlite" for the *generation* and code, but keep the schema compatible. 
   // actually, if I use mysql provider, `prisma create` might fail if no DB.
   // I'll use sqlite for this scaffold to ensure "npm run dev" works out of the box for the user to see progress.
@@ -22,7 +22,6 @@ model User {
   createdAt DateTime @default(now())
   events    Event[]  @relation("CoordinatorEvents")
 }
-
 
 model Client {
   id        String   @id @default(uuid())
@@ -40,148 +39,147 @@ model Client {
 }
 
 model Event {
-  id          String   @id @default(uuid())
-  name        String   // "Boda Juan y Maria"
-  type        String   // "Boda", "XV Años"
-  date        DateTime
-  guestCount  Int
-  status      String   @default("DRAFT") // DRAFT, CONFIRMED, COMPLETED, CANCELLED
-  
-  location    String? // Keep for backward compatibility or custom locations
-  
-  venueId     String?
-  venue       Venue?   @relation(fields: [venueId], references: [id])
-  
-  notes       String?
+  id         String   @id @default(uuid())
+  name       String // "Boda Juan y Maria"
+  type       String // "Boda", "XV Años"
+  date       DateTime
+  guestCount Int
+  status     String   @default("DRAFT") // DRAFT, CONFIRMED, COMPLETED, CANCELLED
 
-  clientId    String
-  client      Client   @relation(fields: [clientId], references: [id])
-  
+  location String? // Keep for backward compatibility or custom locations
+
+  venueId String?
+  venue   Venue?  @relation(fields: [venueId], references: [id])
+
+  notes String?
+
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id])
+
   coordinatorId String?
   coordinator   User?   @relation("CoordinatorEvents", fields: [coordinatorId], references: [id])
 
-  quotes      Quote[]
-  payments    Payment[]
-  
-  layout      Layout?
-  timeline    Timeline?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  quotes   Quote[]
+  payments Payment[]
 
+  layout   Layout?
+  timeline Timeline?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Venue {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
   description String?
   address     String?
   capacity    Int
-  
+
   // Pricing
-  priceRent   Decimal? // Base rental price
+  priceRent    Decimal? // Base rental price
   pricePerHour Decimal?
-  
+
   // Relations
-  features    VenueFeature[]
-  images      VenueImage[]
-  events      Event[]
-  
-  updatedAt   DateTime @updatedAt
-  createdAt   DateTime @default(now())
+  features VenueFeature[]
+  images   VenueImage[]
+  events   Event[]
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
 }
 
 model VenueFeature {
-  id        String @id @default(uuid())
-  venueId   String
-  venue     Venue  @relation(fields: [venueId], references: [id], onDelete: Cascade)
-  
-  name      String // "Estacionamiento", "WiFi", "Jardin"
-  type      String // "Service", "Restriction", "Furniture"
-  value     String? // "Included", "Extra Cost", "No Pets"
+  id      String @id @default(uuid())
+  venueId String
+  venue   Venue  @relation(fields: [venueId], references: [id], onDelete: Cascade)
+
+  name  String // "Estacionamiento", "WiFi", "Jardin"
+  type  String // "Service", "Restriction", "Furniture"
+  value String? // "Included", "Extra Cost", "No Pets"
 }
 
 model VenueImage {
-  id        String @id @default(uuid())
-  venueId   String
-  venue     Venue  @relation(fields: [venueId], references: [id], onDelete: Cascade)
-  url       String
-  caption   String?
+  id      String  @id @default(uuid())
+  venueId String
+  venue   Venue   @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  url     String
+  caption String?
 }
 
 model Quote {
-  id            String   @id @default(uuid())
-  version       Int      @default(1)
-  parentQuoteId String?  // ID of the previous version
-  parentQuote   Quote?   @relation("QuoteVersions", fields: [parentQuoteId], references: [id])
-  childQuotes   Quote[]  @relation("QuoteVersions")
+  id            String  @id @default(uuid())
+  version       Int     @default(1)
+  parentQuoteId String? // ID of the previous version
+  parentQuote   Quote?  @relation("QuoteVersions", fields: [parentQuoteId], references: [id])
+  childQuotes   Quote[] @relation("QuoteVersions")
 
-  eventId       String
-  event         Event    @relation(fields: [eventId], references: [id])
-  
-  items         QuoteItem[]
-  
-  subtotal      Decimal
-  tax           Decimal
-  total         Decimal
-  margin        Decimal? // Profitability
-  
-  status        String   @default("DRAFT") // DRAFT, SENT, ACCEPTED, REJECTED
-  
-  createdAt     DateTime @default(now())
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id])
+
+  items QuoteItem[]
+
+  subtotal Decimal
+  tax      Decimal
+  total    Decimal
+  margin   Decimal? // Profitability
+
+  status String @default("DRAFT") // DRAFT, SENT, ACCEPTED, REJECTED
+
+  createdAt DateTime @default(now())
 }
 
 model QuoteItem {
-  id              String   @id @default(uuid())
-  quoteId         String
-  quote           Quote    @relation(fields: [quoteId], references: [id])
-  
-  serviceItemId   String
-  serviceItem     CatalogItem @relation(fields: [serviceItemId], references: [id])
-  
+  id      String @id @default(uuid())
+  quoteId String
+  quote   Quote  @relation(fields: [quoteId], references: [id])
+
+  serviceItemId String
+  serviceItem   CatalogItem @relation(fields: [serviceItemId], references: [id])
+
   categorySnapshot String? // "Mobiliario" (Name at time of quote)
-  
-  quantity        Int
-  unitPrice       Decimal // Copied from CatalogItem at time of quote to lock price
-  cost            Decimal // For margin calc
-  
-  notes           String? // "Sin cebolla", "Color rojo"
+
+  quantity  Int
+  unitPrice Decimal // Copied from CatalogItem at time of quote to lock price
+  cost      Decimal // For margin calc
+
+  notes String? // "Sin cebolla", "Color rojo"
 }
 
 // --- CATALOG SYSTEM (The "Brain" of the planner) ---
 
 model CatalogCategory {
-  id            String   @id @default(uuid())
-  name          String   // "Mobiliario", "Catering", "Bebidas", "Decoracion"
+  id            String               @id @default(uuid())
+  name          String // "Mobiliario", "Catering", "Bebidas", "Decoracion"
   description   String?
-  rules         String?  // JSON: { "type": "RATIO", "ratio": 10, "target": "guests" }
+  rules         String? // JSON: { "type": "RATIO", "ratio": 10, "target": "guests" }
   subCategories CatalogSubCategory[]
 }
 
 model CatalogSubCategory {
-  id            String   @id @default(uuid())
-  name          String   // "Mesas", "Sillas", "Plato Fuerte"
-  categoryId    String
-  category      CatalogCategory @relation(fields: [categoryId], references: [id])
-  items         CatalogItem[]
+  id         String          @id @default(uuid())
+  name       String // "Mesas", "Sillas", "Plato Fuerte"
+  categoryId String
+  category   CatalogCategory @relation(fields: [categoryId], references: [id])
+  items      CatalogItem[]
 }
 
 model CatalogItem {
-  id              String   @id @default(uuid())
-  name            String   // "Silla Tiffany Dorada", "Filete Mignon"
-  description     String?
-  
-  subCategoryId   String
-  subCategory     CatalogSubCategory @relation(fields: [subCategoryId], references: [id])
-  
-  price           Decimal  // Sale price
-  cost            Decimal? // Internal cost
-  unit            String   // "pieza", "persona", "evento"
-  stock           Int      @default(0) // Inventory tracking
-  stockDamaged    Int      @default(0) // Items in bad condition (still part of stock count, or separate? Plan: Part of total stock, but unavailable)
-  
-  options         String?  // JSON stringified: colors, sizes, etc.
-  
+  id          String  @id @default(uuid())
+  name        String // "Silla Tiffany Dorada", "Filete Mignon"
+  description String?
+
+  subCategoryId String
+  subCategory   CatalogSubCategory @relation(fields: [subCategoryId], references: [id])
+
+  price        Decimal // Sale price
+  cost         Decimal? // Internal cost
+  unit         String // "pieza", "persona", "evento"
+  stock        Int      @default(0) // Inventory tracking
+  stockDamaged Int      @default(0) // Items in bad condition (still part of stock count, or separate? Plan: Part of total stock, but unavailable)
+
+  options String? // JSON stringified: colors, sizes, etc.
+
   quoteItems      QuoteItem[]
   maintenanceLogs MaintenanceLog[]
 }
@@ -190,7 +188,7 @@ model Staff {
   id        String   @id @default(uuid())
   firstName String
   lastName  String
-  role      String   // Mesero, Capitan, DJ
+  role      String // Mesero, Capitan, DJ
   dailyRate Decimal? // Cost per event/day
   phone     String?
   email     String?
@@ -198,27 +196,27 @@ model Staff {
 }
 
 model MaintenanceLog {
-  id            String      @id @default(uuid())
-  itemId        String
-  catalogItem   CatalogItem @relation(fields: [itemId], references: [id])
-  type          String      // "Repair", "Replacement", "Loss"
-  quantity      Int
-  cost          Decimal
-  notes         String?
-  date          DateTime    @default(now())
+  id          String      @id @default(uuid())
+  itemId      String
+  catalogItem CatalogItem @relation(fields: [itemId], references: [id])
+  type        String // "Repair", "Replacement", "Loss"
+  quantity    Int
+  cost        Decimal
+  notes       String?
+  date        DateTime    @default(now())
 }
 
 model Supplier {
-  id        String   @id @default(uuid())
-  name      String
-  category  String   // Florería, Música, Fotografía, Decoración
+  id          String    @id @default(uuid())
+  name        String
+  category    String // Florería, Música, Fotografía, Decoración
   contactName String?
-  email     String?
-  phone     String?
-  terms     String?  // Términos de servicio
-  rating    Float    @default(0)
-  createdAt DateTime @default(now())
-  expenses  Expense[]
+  email       String?
+  phone       String?
+  terms       String? // Términos de servicio
+  rating      Float     @default(0)
+  createdAt   DateTime  @default(now())
+  expenses    Expense[]
 }
 
 model Payment {
@@ -226,10 +224,10 @@ model Payment {
   eventId   String
   event     Event    @relation(fields: [eventId], references: [id])
   amount    Decimal
-  method    String   // "Efectivo", "Transferencia", "Tarjeta"
-  status    String   // "Pendiente", "Pagado"
+  method    String // "Efectivo", "Transferencia", "Tarjeta"
+  status    String // "Pendiente", "Pagado"
   date      DateTime @default(now())
-  reference String?  // Comprobante
+  reference String? // Comprobante
 }
 
 model Expense {
@@ -238,9 +236,9 @@ model Expense {
   supplier    Supplier? @relation(fields: [supplierId], references: [id])
   description String
   amount      Decimal
-  category    String    // "Insumos", "Servicios", "Nómina", "Otros"
+  category    String // "Insumos", "Servicios", "Nómina", "Otros"
   date        DateTime  @default(now())
-  status      String    // "Pendiente", "Pagado"
+  status      String // "Pendiente", "Pagado"
 }
 
 // --- CATERING MODULE ---
@@ -248,7 +246,7 @@ model Expense {
 model Ingredient {
   id          String       @id @default(uuid())
   name        String
-  unit        String       // "kg", "lt", "pz"
+  unit        String // "kg", "lt", "pz"
   costPerUnit Decimal
   stock       Decimal      @default(0)
   recipeItems RecipeItem[]
@@ -256,10 +254,10 @@ model Ingredient {
 
 model Dish {
   id          String       @id @default(uuid())
-  name        String       // "Filete Mignon"
+  name        String // "Filete Mignon"
   description String?
-  price       Decimal      // Sale Price
-  cost        Decimal?     // Calculated from ingredients
+  price       Decimal // Sale Price
+  cost        Decimal? // Calculated from ingredients
   recipeItems RecipeItem[]
   menus       Menu[]       @relation("MenuDishes")
 }
@@ -270,55 +268,55 @@ model RecipeItem {
   dish         Dish       @relation(fields: [dishId], references: [id])
   ingredientId String
   ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
-  quantity     Decimal    // Amount needed per dish
+  quantity     Decimal // Amount needed per dish
 }
 
 model Menu {
-  id          String   @id @default(uuid())
-  name        String   // "Menú 3 Tiempos Boda"
+  id          String  @id @default(uuid())
+  name        String // "Menú 3 Tiempos Boda"
   description String?
-  dishes      Dish[]   @relation("MenuDishes")
+  dishes      Dish[]  @relation("MenuDishes")
 }
 
 // --- PRODUCTION MODULE ---
 
 model Layout {
-  id        String   @id @default(uuid())
-  eventId   String   @unique // One layout per event for now
-  event     Event    @relation(fields: [eventId], references: [id])
-  name      String   // "Distribución Salón Principal"
-  data      String   // JSON: { objects: [{ x: 10, y: 10, type: 'table', label: 'Mesa 1' }] }
+  id      String @id @default(uuid())
+  eventId String @unique // One layout per event for now
+  event   Event  @relation(fields: [eventId], references: [id])
+  name    String // "Distribución Salón Principal"
+  data    String // JSON: { objects: [{ x: 10, y: 10, type: 'table', label: 'Mesa 1' }] }
 }
 
 model Timeline {
-  id        String         @id @default(uuid())
-  eventId   String         @unique
-  event     Event          @relation(fields: [eventId], references: [id])
-  items     TimelineItem[]
+  id      String         @id @default(uuid())
+  eventId String         @unique
+  event   Event          @relation(fields: [eventId], references: [id])
+  items   TimelineItem[]
 }
 
 model TimelineItem {
   id          String   @id @default(uuid())
   timelineId  String
   timeline    Timeline @relation(fields: [timelineId], references: [id])
-  time        String   // "18:00"
-  description String   // "Recepción de invitados"
+  time        String // "18:00"
+  description String // "Recepción de invitados"
   order       Int      @default(0)
 }
 
 model ProductionCategory {
-  id        String              @id @default(uuid())
-  name      String              // "ACCESO Y RECEPCIÓN"
-  emoji     String?             // "🚪"
-  elements  ProductionElement[]
+  id       String              @id @default(uuid())
+  name     String
+  emoji    String?
+  elements ProductionElement[]
 }
 
 model ProductionElement {
   id         String             @id @default(uuid())
-  name       String             // "Acceso principal"
+  name       String
   categoryId String
   category   ProductionCategory @relation(fields: [categoryId], references: [id])
   width      Int                @default(100)
   height     Int                @default(100)
-  icon       String?            // Optional custom icon
+  icon       String?
 }
