@@ -7,6 +7,7 @@ async function main() {
     console.log('🌱 Starting database seed...');
 
     // Categories and Subcategories
+    // --- OPTIMIZED CATALOG SEEDING ---
     const categories = [
         {
             name: 'Mobiliario',
@@ -35,36 +36,39 @@ async function main() {
         }
     ];
 
+    // 1. Fetch all Categories
+    const existingCatalogCats = await prisma.catalogCategory.findMany();
+    const catCatalogMap = new Map<string, string>();
+    existingCatalogCats.forEach(c => catCatalogMap.set(c.name, c.id));
+
+    // 2. Insert missing Categories
     for (const cat of categories) {
-        // Check if category exists (ID is UUID, Name is NOT unique in schema)
-        let category = await prisma.catalogCategory.findFirst({
-            where: { name: cat.name }
-        });
-
-        if (!category) {
-            category = await prisma.catalogCategory.create({
-                data: {
-                    name: cat.name,
-                    description: cat.description
-                }
+        if (!catCatalogMap.has(cat.name)) {
+            const newCat = await prisma.catalogCategory.create({
+                data: { name: cat.name, description: cat.description }
             });
-            console.log(`Created category: ${category.name}`);
-        } else {
-            console.log(`Category exists: ${category.name}`);
+            catCatalogMap.set(newCat.name, newCat.id);
+            console.log(`Created Cat: ${newCat.name}`);
         }
+    }
 
-        if (!category) continue; // Should not happen
+    // 3. Fetch all Subcategories
+    const allSubs = await prisma.catalogSubCategory.findMany();
+    const subSet = new Set(allSubs.map(s => `${s.categoryId}:${s.name}`));
 
-        for (const sub of cat.subs) {
-            const existingSub = await prisma.catalogSubCategory.findFirst({
-                where: { name: sub, categoryId: category.id }
-            });
+    // 4. Insert missing Subcategories
+    for (const cat of categories) {
+        const catId = catCatalogMap.get(cat.name);
+        if (!catId) continue;
 
-            if (!existingSub) {
+        for (const subName of cat.subs) {
+            const key = `${catId}:${subName}`;
+            if (!subSet.has(key)) {
                 await prisma.catalogSubCategory.create({
-                    data: { name: sub, categoryId: category.id }
+                    data: { name: subName, categoryId: catId }
                 });
-                console.log(`  - Added sub: ${sub}`);
+                console.log(`Created Sub: ${subName}`);
+                subSet.add(key); // prevent dups in this run
             }
         }
     }
