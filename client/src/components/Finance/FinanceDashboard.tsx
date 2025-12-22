@@ -57,6 +57,9 @@ const FinanceDashboard: React.FC = () => {
             const projRes = await fetch('/api/finance/projections');
             if (projRes.ok) setProjections(await projRes.json());
 
+            const incomesRes = await fetch('/api/income');
+            const incomes = await incomesRes.json();
+
             const paymentsRes = await fetch('/api/finance/payments');
             const payments = await paymentsRes.json();
 
@@ -65,7 +68,8 @@ const FinanceDashboard: React.FC = () => {
 
             // Merge and sort
             const merged = [
-                ...payments.map((p: any) => ({ ...p, type: 'INCOME', category: 'Ingreso' })),
+                ...payments.map((p: any) => ({ ...p, type: 'INCOME', category: 'Event Payment' })),
+                ...incomes.map((i: any) => ({ ...i, type: 'INCOME', category: 'General Income', description: i.notes })), // Map notes to description
                 ...expenses.map((e: any) => ({ ...e, type: 'EXPENSE' }))
             ].sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
@@ -86,16 +90,31 @@ const FinanceDashboard: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const endpoint = formType === 'INCOME' ? '/api/finance/payments' : '/api/finance/expenses';
-        const body = formType === 'INCOME'
-            ? { amount: formData.amount, method: formData.method, status: formData.status, reference: formData.description, eventId: '' /* Manual income */ }
-            : { amount: formData.amount, description: formData.description, category: formData.category, status: formData.status };
 
-        await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
+        if (formType === 'INCOME') {
+            await fetch('/api/income', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: formData.amount,
+                    source: 'Manual',
+                    notes: `${formData.description || ''} - ${formData.method || ''}`,
+                    date: formData.date
+                })
+            });
+        } else {
+            // Expense
+            await fetch('/api/finance/expenses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: formData.amount,
+                    description: formData.description,
+                    category: formData.category,
+                    status: formData.status
+                })
+            });
+        }
 
         setShowModal(false);
         setFormData({ amount: '', description: '', category: '', method: '', status: 'Pagado', date: new Date().toISOString().split('T')[0] });

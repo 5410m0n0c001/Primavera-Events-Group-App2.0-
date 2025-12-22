@@ -61,6 +61,7 @@ model Event {
 
   quotes   Quote[]
   payments Payment[]
+  incomes  Income[]
 
   layout   Layout?
   timeline Timeline?
@@ -319,4 +320,18 @@ model ProductionElement {
   width      Int                @default(100)
   height     Int                @default(100)
   icon       String?
+}
+
+model Income {
+  id        String   @id @default(cuid())
+  amount    Decimal
+  source    String   
+  eventId   String?
+  event     Event?   @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  date      DateTime @default(now())
+  notes     String?
+  createdAt DateTime @default(now())
+  
+  @@index([eventId])
+  @@map("incomes")
 }

@@ -8,6 +8,7 @@ const prisma = new PrismaClient();
 router.get('/', async (req, res) => {
     try {
         const venues = await prisma.venue.findMany({
+            orderBy: { name: 'asc' },
             include: {
                 features: true,
                 images: true
