@@ -7,9 +7,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // I will use "sqlite" for the *generation* and code, but keep the schema compatible. 
-  // actually, if I use mysql provider, `prisma create` might fail if no DB.
-  // I'll use sqlite for this scaffold to ensure "npm run dev" works out of the box for the user to see progress.
   url      = env("DATABASE_URL")
 }
 

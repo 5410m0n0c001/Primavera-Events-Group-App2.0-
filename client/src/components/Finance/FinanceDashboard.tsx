@@ -97,7 +97,7 @@ const FinanceDashboard: React.FC = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     amount: formData.amount,
-                    source: 'Manual',
+                    source: formData.category || 'Manual', // Use selected category as source
                     notes: `${formData.description || ''} - ${formData.method || ''}`,
                     date: formData.date
                 })
@@ -312,48 +312,54 @@ const FinanceDashboard: React.FC = () => {
                                 </div>
                             </div>
 
-                            {formType === 'EXPENSE' ? (
-                                <div className="space-y-4">
-                                    <input
-                                        className="apple-input w-full"
-                                        placeholder="Descripción"
-                                        value={formData.description}
-                                        onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                        required
-                                    />
-                                    <select
-                                        className="apple-input w-full appearance-none bg-no-repeat bg-right"
-                                        value={formData.category}
-                                        onChange={e => setFormData({ ...formData, category: e.target.value })}
-                                    >
-                                        <option value="">Seleccionar Categoría...</option>
-                                        <option value="Insumos">Insumos y Materiales</option>
-                                        <option value="Servicios">Servicios (Luz, Agua, Internet)</option>
-                                        <option value="Nomina">Nómina y Staff</option>
-                                        <option value="Marketing">Marketing y Publicidad</option>
-                                        <option value="Mantenimiento">Mantenimiento</option>
-                                        <option value="Otros">Otros</option>
-                                    </select>
-                                </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    <input
-                                        className="apple-input w-full"
-                                        placeholder="Referencia / Cliente"
-                                        value={formData.description} // Mapped to reference
-                                        onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                    />
+                            <div className="space-y-4">
+                                <input
+                                    className="apple-input w-full"
+                                    placeholder={formType === 'EXPENSE' ? "Descripción del Gasto" : "Referencia / Notas del Ingreso"}
+                                    value={formData.description}
+                                    onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                    required
+                                />
+
+                                <select
+                                    className="apple-input w-full appearance-none bg-no-repeat bg-right"
+                                    value={formData.category} // We will use 'category' state for both. For Income, we map it to 'source'.
+                                    onChange={e => setFormData({ ...formData, category: e.target.value })}
+                                >
+                                    <option value="">{formType === 'EXPENSE' ? "Seleccionar Categoría..." : "Seleccionar Fuente..."}</option>
+
+                                    {formType === 'EXPENSE' ? (
+                                        <>
+                                            <option value="Insumos">Insumos y Materiales</option>
+                                            <option value="Servicios">Servicios (Luz, Agua, Internet)</option>
+                                            <option value="Nomina">Nómina y Staff</option>
+                                            <option value="Marketing">Marketing y Publicidad</option>
+                                            <option value="Mantenimiento">Mantenimiento</option>
+                                            <option value="Otros">Otros</option>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <option value="Ventas">Ventas</option>
+                                            <option value="Servicios">Servicios</option>
+                                            <option value="Renta">Renta de Mobiliario/Venue</option>
+                                            <option value="Otro">Otro</option>
+                                        </>
+                                    )}
+                                </select>
+
+                                {formType === 'INCOME' && (
                                     <select
                                         className="apple-input w-full"
                                         value={formData.method}
                                         onChange={e => setFormData({ ...formData, method: e.target.value })}
                                     >
+                                        <option value="">Método de Pago...</option>
                                         <option value="Efectivo">Efectivo</option>
                                         <option value="Transferencia">Transferencia</option>
                                         <option value="Tarjeta">Tarjeta</option>
                                     </select>
-                                </div>
-                            )}
+                                )}
+                            </div>
 
                             <div className="flex gap-4 pt-4">
                                 <button
