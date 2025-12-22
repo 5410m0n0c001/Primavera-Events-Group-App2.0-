@@ -4,6 +4,41 @@ import { PrismaClient } from '@prisma/client';
 const router = Router();
 const prisma = new PrismaClient();
 
+// POST /api/venues/seed - Restore default venues
+router.post('/seed', async (req, res) => {
+    try {
+        const MOCK_VENUES = [
+            { name: 'Salón Los Caballos', capacity: 300, priceRent: 15000, description: 'Amplio salón estilo hacienda con jardines.', features: [{ name: 'Jardín', type: 'amenity' }, { name: 'Pista de Baile', type: 'amenity' }] },
+            { name: 'Jardín La Flor', capacity: 200, priceRent: 12000, description: 'Hermoso jardín ideal para bodas al aire libre.', features: [{ name: 'Carpa', type: 'amenity' }, { name: 'Iluminación', type: 'amenity' }] },
+            { name: 'Salón Los Potrillos', capacity: 150, priceRent: 10000, description: 'Espacio íntimo para eventos familiares.', features: [{ name: 'Cocina', type: 'amenity' }, { name: 'Barra', type: 'amenity' }] },
+            { name: 'Salón Jardín Yolomécatl', capacity: 400, priceRent: 25000, description: 'Gran capacidad y elegancia para eventos masivos.', features: [{ name: 'Escenario', type: 'amenity' }, { name: 'Estacionamiento', type: 'amenity' }] },
+            { name: 'Salón Presidente', capacity: 500, priceRent: 30000, description: 'El venue más exclusivo y grande.', features: [{ name: 'A/C', type: 'amenity' }, { name: 'Suite', type: 'amenity' }] },
+        ];
+
+        for (const venue of MOCK_VENUES) {
+            // Check if exists
+            const exists = await prisma.venue.findFirst({ where: { name: venue.name } });
+            if (!exists) {
+                await prisma.venue.create({
+                    data: {
+                        name: venue.name,
+                        description: venue.description,
+                        capacity: venue.capacity,
+                        priceRent: venue.priceRent,
+                        features: {
+                            create: venue.features.map(f => ({ name: f.name, type: f.type }))
+                        }
+                    }
+                });
+            }
+        }
+        res.json({ message: 'Venues seeded' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to seed venues' });
+    }
+});
+
 // GET /api/venues - List all venues
 router.get('/', async (req, res) => {
     try {

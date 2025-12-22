@@ -93,6 +93,25 @@ const VenuesManager: React.FC = () => {
         }
     };
 
+    const handleRestoreDefaults = async () => {
+        if (!confirm('¿Restaurar las 5 locaciones por defecto? Esto agregará los salones base si no existen.')) return;
+        setLoading(true);
+        try {
+            const response = await fetch('/api/venues/seed', { method: 'POST' });
+            if (response.ok) {
+                await fetchVenues();
+                alert('Locaciones restauradas correctamente.');
+            } else {
+                alert('Error al restaurar locaciones.');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error al restaurar locaciones.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     if (loading) return <div className="p-8 text-center dark:text-gray-400">Cargando locaciones...</div>;
 
     return (
@@ -102,12 +121,21 @@ const VenuesManager: React.FC = () => {
                     <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Locaciones y Salones</h1>
                     <p className="text-gray-500 dark:text-gray-400">Gestiona tus espacios y consulta disponibilidad</p>
                 </div>
-                <button
-                    className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition flex items-center gap-2 shadow-lg"
-                    onClick={handleCreate}
-                >
-                    <span>+</span> Nueva Locación
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={handleRestoreDefaults}
+                        className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+                        title="Cargar locaciones de ejemplo"
+                    >
+                        ↻ Restaurar
+                    </button>
+                    <button
+                        className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition flex items-center gap-2 shadow-lg"
+                        onClick={handleCreate}
+                    >
+                        <span>+</span> Nueva Locación
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

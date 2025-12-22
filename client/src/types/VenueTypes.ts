@@ -21,4 +21,6 @@ export interface Venue {
     pricePerHour?: number;
     features: VenueFeature[];
     images: VenueImage[];
+    status?: string;
+    packages?: any[];
 }

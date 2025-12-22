@@ -9,8 +9,13 @@ router.get('/stats', async (req, res) => {
     try {
         const payments = await prisma.payment.findMany();
         const expenses = await prisma.expense.findMany();
+        const incomes = await prisma.income.findMany();
 
-        const totalIncome = payments.reduce((sum, p) => sum + parseFloat(p.amount.toString()), 0);
+        const totalPayments = payments.reduce((sum, p) => sum + parseFloat(p.amount.toString()), 0);
+        const totalOtherIncome = incomes.reduce((sum, i) => sum + parseFloat(i.amount.toString()), 0);
+
+        const totalIncome = totalPayments + totalOtherIncome;
+
         const totalExpenses = expenses.reduce((sum, e) => sum + parseFloat(e.amount.toString()), 0);
         const netProfit = totalIncome - totalExpenses;
 
