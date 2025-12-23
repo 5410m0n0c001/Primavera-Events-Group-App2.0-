@@ -34,6 +34,12 @@ const FinanceDashboard: React.FC = () => {
     const [showModal, setShowModal] = useState(false);
     const [formType, setFormType] = useState<'INCOME' | 'EXPENSE'>('EXPENSE');
 
+    const [viewMode, setViewMode] = useState<'LIST' | 'CALENDAR'>('LIST');
+
+    // Search & Filter State
+    const [searchTerm, setSearchTerm] = useState('');
+    const [dateRange, setDateRange] = useState({ start: '', end: '' });
+
     // Form State
     const [formData, setFormData] = useState({
         amount: '',
@@ -45,25 +51,34 @@ const FinanceDashboard: React.FC = () => {
     });
 
     useEffect(() => {
-        loadData();
-    }, []);
+        const timeoutId = setTimeout(() => {
+            loadData();
+        }, 500); // Debounce search
+        return () => clearTimeout(timeoutId);
+    }, [searchTerm, dateRange]);
 
     const loadData = async () => {
         try {
             setLoading(true);
+            const queryParams = new URLSearchParams();
+            if (searchTerm) queryParams.append('search', searchTerm);
+            if (dateRange.start) queryParams.append('startDate', dateRange.start);
+            if (dateRange.end) queryParams.append('endDate', dateRange.end);
+            const queryString = queryParams.toString();
+
             const statsRes = await fetch('/api/finance/stats');
             if (statsRes.ok) setStats(await statsRes.json());
 
             const projRes = await fetch('/api/finance/projections');
             if (projRes.ok) setProjections(await projRes.json());
 
-            const incomesRes = await fetch('/api/income');
+            const incomesRes = await fetch(`/api/income?${queryString}`);
             const incomes = await incomesRes.json();
 
-            const paymentsRes = await fetch('/api/finance/payments');
+            const paymentsRes = await fetch(`/api/finance/payments?${queryString}`);
             const payments = await paymentsRes.json();
 
-            const expensesRes = await fetch('/api/finance/expenses');
+            const expensesRes = await fetch(`/api/finance/expenses?${queryString}`);
             const expenses = await expensesRes.json();
 
             // Merge and sort
@@ -115,10 +130,48 @@ const FinanceDashboard: React.FC = () => {
                 })
             });
         }
-
         setShowModal(false);
-        setFormData({ amount: '', description: '', category: '', method: '', status: 'Pagado', date: new Date().toISOString().split('T')[0] });
         loadData();
+    };
+
+    const fMoney = (amount: number) => amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+
+    // Calendar Helper
+    const renderCalendar = () => {
+        const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+        const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+        // Group transactions by date
+        const txByDate: Record<string, Transaction[]> = {};
+        transactions.forEach(t => {
+            const date = t.date.split('T')[0];
+            if (!txByDate[date]) txByDate[date] = [];
+            txByDate[date].push(t);
+        });
+
+        return (
+            <div className="grid grid-cols-7 gap-2">
+                {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(d => (
+                    <div key={d} className="font-bold text-center text-gray-500 py-2">{d}</div>
+                ))}
+                {days.map(day => {
+                    const dateKey = new Date(new Date().getFullYear(), new Date().getMonth(), day).toISOString().split('T')[0];
+                    const dayTxs = txByDate[dateKey] || [];
+                    return (
+                        <div key={day} className="border min-h-[100px] p-2 rounded bg-white hover:shadow-md transition-shadow">
+                            <div className="text-right text-gray-400 text-sm mb-1">{day}</div>
+                            <div className="space-y-1">
+                                {dayTxs.map(tx => (
+                                    <div key={tx.id} className={`text-[10px] p-1 rounded truncate leading-tight ${tx.type === 'INCOME' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                        {fMoney(tx.amount)}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        );
     };
 
     if (loading) return <div className="p-10 text-center animate-pulse">Cargando Finanzas...</div>;
@@ -225,56 +278,111 @@ const FinanceDashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Transactions List */}
-            <div className="apple-card overflow-hidden">
-                <div className="px-8 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/30">
-                    <h3 className="font-bold text-gray-900 text-sm uppercase tracking-wide">Movimientos Recientes</h3>
-                    <span className="text-xs font-medium text-gray-400 bg-white px-2 py-1 rounded-md shadow-sm border border-gray-100">{transactions.length} registros</span>
+            {/* Controls & Filter Bar */}
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-wrap gap-4 items-center justify-between mb-6">
+                <div className="flex gap-4 items-center flex-1">
+                    <div className="relative flex-1 max-w-md">
+                        <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
+                        <input
+                            type="text"
+                            placeholder="Buscar por concepto, referencia..."
+                            className="pl-10 pr-4 py-2 w-full border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="date"
+                            className="border rounded-lg px-3 py-2 text-sm text-gray-600"
+                            value={dateRange.start}
+                            onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                        />
+                        <span className="text-gray-400">→</span>
+                        <input
+                            type="date"
+                            className="border rounded-lg px-3 py-2 text-sm text-gray-600"
+                            value={dateRange.end}
+                            onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                        />
+                    </div>
                 </div>
-                <table className="w-full text-left border-collapse">
-                    <thead className="bg-gray-50/50 text-[11px] uppercase text-gray-400 font-bold tracking-wider">
-                        <tr>
-                            <th className="p-4 pl-8">Fecha</th>
-                            <th className="p-4">Descripción</th>
-                            <th className="p-4">Categoría</th>
-                            <th className="p-4 text-right">Monto</th>
-                            <th className="p-4 text-center pr-8">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-50">
-                        {transactions.map(t => (
-                            <tr key={t.id} className="hover:bg-blue-50/30 transition-colors group">
-                                <td className="p-4 pl-8 text-sm text-gray-500 font-medium">{new Date(t.date).toLocaleDateString()}</td>
-                                <td className="p-4 font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
-                                    {t.type === 'INCOME' ? `Ingreso: ${t.reference || 'General'}` : t.description}
-                                </td>
-                                <td className="p-4 text-sm">
-                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase border ${t.type === 'INCOME'
-                                        ? 'bg-green-50 text-green-700 border-green-100'
-                                        : 'bg-orange-50 text-orange-700 border-orange-100'
-                                        }`}>
-                                        {t.category || (t.type === 'INCOME' ? 'Venta' : 'Gasto')}
-                                    </span>
-                                </td>
-                                <td className={`p-4 text-right font-bold text-sm ${t.type === 'INCOME' ? 'text-green-600' : 'text-gray-900'}`}>
-                                    {t.type === 'INCOME' ? '+' : '-'}${t.amount.toLocaleString()}
-                                </td>
-                                <td className="p-4 text-center pr-8">
-                                    <button
-                                        onClick={() => handleDelete(t.id, t.type)}
-                                        className="text-gray-300 hover:text-red-500 transition p-2 rounded-full hover:bg-red-50"
-                                        title="Eliminar registro"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+
+                <div className="flex bg-gray-100 p-1 rounded-lg">
+                    <button
+                        onClick={() => setViewMode('LIST')}
+                        className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${viewMode === 'LIST' ? 'bg-white shadow text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                        📋 Lista
+                    </button>
+                    <button
+                        onClick={() => setViewMode('CALENDAR')}
+                        className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${viewMode === 'CALENDAR' ? 'bg-white shadow text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                        📅 Calendario
+                    </button>
+                </div>
             </div>
+
+            {/* Content Area */}
+            {viewMode === 'LIST' ? (
+                <div className="apple-card overflow-hidden">
+                    <div className="px-8 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/30">
+                        <h3 className="font-bold text-gray-900 text-sm uppercase tracking-wide">Movimientos Recientes</h3>
+                        <span className="text-xs font-medium text-gray-400 bg-white px-2 py-1 rounded-md shadow-sm border border-gray-100">{transactions.length} registros</span>
+                    </div>
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-gray-50/50 text-[11px] uppercase text-gray-400 font-bold tracking-wider">
+                            <tr>
+                                <th className="p-4 pl-8">Fecha</th>
+                                <th className="p-4">Descripción</th>
+                                <th className="p-4">Categoría</th>
+                                <th className="p-4 text-right">Monto</th>
+                                <th className="p-4 text-center pr-8">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-50">
+                            {transactions.map(t => (
+                                <tr key={t.id} className="hover:bg-blue-50/30 transition-colors group">
+                                    <td className="p-4 pl-8 text-sm text-gray-500 font-medium">{new Date(t.date).toLocaleDateString()}</td>
+                                    <td className="p-4 font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                                        {t.type === 'INCOME' ? `Ingreso: ${t.reference || 'General'}` : t.description}
+                                    </td>
+                                    <td className="p-4 text-sm">
+                                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase border ${t.type === 'INCOME'
+                                            ? 'bg-green-50 text-green-700 border-green-100'
+                                            : 'bg-orange-50 text-orange-700 border-orange-100'
+                                            }`}>
+                                            {t.category || (t.type === 'INCOME' ? 'Venta' : 'Gasto')}
+                                        </span>
+                                    </td>
+                                    <td className={`p-4 text-right font-bold text-sm ${t.type === 'INCOME' ? 'text-green-600' : 'text-gray-900'}`}>
+                                        {t.type === 'INCOME' ? '+' : '-'}${t.amount.toLocaleString()}
+                                    </td>
+                                    <td className="p-4 text-center pr-8">
+                                        <button
+                                            onClick={() => handleDelete(t.id, t.type)}
+                                            className="text-gray-300 hover:text-red-500 transition p-2 rounded-full hover:bg-red-50"
+                                            title="Eliminar registro"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            ) : (
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 apple-card">
+                    <h3 className="font-bold text-gray-700 mb-4 text-center text-lg capitalize font-display">
+                        {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}
+                    </h3>
+                    {renderCalendar()}
+                </div>
+            )}
 
             {/* Modal - Glassmorphism */}
             {showModal && (

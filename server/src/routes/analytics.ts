@@ -7,8 +7,10 @@ const prisma = new PrismaClient();
 // GET /api/analytics/dashboard
 router.get('/dashboard', async (req, res) => {
     try {
-        // 1. Revenue Trends (Monthly for current year)
+        // 1. Revenue Trends & Totals (Monthly for current year)
         const currentYear = new Date().getFullYear();
+
+        // Fetch Payments
         const payments = await prisma.payment.findMany({
             where: {
                 date: {
@@ -18,10 +20,28 @@ router.get('/dashboard', async (req, res) => {
             }
         });
 
+        // Fetch Generic Incomes
+        const incomes = await prisma.income.findMany({
+            where: {
+                date: {
+                    gte: new Date(`${currentYear}-01-01`),
+                    lte: new Date(`${currentYear}-12-31`)
+                }
+            }
+        });
+
         const monthlyRevenue = new Array(12).fill(0);
+
+        // Sum Payments
         payments.forEach(p => {
             const month = new Date(p.date).getMonth();
             monthlyRevenue[month] += parseFloat(p.amount.toString());
+        });
+
+        // Sum Incomes
+        incomes.forEach(i => {
+            const month = new Date(i.date).getMonth();
+            monthlyRevenue[month] += parseFloat(i.amount.toString());
         });
 
         // 2. Event Distribution (by Type)

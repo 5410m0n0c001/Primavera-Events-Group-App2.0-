@@ -39,7 +39,29 @@ router.get('/stats', async (req, res) => {
 // GET all payments
 router.get('/payments', async (req, res) => {
     try {
+        const { startDate, endDate, search } = req.query;
+
+        const where: any = {};
+
+        // Date Filter
+        if (startDate && endDate) {
+            where.date = {
+                gte: new Date(startDate as string),
+                lte: new Date(endDate as string)
+            };
+        }
+
+        // Search Filter
+        if (search) {
+            where.OR = [
+                { reference: { contains: search as string } }, // SQLite is case-insensitive by default roughly, Postgres uses mode: 'insensitive'
+                { method: { contains: search as string } },
+                { event: { client: { name: { contains: search as string } } } }
+            ];
+        }
+
         const payments = await prisma.payment.findMany({
+            where,
             include: { event: { include: { client: true } } },
             orderBy: { date: 'desc' }
         });
@@ -73,7 +95,29 @@ router.post('/payments', async (req, res) => {
 // GET all expenses
 router.get('/expenses', async (req, res) => {
     try {
+        const { startDate, endDate, search } = req.query;
+
+        const where: any = {};
+
+        // Date Filter
+        if (startDate && endDate) {
+            where.date = {
+                gte: new Date(startDate as string),
+                lte: new Date(endDate as string)
+            };
+        }
+
+        // Search Filter
+        if (search) {
+            where.OR = [
+                { description: { contains: search as string } },
+                { category: { contains: search as string } },
+                { supplier: { name: { contains: search as string } } }
+            ];
+        }
+
         const expenses = await prisma.expense.findMany({
+            where,
             include: { supplier: true },
             orderBy: { date: 'desc' }
         });

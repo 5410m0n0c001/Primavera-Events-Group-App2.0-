@@ -7,7 +7,29 @@ const prisma = new PrismaClient();
 // GET - Listar ingresos (Generic + Linked)
 router.get('/', async (req, res) => {
     try {
+        const { startDate, endDate, search } = req.query;
+
+        const where: any = {};
+
+        // Date Filter
+        if (startDate && endDate) {
+            where.date = {
+                gte: new Date(startDate as string),
+                lte: new Date(endDate as string)
+            };
+        }
+
+        // Search Filter
+        if (search) {
+            where.OR = [
+                { source: { contains: search as string } },
+                { notes: { contains: search as string } },
+                { event: { client: { name: { contains: search as string } } } }
+            ];
+        }
+
         const incomes = await prisma.income.findMany({
+            where,
             include: { event: true },
             orderBy: { date: 'desc' }
         });
