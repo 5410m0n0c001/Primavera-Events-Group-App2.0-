@@ -97,16 +97,24 @@ const server = app.listen(Number(PORT), '0.0.0.0', () => {
 const gracefulShutdown = async (signal: string) => {
     console.log(`🛑 [INFO] ${signal} received. Shutting down gracefully...`);
 
-    server.close(() => {
-        console.log('✅ [INFO] HTTP server closed.');
-    });
-
     try {
+        await new Promise<void>((resolve, reject) => {
+            server.close((err) => {
+                if (err) {
+                    console.error('❌ [ERROR] Error closing HTTP server:', err);
+                    reject(err);
+                } else {
+                    console.log('✅ [INFO] HTTP server closed.');
+                    resolve();
+                }
+            });
+        });
+
         await prisma.$disconnect();
         console.log('✅ [INFO] Database connection closed.');
         process.exit(0);
     } catch (err) {
-        console.error('❌ [ERROR] Error during database disconnection:', err);
+        console.error('❌ [ERROR] Error during graceful shutdown:', err);
         process.exit(1);
     }
 };

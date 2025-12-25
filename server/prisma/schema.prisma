@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -29,10 +29,15 @@ model Client {
   address   String?
   notes     String?
   company   String?
+  userId    String?
   type      String   @default("LEAD") // LEAD, PROSPECT, ACTIVE, PAST
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   events    Event[]
+  
+  @@unique([userId, email])
+  @@index([userId])
+  @@index([email])
 }
 
 model Event {
@@ -40,6 +45,7 @@ model Event {
   name       String // "Boda Juan y Maria"
   type       String // "Boda", "XV Años"
   date       DateTime
+  userId     String?
   guestCount Int
   status     String   @default("DRAFT") // DRAFT, CONFIRMED, COMPLETED, CANCELLED
 
@@ -65,6 +71,10 @@ model Event {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])     // Optimization for: user's event list
+  @@index([date])       // Optimization for: calendar queries
+  @@index([createdAt])  // Optimization for: reporting/sorting
 }
 
 model Venue {
@@ -82,6 +92,9 @@ model Venue {
   features VenueFeature[]
   images   VenueImage[]
   events   Event[]
+
+  @@index([name])
+  @@index([capacity])
 
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
