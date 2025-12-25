@@ -39,7 +39,8 @@ services:
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     networks:
       - app-network
     expose:

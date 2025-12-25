@@ -88,36 +88,51 @@ app.use('/api/events', exportsRoutes);
 app.use(errorHandler);
 
 console.log(`🔍 [DEBUG] Attempting to listen on port ${PORT}...`);
-const server = app.listen(Number(PORT), '0.0.0.0', () => {
-    console.log(`✅ [DEBUG] Server successfully bound to port ${PORT}`);
-    logger.info(`Server running on http://localhost:${PORT}`);
-});
 
-// Graceful Shutdown Implementation
-const gracefulShutdown = async (signal: string) => {
-    console.log(`🛑 [INFO] ${signal} received. Shutting down gracefully...`);
-
+const startServer = async () => {
     try {
-        await new Promise<void>((resolve, reject) => {
-            server.close((err) => {
-                if (err) {
-                    console.error('❌ [ERROR] Error closing HTTP server:', err);
-                    reject(err);
-                } else {
-                    console.log('✅ [INFO] HTTP server closed.');
-                    resolve();
-                }
-            });
+        console.log('🔍 [DEBUG] connecting to database...');
+        await prisma.$connect();
+        console.log('✅ [DEBUG] Database connected successfully.');
+
+        const server = app.listen(Number(PORT), '0.0.0.0', () => {
+            console.log(`✅ [DEBUG] Server successfully bound to port ${PORT}`);
+            logger.info(`Server running on http://localhost:${PORT}`);
         });
 
-        await prisma.$disconnect();
-        console.log('✅ [INFO] Database connection closed.');
-        process.exit(0);
-    } catch (err) {
-        console.error('❌ [ERROR] Error during graceful shutdown:', err);
+        // Graceful Shutdown Implementation
+        const gracefulShutdown = async (signal: string) => {
+            console.log(`🛑 [INFO] ${signal} received. Shutting down gracefully...`);
+
+            try {
+                await new Promise<void>((resolve, reject) => {
+                    server.close((err) => {
+                        if (err) {
+                            console.error('❌ [ERROR] Error closing HTTP server:', err);
+                            reject(err);
+                        } else {
+                            console.log('✅ [INFO] HTTP server closed.');
+                            resolve();
+                        }
+                    });
+                });
+
+                await prisma.$disconnect();
+                console.log('✅ [INFO] Database connection closed.');
+                process.exit(0);
+            } catch (err) {
+                console.error('❌ [ERROR] Error during graceful shutdown:', err);
+                process.exit(1);
+            }
+        };
+
+        process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+        process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+    } catch (error) {
+        console.error('❌ [FATAL] Failed to connect to database:', error);
         process.exit(1);
     }
 };
 
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+startServer();
