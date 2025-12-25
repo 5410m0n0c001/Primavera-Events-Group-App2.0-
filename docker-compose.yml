@@ -42,6 +42,8 @@ services:
       - database
     networks:
       - app-network
+    expose:
+      - "3000"
     healthcheck:
       disable: true
 
