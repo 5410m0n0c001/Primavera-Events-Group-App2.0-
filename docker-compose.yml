@@ -34,7 +34,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      DATABASE_URL: postgresql://${POSTGRES_USER:-primavera}:${POSTGRES_PASSWORD:-changeme}@database:5432/${POSTGRES_DB:-primavera_events}?schema=public&connection_limit=20&statement_timeout=30000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-primavera}:${POSTGRES_PASSWORD:-changeme}@database:5432/${POSTGRES_DB:-primavera_events}?schema=public&connection_limit=50&pool_timeout=60&statement_timeout=60000
       JWT_SECRET: ${JWT_SECRET:-change-in-production}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       CORS_ORIGIN: ${CORS_ORIGIN:-*}

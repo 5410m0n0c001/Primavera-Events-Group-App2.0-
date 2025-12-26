@@ -89,11 +89,34 @@ app.use(errorHandler);
 
 console.log(`🔍 [DEBUG] Attempting to listen on port ${PORT}...`);
 
-const startServer = async () => {
+const MAX_RETRIES = 10;
+const INITIAL_RETRY_DELAY = 1000; // 1 second
+
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const connectDataWithRetry = async (retryCount = 0): Promise<void> => {
     try {
-        console.log('🔍 [DEBUG] connecting to database...');
+        console.log(`🔍 [DEBUG] Connecting to database... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
         await prisma.$connect();
         console.log('✅ [DEBUG] Database connected successfully.');
+    } catch (error) {
+        if (retryCount >= MAX_RETRIES) {
+            console.error('❌ [FATAL] Failed to connect to database after maximum retries:', error);
+            throw error;
+        }
+
+        const delay = INITIAL_RETRY_DELAY * Math.pow(2, retryCount); // Exponential backoff
+        console.warn(`⚠️ [WARN] Database connection failed. Retrying in ${delay}ms...`);
+        console.error('Error details:', error);
+
+        await wait(delay);
+        return connectDataWithRetry(retryCount + 1);
+    }
+};
+
+const startServer = async () => {
+    try {
+        await connectDataWithRetry(); // Attempt robust connection
 
         const server = app.listen(Number(PORT), '0.0.0.0', () => {
             console.log(`✅ [DEBUG] Server successfully bound to port ${PORT}`);
@@ -130,7 +153,7 @@ const startServer = async () => {
         process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
     } catch (error) {
-        console.error('❌ [FATAL] Failed to connect to database:', error);
+        console.error('❌ [FATAL] Server startup failed:', error);
         process.exit(1);
     }
 };
