@@ -112,7 +112,9 @@ const QuoteBreakdown: React.FC<QuoteBreakdownProps> = ({ draft, onRemove }) => {
                         {draft.paymentLimitDate && (
                             <div className="flex justify-between items-center">
                                 <span className="text-gray-600">Fecha Límite</span>
-                                <span className="font-bold text-gray-800">{new Date(draft.paymentLimitDate).toLocaleDateString()}</span>
+                                <span className="font-bold text-gray-800">
+                                    {draft.paymentLimitDate ? draft.paymentLimitDate.split('-').reverse().join('/') : ''}
+                                </span>
                             </div>
                         )}
                         <div className="flex justify-between items-center pt-2 border-t border-gray-200 mt-2">

@@ -179,7 +179,7 @@ const QuoteWizard: React.FC = () => {
         }));
     };
 
-    const handleSaveDraft = async () => {
+    const handleSaveDraft = async (status: 'DRAFT' | 'ACCEPTED' = 'DRAFT') => {
         try {
             const response = await fetch('/api/quotes', {
                 method: 'POST',
@@ -190,8 +190,7 @@ const QuoteWizard: React.FC = () => {
                     date: draft.date,
                     items: draft.selectedItems,
                     totals,
-                    status: 'DRAFT',
-                    // Pass other fields
+                    status, // Dynamic status
                     discount: draft.discount,
                     downPaymentPercentage: draft.downPaymentPercentage,
                     paymentLimitDate: draft.paymentLimitDate
@@ -199,14 +198,16 @@ const QuoteWizard: React.FC = () => {
             });
 
             if (response.ok) {
-                alert('Borrador guardado correctamente.');
+                const action = status === 'ACCEPTED' ? 'aprobada y registrada' : 'guardada';
+                alert(`Cotización ${action} exitosamente.`);
                 resetForm();
             } else {
-                alert('Error al guardar borrador.');
+                const err = await response.json();
+                alert('Error al guardar: ' + (err.error || 'Error desconocido'));
             }
         } catch (e) {
             console.error(e);
-            alert('Error de conexión.');
+            alert('Error de conexión con el servidor.');
         }
     };
 
@@ -455,10 +456,13 @@ const QuoteWizard: React.FC = () => {
 
                         <div className="flex flex-col md:flex-row justify-center gap-4">
                             <button onClick={handleGeneratePDF} className="bg-primavera-gold text-white px-8 py-3 rounded-lg font-bold hover:brightness-110 transition flex items-center justify-center gap-2">
-                                <span>📄</span> Descargar PDF Profesional
+                                <span>📄</span> Descargar PDF
                             </button>
-                            <button onClick={handleSaveDraft} className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-bold hover:bg-gray-50 transition">
-                                Guardar Borrador
+                            <button onClick={() => handleSaveDraft('DRAFT')} className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-bold hover:bg-gray-50 transition">
+                                Guardar como Borrador
+                            </button>
+                            <button onClick={() => handleSaveDraft('ACCEPTED')} className="bg-green-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-green-700 transition shadow-lg flex items-center gap-2">
+                                <span>✅</span> Aprobar y Registrar Evento
                             </button>
                         </div>
                         <button onClick={() => setStep(2)} className="mt-6 text-gray-500 underline text-sm">
