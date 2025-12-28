@@ -41,6 +41,9 @@ process.on('unhandledRejection', (reason, promise) => {
 
 const app = express();
 
+// 🛡️ Security: Trust Proxy (Required for Coolify/Traefik & Rate Limiter)
+app.set('trust proxy', 1);
+
 // 🔒 Emergency Root Check - MUST BE FIRST
 app.get("/", (_req, res) => {
     res.status(200).send("OK");
@@ -122,6 +125,11 @@ const startServer = async () => {
             console.log(`✅ [DEBUG] Server successfully bound to port ${PORT}`);
             logger.info(`Server running on http://localhost:${PORT}`);
         });
+
+        // 🔧 Optimization: Adjust Keep-Alive Timeouts for Load Balancers
+        // Must be larger than the LB's idle timeout (usually 60s)
+        server.keepAliveTimeout = 65000; // 65 seconds
+        server.headersTimeout = 66000;   // 66 seconds
 
         // Graceful Shutdown Implementation
         const gracefulShutdown = async (signal: string) => {

@@ -44,8 +44,8 @@ services:
       - app-network
     expose:
       - "3000"
-    healthcheck:
-      disable: true
+    # healthcheck:
+    #   disable: true
 
   frontend:
     build:
