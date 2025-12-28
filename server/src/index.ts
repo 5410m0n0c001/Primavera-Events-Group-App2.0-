@@ -128,8 +128,8 @@ const startServer = async () => {
 
         // 🔧 Optimization: Adjust Keep-Alive Timeouts for Load Balancers
         // Must be larger than the LB's idle timeout (usually 60s)
-        server.keepAliveTimeout = 65000; // 65 seconds
-        server.headersTimeout = 66000;   // 66 seconds
+        server.keepAliveTimeout = 75000; // 75 seconds (Increased for stability)
+        server.headersTimeout = 76000;   // 76 seconds
 
         // Graceful Shutdown Implementation
         const gracefulShutdown = async (signal: string) => {
