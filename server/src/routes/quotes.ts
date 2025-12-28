@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import PDFDocument from 'pdfkit';
 import { CalculatorEngine } from '../services/CalculatorEngine';
+import { prisma } from '../prisma';
 
 const router = Router();
 
