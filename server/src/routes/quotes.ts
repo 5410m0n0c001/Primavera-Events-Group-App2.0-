@@ -201,11 +201,14 @@ router.post('/', async (req: Request, res: Response) => {
                     // Safer check: If it exists in DB use it, else use customItem.
 
                     // For performance, we assume if it looks like UUID it is one, else Custom.
-                    // But to be super safe inside transaction:
-                    if (serviceItemId) {
+                    // Validate UUID format before DB lookup to prevent Postgres errors
+                    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+                    if (serviceItemId && uuidRegex.test(serviceItemId)) {
                         const exists = await tx.catalogItem.findUnique({ where: { id: serviceItemId } });
                         if (!exists) serviceItemId = customItem.id;
                     } else {
+                        // Mock ID (e.g. 'loc_1') or Invalid -> Use Custom Item Fallback
                         serviceItemId = customItem.id;
                     }
 
