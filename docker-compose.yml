@@ -62,8 +62,6 @@ services:
     expose:
       - "80"
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.frontend.loadbalancer.server.port=80"
       - "coolify.managed=true"
     restart: unless-stopped
     depends_on:
