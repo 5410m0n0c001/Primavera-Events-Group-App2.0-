@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const router = Router();
-const prisma = new PrismaClient();
+import { prisma } from '../prisma';
 
 // GET all suppliers
 router.get('/', async (req, res) => {

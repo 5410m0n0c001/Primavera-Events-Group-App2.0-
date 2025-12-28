@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const router = Router();
-const prisma = new PrismaClient();
+import { prisma } from '../prisma';
 
 // GET Check Availability for a specific Date
 router.get('/availability', async (req, res) => {

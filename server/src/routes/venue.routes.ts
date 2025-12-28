@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const router = Router();
-const prisma = new PrismaClient();
+import { prisma } from '../prisma';
 
 // POST /api/venues/seed - Restore default venues
 router.post('/seed', async (req, res) => {

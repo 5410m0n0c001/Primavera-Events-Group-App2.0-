@@ -2,7 +2,7 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 
 const router = express.Router();
-const prisma = new PrismaClient();
+import { prisma } from '../prisma';
 
 // GET - Listar ingresos (Generic + Linked)
 router.get('/', async (req, res) => {

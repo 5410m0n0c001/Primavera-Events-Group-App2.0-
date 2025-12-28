@@ -1,11 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 
-const db = new PrismaClient(); // Local instance to avoid import circles if any, or use singleton if preferred. 
-// Plan suggests using new PrismaClient() or importing from prisma.ts. 
-// I'll import from ../prisma to share the client and avoid connection limit issues.
-// Re-reading plan: Plan says "const db = new PrismaClient();". 
-// I should use the singleton to be safe.
-
 import { prisma } from '../prisma';
 
 export async function generateEventCSV(eventId: string): Promise<string> {
