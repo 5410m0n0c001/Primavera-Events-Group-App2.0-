@@ -179,6 +179,71 @@ const QuoteWizard: React.FC = () => {
         }));
     };
 
+    const handleSaveDraft = async () => {
+        try {
+            const response = await fetch('/api/quotes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    eventName: draft.eventName,
+                    guestCount: draft.guestCount,
+                    date: draft.date,
+                    items: draft.selectedItems,
+                    totals,
+                    status: 'DRAFT',
+                    // Pass other fields
+                    discount: draft.discount,
+                    downPaymentPercentage: draft.downPaymentPercentage,
+                    paymentLimitDate: draft.paymentLimitDate
+                })
+            });
+
+            if (response.ok) {
+                alert('Borrador guardado correctamente.');
+                resetForm();
+            } else {
+                alert('Error al guardar borrador.');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error de conexión.');
+        }
+    };
+
+    const resetForm = () => {
+        setDraft({
+            eventName: '',
+            guestCount: 100,
+            date: '',
+            selectedItems: [],
+            discount: 0,
+            downPaymentPercentage: 30,
+            paymentLimitDate: ''
+        });
+        setStep(1);
+        setBudget(0);
+    };
+
+    const handleNextStep = async () => {
+        // Validation Step 1
+        if (!draft.eventName.trim()) {
+            alert('Por favor agrega un Nombre del Evento.');
+            return;
+        }
+        if (!draft.date) {
+            alert('Por favor selecciona una Fecha.');
+            return;
+        }
+        if (draft.guestCount <= 0) {
+            alert('El número de invitados debe ser mayor a 0.');
+            return;
+        }
+
+        // Hybrid Validation: Validate with backend before showing final summary -> MOVED TO FINALIZE
+        // But we can do basic check here.
+        setStep(2);
+    };
+
     const handleFinalize = async () => {
         try {
             // Hybrid Validation: Validate with backend before showing final summary
@@ -341,7 +406,7 @@ const QuoteWizard: React.FC = () => {
                             </div>
                         </div>
                         <div className="mt-8 flex justify-end">
-                            <button onClick={() => setStep(2)} className="w-full md:w-auto bg-primavera-black text-white px-8 py-3 rounded-lg font-bold hover:bg-gray-800 transition">
+                            <button onClick={handleNextStep} className="w-full md:w-auto bg-primavera-black text-white px-8 py-3 rounded-lg font-bold hover:bg-gray-800 transition">
                                 Siguiente: Seleccionar Servicios →
                             </button>
                         </div>
@@ -392,7 +457,7 @@ const QuoteWizard: React.FC = () => {
                             <button onClick={handleGeneratePDF} className="bg-primavera-gold text-white px-8 py-3 rounded-lg font-bold hover:brightness-110 transition flex items-center justify-center gap-2">
                                 <span>📄</span> Descargar PDF Profesional
                             </button>
-                            <button className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-bold hover:bg-gray-50 transition">
+                            <button onClick={handleSaveDraft} className="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg font-bold hover:bg-gray-50 transition">
                                 Guardar Borrador
                             </button>
                         </div>
