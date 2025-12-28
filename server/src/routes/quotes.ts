@@ -235,3 +235,5 @@ router.post('/', async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to save quote', details: error.message || String(error) });
     }
 });
+
+export default router;
