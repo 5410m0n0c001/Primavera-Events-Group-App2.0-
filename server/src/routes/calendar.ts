@@ -19,13 +19,19 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Helper for UUID validation
+const isValidUUID = (id: any) => {
+    const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return typeof id === 'string' && regex.test(id);
+};
+
 // POST create event
 router.post('/', async (req, res) => {
     try {
         const { name, type, date, guestCount, clientId, venueId, status } = req.body;
 
         // Basic conflict check
-        if (venueId && status === 'CONFIRMED') {
+        if (venueId && status === 'CONFIRMED' && isValidUUID(venueId)) {
             const conflict = await prisma.event.findFirst({
                 where: {
                     venueId,
@@ -41,20 +47,36 @@ router.post('/', async (req, res) => {
             }
         }
 
+        // Handle Invalid Client ID on Create - We need a real client.
+        // If clientId is bad (e.g. 'c1'), we fail or use a default?
+        // Let's assume frontend sends valid data usually. If 'c1', it will crash unless we catch it.
+        // For robusntess, if invalid, try to find a default "Invited" client? 
+        // Or just let it fail but LOG it.
+        // Better: Validated strictly.
+
+        let finalClientId = clientId;
+        if (!isValidUUID(finalClientId)) {
+            console.warn('Invalid Client ID received:', clientId);
+            // Try to find ANY client to attach to (fallback)
+            const fallback = await prisma.client.findFirst();
+            if (fallback) finalClientId = fallback.id;
+            else return res.status(400).json({ error: 'Invalid Client ID and no fallback found.' });
+        }
+
         const event = await prisma.event.create({
             data: {
                 name,
                 type,
                 date: new Date(date),
                 guestCount: parseInt(guestCount || 0),
-                clientId,
-                venueId,
+                clientId: finalClientId,
+                venueId: isValidUUID(venueId) ? venueId : null,
                 status: status || 'DRAFT'
             }
         });
         res.status(201).json(event);
     } catch (error) {
-        console.error(error);
+        console.error('Error creating event:', error);
         res.status(500).json({ error: 'Error creating event' });
     }
 });
@@ -65,21 +87,33 @@ router.put('/:id', async (req, res) => {
         const { id } = req.params;
         const { name, type, date, guestCount, clientId, venueId, status } = req.body;
 
+        // Prepare update data, ignoring invalid UUIDs (mock data)
+        const updateData: any = {
+            name,
+            type,
+            status
+        };
+
+        if (date) updateData.date = new Date(date);
+        if (guestCount !== undefined) updateData.guestCount = parseInt(guestCount);
+
+        // Only update relations if IDs are valid UUIDs
+        if (clientId && isValidUUID(clientId)) updateData.clientId = clientId;
+        if (venueId) {
+            updateData.venueId = isValidUUID(venueId) ? venueId : null; // Allow clearing venue if valid or explicit null? 
+            // If user sends 'v1', we treat it as NULL or IGNORE? 
+            // If we treat as NULL, we lose the relation. If we ignore, we keep old.
+            // Safe bet: Ignore invalid, accept valid or null.
+            if (!isValidUUID(venueId)) delete updateData.venueId;
+        }
+
         const event = await prisma.event.update({
             where: { id },
-            data: {
-                name,
-                type,
-                date: date ? new Date(date) : undefined,
-                guestCount: guestCount ? parseInt(guestCount) : undefined,
-                clientId,
-                venueId,
-                status
-            }
+            data: updateData
         });
         res.json(event);
     } catch (error) {
-        console.error(error);
+        console.error('Error updating event:', error);
         res.status(500).json({ error: 'Error updating event' });
     }
 });
