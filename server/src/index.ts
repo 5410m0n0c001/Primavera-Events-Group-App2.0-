@@ -39,6 +39,8 @@ process.on('unhandledRejection', (reason, promise) => {
     console.error('❌ [FATAL] Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
+import { timingMiddleware, diagnosticEndpoints } from './debug';
+
 const app = express();
 
 // 🛡️ Security: Trust Proxy (Required for Coolify/Traefik & Rate Limiter)
@@ -54,6 +56,7 @@ const PORT = process.env.PORT || 3000;
 // const prisma = new PrismaClient(); // Removed local instance
 
 // Global Middlewares
+app.use(timingMiddleware); // ⏱️ Timing Middleware (First)
 app.use(helmetMiddleware);
 app.use(corsMiddleware);
 app.use(express.json()); // Parse JSON bodies
@@ -86,6 +89,9 @@ console.log('🔍 [DEBUG] Registering routes...');
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/quotes', quotesRoutes);
 app.use('/api/events', exportsRoutes);
+
+app.get('/api/debug/health', (req, res) => { res.json({ status: 'ok' }) }); // Quick health
+diagnosticEndpoints(app); // 🩺 Diagnostic Endpoints
 
 // Error Handler (Must be last)
 app.use(errorHandler);

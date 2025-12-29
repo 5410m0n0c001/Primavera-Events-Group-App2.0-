@@ -73,6 +73,8 @@ model Event {
   updatedAt DateTime @updatedAt
 
   @@index([userId])     // Optimization for: user's event list
+  @@index([venueId])    // Optimization for: venue lookups
+  @@index([clientId])   // Optimization for: client history
   @@index([date])       // Optimization for: calendar queries
   @@index([createdAt])  // Optimization for: reporting/sorting
 }
@@ -108,6 +110,8 @@ model VenueFeature {
   name  String // "Estacionamiento", "WiFi", "Jardin"
   type  String // "Service", "Restriction", "Furniture"
   value String? // "Included", "Extra Cost", "No Pets"
+  
+  @@index([venueId])
 }
 
 model VenueImage {
@@ -116,6 +120,8 @@ model VenueImage {
   venue   Venue   @relation(fields: [venueId], references: [id], onDelete: Cascade)
   url     String
   caption String?
+
+  @@index([venueId])
 }
 
 model Quote {
@@ -193,6 +199,8 @@ model CatalogItem {
 
   quoteItems      QuoteItem[]
   maintenanceLogs MaintenanceLog[]
+
+  @@index([subCategoryId])
 }
 
 model Staff {
@@ -330,6 +338,8 @@ model ProductionElement {
   width      Int                @default(100)
   height     Int                @default(100)
   icon       String?
+
+  @@index([categoryId])
 }
 
 model Income {
