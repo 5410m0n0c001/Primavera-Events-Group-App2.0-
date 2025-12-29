@@ -44,12 +44,30 @@ router.get('/', async (req, res) => {
     try {
         const venues = await prisma.venue.findMany({
             orderBy: { name: 'asc' },
-            include: {
-                features: true,
-                images: true
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                address: true,
+                capacity: true,
+                priceRent: true,
+                features: {
+                    select: {
+                        name: true,
+                        type: true
+                    }
+                },
+                images: {
+                    take: 1, // Only need one image for list view
+                    select: {
+                        url: true,
+                        caption: true
+                    }
+                }
             }
         });
         res.json(venues);
+
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch venues' });
     }

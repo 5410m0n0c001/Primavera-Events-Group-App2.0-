@@ -8,10 +8,27 @@ import { prisma } from '../prisma';
 router.get('/', async (req, res) => {
     try {
         const events = await prisma.event.findMany({
-            include: {
-                client: true, // Include client name
-                venue: true   // Include venue name
-            }
+            select: {
+                id: true,
+                name: true,
+                type: true,
+                date: true,
+                status: true,
+                guestCount: true,
+                client: {
+                    select: {
+                        firstName: true,
+                        lastName: true
+                    }
+                },
+                venue: {
+                    select: {
+                        name: true
+                    }
+                }
+            },
+            orderBy: { date: 'desc' },
+            take: 200 // Limit to avoid massive payloads
         });
         res.json(events);
     } catch (error) {

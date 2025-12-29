@@ -144,6 +144,9 @@ model Quote {
   status String @default("DRAFT") // DRAFT, SENT, ACCEPTED, REJECTED
 
   createdAt DateTime @default(now())
+
+  @@index([eventId])
+  @@index([status])
 }
 
 model QuoteItem {
@@ -161,6 +164,9 @@ model QuoteItem {
   cost      Decimal // For margin calc
 
   notes String? // "Sin cebolla", "Color rojo"
+
+  @@index([quoteId])
+  @@index([serviceItemId])
 }
 
 // --- CATALOG SYSTEM (The "Brain" of the planner) ---
@@ -179,6 +185,8 @@ model CatalogSubCategory {
   categoryId String
   category   CatalogCategory @relation(fields: [categoryId], references: [id])
   items      CatalogItem[]
+
+  @@index([categoryId])
 }
 
 model CatalogItem {
@@ -247,6 +255,9 @@ model Payment {
   status    String // "Pendiente", "Pagado"
   date      DateTime @default(now())
   reference String? // Comprobante
+
+  @@index([eventId])
+  @@index([date])
 }
 
 model Expense {
@@ -258,6 +269,9 @@ model Expense {
   category    String // "Insumos", "Servicios", "Nómina", "Otros"
   date        DateTime  @default(now())
   status      String // "Pendiente", "Pagado"
+
+  @@index([supplierId])
+  @@index([date])
 }
 
 // --- CATERING MODULE ---
@@ -288,6 +302,9 @@ model RecipeItem {
   ingredientId String
   ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
   quantity     Decimal // Amount needed per dish
+
+  @@index([dishId])
+  @@index([ingredientId])
 }
 
 model Menu {
@@ -321,6 +338,8 @@ model TimelineItem {
   time        String // "18:00"
   description String // "Recepción de invitados"
   order       Int      @default(0)
+
+  @@index([timelineId])
 }
 
 model ProductionCategory {
@@ -341,6 +360,7 @@ model ProductionElement {
 
   @@index([categoryId])
 }
+
 
 model Income {
   id        String   @id @default(cuid())
