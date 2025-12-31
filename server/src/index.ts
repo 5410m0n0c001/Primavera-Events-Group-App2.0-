@@ -42,6 +42,7 @@ process.on('unhandledRejection', (reason, promise) => {
 import { timingMiddleware, diagnosticEndpoints } from './debug';
 
 const app = express();
+let isDbReady = false;
 
 // 🛡️ Security: Trust Proxy (Required for Coolify/Traefik & Rate Limiter)
 app.set('trust proxy', 1);
@@ -50,10 +51,10 @@ app.set('trust proxy', 1);
 app.get("/", (_req, res) => {
     res.status(200).send("OK");
 });
+
 // Default to 3000 if PORT is not set
 console.log('🔍 [DEBUG] Env PORT:', process.env.PORT);
 const PORT = process.env.PORT || 3000;
-// const prisma = new PrismaClient(); // Removed local instance
 
 // Global Middlewares
 app.use(timingMiddleware); // ⏱️ Timing Middleware (First)
@@ -62,7 +63,6 @@ app.use(corsMiddleware);
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true }));
 app.use(apiLimiter);
-// app.use(sanitizeMiddleware);
 
 // Request Logger
 app.use((req, res, next) => {
@@ -70,8 +70,31 @@ app.use((req, res, next) => {
     next();
 });
 
-// Health Check
+// ✅ Health Checks - MUST BE BEFORE DB CHECK
+// This one is used by Docker/Coolify to verify container is running
+app.get('/api/debug/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        dbReady: isDbReady
+    });
+});
+
 app.get('/health', healthCheck);
+
+// 🚧 Database Readiness Middleware
+app.use('/api', (req, res, next) => {
+    // Skip if DB is ready
+    if (isDbReady) return next();
+
+    // Allow specific bypasses if needed (e.g. static assets, though mostly handled by nginx)
+
+    console.warn(`⚠️ [WARN] Request ${req.method} ${req.url} blocked - Database initializing`);
+    res.status(503).json({
+        error: 'Service Unavailable',
+        message: 'System is initializing database connection. Please try again in 5 seconds.',
+        retryAfter: 5
+    });
+});
 
 // API Routes
 app.use('/api/clients', clientRoutes);
@@ -90,13 +113,10 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/quotes', quotesRoutes);
 app.use('/api/events', exportsRoutes);
 
-app.get('/api/debug/health', (req, res) => { res.json({ status: 'ok' }) }); // Quick health
 diagnosticEndpoints(app); // 🩺 Diagnostic Endpoints
 
 // Error Handler (Must be last)
 app.use(errorHandler);
-
-console.log(`🔍 [DEBUG] Attempting to listen on port ${PORT}...`);
 
 const MAX_RETRIES = 10;
 const INITIAL_RETRY_DELAY = 1000; // 1 second
@@ -107,11 +127,20 @@ const connectDataWithRetry = async (retryCount = 0): Promise<void> => {
     try {
         console.log(`🔍 [DEBUG] Connecting to database... (Attempt ${retryCount + 1}/${MAX_RETRIES})`);
         await prisma.$connect();
+
+        // Simple query to verify connection
+        // await prisma.$queryRaw`SELECT 1`; 
+
         console.log('✅ [DEBUG] Database connected successfully.');
+        isDbReady = true;
     } catch (error) {
         if (retryCount >= MAX_RETRIES) {
             console.error('❌ [FATAL] Failed to connect to database after maximum retries:', error);
-            throw error;
+            // We might want to keep the server running but unavailable, 
+            // or exit. Exiting lets Docker restart it, but might loop. 
+            // Better to keep it up but reporting 503 or unhealthy on deep health checks.
+            // For now, let's exit to force a restart if it's truly broken long-term.
+            process.exit(1);
         }
 
         const delay = INITIAL_RETRY_DELAY * Math.pow(2, retryCount); // Exponential backoff
@@ -125,17 +154,22 @@ const connectDataWithRetry = async (retryCount = 0): Promise<void> => {
 
 const startServer = async () => {
     try {
-        await connectDataWithRetry(); // Attempt robust connection
-
+        // 🚀 1. Start Server IMMEDIATELY
         const server = app.listen(Number(PORT), '0.0.0.0', () => {
-            console.log(`✅ [DEBUG] Server successfully bound to port ${PORT}`);
+            console.log(`✅ [DEBUG] Server successfully bound to port ${PORT} (Waiting for DB)`);
             logger.info(`Server running on http://localhost:${PORT}`);
         });
 
-        // 🔧 Optimization: Adjust Keep-Alive Timeouts for Load Balancers
-        // Must be larger than the LB's idle timeout (usually 60s)
-        server.keepAliveTimeout = 75000; // 75 seconds (Increased for stability)
-        server.headersTimeout = 76000;   // 76 seconds
+        // 🔧 Optimization: Adjust Keep-Alive Timeouts
+        server.keepAliveTimeout = 75000;
+        server.headersTimeout = 76000;
+
+        // 🛢️ 2. Connect Database in background
+        // We don't await this here so startServer finishes and app is responsive
+        connectDataWithRetry().catch(err => {
+            console.error("❌ [FATAL] Final DB connection failure:", err);
+            // process.exit(1); // handled inside retry
+        });
 
         // Graceful Shutdown Implementation
         const gracefulShutdown = async (signal: string) => {
