@@ -14,16 +14,22 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
     }
 
     // Prisma Errors
+    // Prisma Errors - SRE Sec Fix: Do not leak DB structure or error codes to client
     if (err.code && err.code.startsWith('P')) {
         return res.status(400).json({
             error: true,
-            message: 'Database operation failed',
-            code: err.code
+            // Generic message to prevent information leakage
+            message: 'Database operation failed or provided data was invalid.',
+            // Only send code in development, hide in production
+            ...(process.env.NODE_ENV === 'development' && { code: err.code })
         });
     }
 
     const statusCode = err.statusCode || 500;
-    const message = err.message || 'Internal Server Error';
+    // Hide raw error message if it's a 500 to prevent leaking code details in production
+    const message = (statusCode === 500 && process.env.NODE_ENV !== 'development')
+        ? 'Internal Server Error'
+        : (err.message || 'Internal Server Error');
 
     res.status(statusCode).json({
         error: true,

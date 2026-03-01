@@ -26,6 +26,7 @@ import { corsMiddleware } from './middleware/cors';
 import { helmetMiddleware } from './middleware/helmet';
 import { apiLimiter } from './middleware/rateLimiter';
 import { errorHandler } from './middleware/errorHandler';
+import { authenticate } from './middleware/authenticate'; // 🛡️ SRE Audit: Added JWT Auth
 import { healthCheck } from './health';
 import { logger } from './utils/logger';
 
@@ -97,21 +98,22 @@ app.use('/api', (req, res, next) => {
 });
 
 // API Routes
-app.use('/api/clients', clientRoutes);
-app.use('/api/calendar', calendarRoutes);
-app.use('/api/catalog', catalogRoutes);
-app.use('/api/staff', staffRoutes);
-app.use('/api/inventory', inventoryRoutes);
-app.use('/api/suppliers', supplierRoutes);
-app.use('/api/finance', financeRoutes);
-app.use('/api/income', incomeRoutes);
-app.use('/api/catering', cateringRoutes);
-app.use('/api/production', productionRoutes);
-app.use('/api/venues', venueRoutes);
+// 🛡️ SRE Audit: Applying Auth middleware to sensitive routes
+app.use('/api/clients', authenticate, clientRoutes);
+app.use('/api/calendar', authenticate, calendarRoutes);
+app.use('/api/catalog', authenticate, catalogRoutes);
+app.use('/api/staff', authenticate, staffRoutes);
+app.use('/api/inventory', authenticate, inventoryRoutes);
+app.use('/api/suppliers', authenticate, supplierRoutes);
+app.use('/api/finance', authenticate, financeRoutes);
+app.use('/api/income', authenticate, incomeRoutes);
+app.use('/api/catering', authenticate, cateringRoutes);
+app.use('/api/production', authenticate, productionRoutes);
+app.use('/api/venues', authenticate, venueRoutes);
 console.log('🔍 [DEBUG] Registering routes...');
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/quotes', quotesRoutes);
-app.use('/api/events', exportsRoutes);
+app.use('/api/analytics', authenticate, analyticsRoutes);
+app.use('/api/quotes', authenticate, quotesRoutes);
+app.use('/api/events', authenticate, exportsRoutes);
 
 diagnosticEndpoints(app); // 🩺 Diagnostic Endpoints
 

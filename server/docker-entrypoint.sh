@@ -5,12 +5,14 @@ echo "================================================"
 echo "🚀 Primavera Events - Backend Initialization"
 echo "================================================"
 
-# Fast fail-over to migrations - let Node.js handling checking connectivity if this fails
-echo "🔄 Running migrations (db push)..."
-npx prisma db push --schema=./prisma/schema.prisma --accept-data-loss
+# SAFE PRODUCTION MIGRATIONS: Use migrate deploy instead of db push
+echo "🔄 Running migrations (migrate deploy)..."
+npx prisma migrate deploy
 
-echo "🌱 Seeding database..."
-node dist/seed.js || echo "⚠️  Seeding warning (non-fatal)"
+echo "🌱 Seeding database in background..."
+# Run seeding in background to not block server startup
+node dist/seed.js > logs/seed.log 2>&1 &
+echo "⚠️  Seeding started in background. Check logs/seed.log for details."
 
 echo "🔄 Ensuring Prisma Client..."
 npx prisma generate --schema=./prisma/schema.prisma

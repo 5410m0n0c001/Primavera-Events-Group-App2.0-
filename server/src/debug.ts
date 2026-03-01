@@ -62,8 +62,10 @@ export const prisma = new PrismaClient({
 });
 
 // ============================================
-// 2. REQUEST TIMING MIDDLEWARE
+// 2. REQUEST TIMING MIDDLEWARE (SRE FIXED)
 // ============================================
+
+import { AsyncLocalStorage } from 'async_hooks';
 
 interface RequestMetrics {
     method: string;
@@ -76,61 +78,66 @@ interface RequestMetrics {
     error?: string;
 }
 
+// Global metrics array (simplistic in-memory storage, enough for basic debugging)
 const requestMetrics: RequestMetrics[] = [];
-let queryCountPerRequest = 0;
-let isCountingQueries = false;
+
+// SRE Fix: Using AsyncLocalStorage to isolate query counts per request thread
+interface RequestContext {
+    queryCount: number;
+}
+const asyncLocalStorage = new AsyncLocalStorage<RequestContext>();
 
 export const timingMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    const startTime = Date.now();
-    const metric: RequestMetrics = {
-        method: req.method,
-        url: req.path || req.url,
-        startTime,
-    };
+    // Initialize context for this specific request
+    asyncLocalStorage.run({ queryCount: 0 }, () => {
+        const startTime = Date.now();
+        const metric: RequestMetrics = {
+            method: req.method,
+            url: req.path || req.url,
+            startTime,
+        };
 
-    // Contar queries en este request
-    // NOTE: This global counter approach is not async-safe for concurrent requests!
-    // However, for debugging a single user or low traffic, it gives a rough idea.
-    // Ideally we'd use AsyncLocalStorage, but let's stick to the user's snippet for simplicity/fidelity.
-    isCountingQueries = true;
-    queryCountPerRequest = 0;
+        // Interceptar response
+        const originalSend = res.send;
+        res.send = function (data: any) {
+            const endTime = Date.now();
 
-    // Interceptar response
-    const originalSend = res.send;
-    res.send = function (data: any) {
-        const endTime = Date.now();
-        metric.endTime = endTime;
-        metric.duration = endTime - startTime;
-        metric.statusCode = res.statusCode;
-        metric.dbQueryCount = queryCountPerRequest;
+            // Retrieve thread-local context
+            const store = asyncLocalStorage.getStore();
+            const queriesForThisRequest = store ? store.queryCount : 0;
 
-        // Guardar métrica
-        requestMetrics.push(metric);
+            metric.endTime = endTime;
+            metric.duration = endTime - startTime;
+            metric.statusCode = res.statusCode;
+            metric.dbQueryCount = queriesForThisRequest;
 
-        // Mantener solo últimas 1000 requests
-        if (requestMetrics.length > 1000) {
-            requestMetrics.shift();
-        }
+            // Guardar métrica
+            requestMetrics.push(metric);
 
-        isCountingQueries = false;
+            // Mantener solo últimas 1000 requests
+            if (requestMetrics.length > 1000) {
+                requestMetrics.shift();
+            }
 
-        // Alert si request lento
-        if (metric.duration && metric.duration > 5000) {
-            console.warn(
-                `🐌 SLOW REQUEST: ${metric.method} ${metric.url} - ${metric.duration}ms (${metric.dbQueryCount} queries)`
-            );
-        }
+            // Alert si request lento
+            if (metric.duration && metric.duration > 5000) {
+                console.warn(
+                    `🐌 SLOW REQUEST: ${metric.method} ${metric.url} - ${metric.duration}ms (${metric.dbQueryCount} queries)`
+                );
+            }
 
-        return originalSend.call(this, data);
-    };
+            return originalSend.call(this, data);
+        };
 
-    next();
+        next();
+    });
 };
 
-// Actualizar contador de queries durante request
+// Actualizar contador de queries durante request aisladamente
 (prisma as any).$on('query', (e: any) => {
-    if (isCountingQueries) {
-        queryCountPerRequest++;
+    const store = asyncLocalStorage.getStore();
+    if (store) {
+        store.queryCount += 1;
     }
 });
 
