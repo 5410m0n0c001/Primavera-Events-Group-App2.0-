@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Client } from './ClientDetailsModal';
+import type { Client } from './ClientDetailsModal';
 
 interface ClientEditModalProps {
     client: Client | null;

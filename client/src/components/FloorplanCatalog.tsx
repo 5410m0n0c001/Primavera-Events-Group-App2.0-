@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FloorplanElement, ElementCategory } from '../data/floorplanElements';
+import type { FloorplanElement, ElementCategory } from '../data/floorplanElements';
 
 interface FloorplanCatalogProps {
     onAddElement: (element: FloorplanElement) => void;
