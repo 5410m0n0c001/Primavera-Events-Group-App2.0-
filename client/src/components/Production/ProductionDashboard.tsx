@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { FloorplanCatalog } from '../FloorplanCatalog';
 import { FloorplanControls } from '../FloorplanControls';
-import { FloorplanMinimap, type MinimapItem } from '../FloorplanMinimap'; // Updated Import
+import { FloorplanMinimap } from '../FloorplanMinimap';
 import type { FloorplanElement } from '../../data/floorplanElements';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 // Types
 interface TimelineItem {
@@ -40,6 +42,7 @@ const ProductionDashboard: React.FC = () => {
     const [canvasWidth, setCanvasWidth] = useState(1200);
     const [canvasHeight, setCanvasHeight] = useState(800);
     const [zoom, setZoom] = useState(0.25); // Initial zoom 25%
+    const [selectedLayoutObjectId, setSelectedLayoutObjectId] = useState<string | null>(null);
 
     const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -131,6 +134,31 @@ const ProductionDashboard: React.FC = () => {
         setDragId(null);
     };
 
+    const handleUpdateSelectedElement = (updates: Partial<LayoutObject>) => {
+        setLayoutObjects(prev => prev.map(obj =>
+            obj.id === selectedLayoutObjectId ? { ...obj, ...updates } : obj
+        ));
+    };
+
+    const handleDuplicateSelectedElement = () => {
+        const objToDuplicate = layoutObjects.find(obj => obj.id === selectedLayoutObjectId);
+        if (objToDuplicate) {
+            const copy: LayoutObject = {
+                ...objToDuplicate,
+                id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                x: objToDuplicate.x + 20,
+                y: objToDuplicate.y + 20
+            };
+            setLayoutObjects([...layoutObjects, copy]);
+            setSelectedLayoutObjectId(copy.id);
+        }
+    };
+
+    const handleDeleteSelectedElement = () => {
+        setLayoutObjects(prev => prev.filter(obj => obj.id !== selectedLayoutObjectId));
+        setSelectedLayoutObjectId(null);
+    };
+
     // --- TIMELINE LOGIC (Restored) ---
     const canAdd = Boolean(newItemDesc); // Only description is strict required to enable
 
@@ -152,6 +180,51 @@ const ProductionDashboard: React.FC = () => {
         setTimelineItems(items => items.filter(item => item.id !== id));
     };
 
+    // --- PDF EXPORT LOGIC ---
+    const exportLayoutPDF = async () => {
+        const element = document.getElementById('layout-export-area');
+        if (!element) return;
+
+        try {
+            const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF({
+                orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+                unit: 'px',
+                format: [canvas.width, canvas.height]
+            });
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+            pdf.save('Plano_Produccion.pdf');
+        } catch (err) {
+            console.error('Error exportando PDF corto:', err);
+            alert('Hubo un error al exportar el plano.');
+        }
+    };
+
+    const exportTimelinePDF = async () => {
+        const element = document.getElementById('timeline-export-area');
+        if (!element) return;
+
+        try {
+            const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+            // Add title
+            pdf.setFontSize(16);
+            pdf.text('Itinerario Minuto a Minuto', 10, 10);
+
+            // Add image below title
+            pdf.addImage(imgData, 'PNG', 5, 20, pdfWidth - 10, pdfHeight);
+            pdf.save('Itinerario.pdf');
+        } catch (err) {
+            console.error('Error exportando PDF itinerario:', err);
+            alert('Hubo un error al exportar el itinerario.');
+        }
+    };
+
     return (
         <div className="h-screen flex flex-col bg-gray-100 overflow-hidden font-sans">
             {/* TOP BAR */}
@@ -160,9 +233,16 @@ const ProductionDashboard: React.FC = () => {
                     <h1 className="text-2xl font-bold text-gray-800 tracking-tight">Producción y Logística</h1>
                     <p className="text-xs text-gray-500 font-medium">Diseñador de Planos & Itinerario</p>
                 </div>
-                <div className="flex bg-gray-100/50 p-1 rounded-lg">
-                    <button onClick={() => setView('layout')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${view === 'layout' ? 'bg-white shadow text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}>Plano</button>
-                    <button onClick={() => setView('timeline')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${view === 'timeline' ? 'bg-white shadow text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}>Minuto a Minuto</button>
+                <div className="flex gap-4 items-center">
+                    <div className="flex bg-gray-100/50 p-1 rounded-lg">
+                        <button onClick={() => setView('layout')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${view === 'layout' ? 'bg-white shadow text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}>Plano</button>
+                        <button onClick={() => setView('timeline')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${view === 'timeline' ? 'bg-white shadow text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}>Minuto a Minuto</button>
+                    </div>
+                    {view === 'layout' ? (
+                        <button onClick={exportLayoutPDF} className="px-4 py-2 bg-red-600 text-white rounded shadow text-sm font-bold hover:bg-red-700 transition">📄 Exportar PDF</button>
+                    ) : (
+                        <button onClick={exportTimelinePDF} className="px-4 py-2 bg-red-600 text-white rounded shadow text-sm font-bold hover:bg-red-700 transition">📄 Exportar PDF</button>
+                    )}
                 </div>
             </div>
 
@@ -191,7 +271,9 @@ const ProductionDashboard: React.FC = () => {
                                     transition: 'transform 0.1s ease-out'
                                 }}
                             >
+                                {/* We add the layout-export-area id here */}
                                 <div
+                                    id="layout-export-area"
                                     ref={canvasRef}
                                     onDragOver={handleDragOver}
                                     onDrop={handleDrop}
@@ -204,7 +286,7 @@ const ProductionDashboard: React.FC = () => {
                                     }}
                                 >
                                     {/* Canvas Dimensions Label */}
-                                    <div className="absolute -top-6 left-0 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                    <div className="absolute -top-6 left-0 text-[10px] font-bold text-gray-400 uppercase tracking-widest" data-html2canvas-ignore>
                                         {canvasWidth}px x {canvasHeight}px
                                     </div>
 
@@ -213,8 +295,12 @@ const ProductionDashboard: React.FC = () => {
                                         <div
                                             key={obj.id}
                                             draggable
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedLayoutObjectId(obj.id);
+                                            }}
                                             onDragStart={(e) => handleDragStartObject(e, obj.id)}
-                                            className={`absolute cursor-move flex items-center justify-center text-[10px] font-bold transition-all hover:scale-105 active:scale-95 text-center overflow-hidden select-none hover:shadow-lg hover:z-50 ${obj.shape === 'circle' ? 'rounded-full' : 'rounded-md'} ${obj.colorClass}`}
+                                            className={`absolute cursor-move flex items-center justify-center text-[10px] font-bold transition-all hover:scale-105 active:scale-95 text-center overflow-hidden select-none hover:shadow-lg hover:z-50 ${obj.shape === 'circle' ? 'rounded-full' : 'rounded-md'} ${obj.colorClass} ${selectedLayoutObjectId === obj.id ? 'ring-4 ring-blue-500 shadow-xl z-50' : ''}`}
                                             style={{
                                                 left: obj.x,
                                                 top: obj.y,
@@ -242,6 +328,64 @@ const ProductionDashboard: React.FC = () => {
                             onZoomChange={setZoom}
                             onCreateCustomElement={handleCreateCustomElement}
                         />
+
+                        {/* Selected Element Editor */}
+                        {selectedLayoutObjectId && (
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 animate-fade-in-up">
+                                <h4 className="font-bold text-sm text-blue-800 mb-3 flex justify-between items-center">
+                                    <span>✏️ Editar Elemento</span>
+                                    <button onClick={() => setSelectedLayoutObjectId(null)} className="text-gray-400 hover:text-gray-600">✕</button>
+                                </h4>
+                                {layoutObjects.filter(obj => obj.id === selectedLayoutObjectId).map(obj => (
+                                    <div key={`edit-${obj.id}`} className="space-y-3">
+                                        <div>
+                                            <label className="block text-[10px] uppercase font-bold text-blue-600/70 mb-1">Nombre / Etiqueta</label>
+                                            <input
+                                                type="text"
+                                                value={obj.label}
+                                                onChange={(e) => handleUpdateSelectedElement({ label: e.target.value })}
+                                                className="w-full px-2 py-1.5 text-sm border border-blue-200 rounded bg-white"
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <label className="block text-[10px] uppercase font-bold text-blue-600/70 mb-1">Ancho (px)</label>
+                                                <input
+                                                    type="number"
+                                                    value={obj.width}
+                                                    onChange={(e) => handleUpdateSelectedElement({ width: parseInt(e.target.value) || 20 })}
+                                                    className="w-full px-2 py-1 border border-blue-200 rounded text-sm bg-white"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] uppercase font-bold text-blue-600/70 mb-1">Alto (px)</label>
+                                                <input
+                                                    type="number"
+                                                    value={obj.height}
+                                                    onChange={(e) => handleUpdateSelectedElement({ height: parseInt(e.target.value) || 20 })}
+                                                    className="w-full px-2 py-1 border border-blue-200 rounded text-sm bg-white"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2 pt-2 border-t border-blue-100">
+                                            <button
+                                                onClick={handleDuplicateSelectedElement}
+                                                className="flex-1 px-2 py-1.5 bg-white border border-blue-300 text-blue-700 text-xs font-bold rounded shadow-sm hover:bg-blue-100 transition"
+                                            >
+                                                DUPLICAR
+                                            </button>
+                                            <button
+                                                onClick={handleDeleteSelectedElement}
+                                                className="flex-1 px-2 py-1.5 bg-red-100 border border-red-200 text-red-600 text-xs font-bold rounded shadow-sm hover:bg-red-200 transition"
+                                            >
+                                                ELIMINAR
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
                         {/* UPDATE: Pass 'layoutObjects' instead of 'selectedElements' for LIVE position updates */}
                         <FloorplanMinimap
                             items={layoutObjects}
@@ -298,7 +442,7 @@ const ProductionDashboard: React.FC = () => {
                             </div>
 
                             {/* TIMELINE LIST */}
-                            <div className="relative pl-8 border-l-2 border-dashed border-gray-200 space-y-8">
+                            <div id="timeline-export-area" className="relative pl-8 border-l-2 border-dashed border-gray-200 space-y-8 bg-white pb-8">
                                 {timelineItems.length === 0 ? (
                                     <div className="text-center py-12 text-gray-400 italic">
                                         No hay actividades programadas. Agrega una arriba.
@@ -323,6 +467,7 @@ const ProductionDashboard: React.FC = () => {
                                                 </div>
                                                 <button
                                                     onClick={() => removeTimelineItem(item.id)}
+                                                    data-html2canvas-ignore
                                                     className="w-8 h-8 flex items-center justify-center rounded-full text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors"
                                                     title="Eliminar actividad"
                                                 >

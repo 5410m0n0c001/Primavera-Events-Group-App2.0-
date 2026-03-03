@@ -22,7 +22,7 @@ const InventoryDashboard: React.FC = () => {
 
     // Item Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [newItem, setNewItem] = useState({ name: '', unit: 'pieza', stock: 0, price: 0, subCategoryId: '' });
+    const [newItem, setNewItem] = useState({ name: '', unit: 'pieza', stock: 0, stockDamaged: 0, price: 0, subCategoryId: '', location: '', capacity: '' });
 
     // Category Management Modal State
     const [isCatModalOpen, setIsCatModalOpen] = useState(false);
@@ -181,16 +181,24 @@ const InventoryDashboard: React.FC = () => {
             return;
         }
 
+        const payload = {
+            ...newItem,
+            options: {
+                location: newItem.location,
+                capacity: newItem.capacity
+            }
+        };
+
         try {
             const res = await fetch('/api/inventory', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newItem)
+                body: JSON.stringify(payload)
             });
             if (res.ok) {
                 loadData();
                 setIsModalOpen(false);
-                setNewItem({ name: '', unit: 'pieza', stock: 0, price: 0, subCategoryId: categories[0]?.subCategories[0]?.id || '' });
+                setNewItem({ name: '', unit: 'pieza', stock: 0, stockDamaged: 0, price: 0, subCategoryId: categories[0]?.subCategories[0]?.id || '', location: '', capacity: '' });
             }
         } catch (error) {
             console.error(error);
@@ -488,12 +496,33 @@ const InventoryDashboard: React.FC = () => {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">Stock</label>
+                                    <label className="block text-sm font-medium text-gray-700">Stock (Total Existente)</label>
                                     <input
                                         type="number"
                                         className="w-full border rounded px-3 py-2 mt-1"
                                         value={newItem.stock}
                                         onChange={e => setNewItem({ ...newItem, stock: parseInt(e.target.value) || 0 })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 text-red-600">Mal Estado</label>
+                                    <input
+                                        type="number"
+                                        className="w-full border rounded px-3 py-2 mt-1 text-red-600"
+                                        value={newItem.stockDamaged}
+                                        onChange={e => setNewItem({ ...newItem, stockDamaged: parseInt(e.target.value) || 0 })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Unidad</label>
+                                    <input
+                                        type="text"
+                                        className="w-full border rounded px-3 py-2 mt-1"
+                                        value={newItem.unit}
+                                        onChange={e => setNewItem({ ...newItem, unit: e.target.value })}
                                     />
                                 </div>
                                 <div>
@@ -503,6 +532,29 @@ const InventoryDashboard: React.FC = () => {
                                         className="w-full border rounded px-3 py-2 mt-1"
                                         value={newItem.price}
                                         onChange={e => setNewItem({ ...newItem, price: parseFloat(e.target.value) || 0 })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Ubicación</label>
+                                    <input
+                                        type="text"
+                                        className="w-full border rounded px-3 py-2 mt-1"
+                                        placeholder="Ej. Bodega A"
+                                        value={newItem.location}
+                                        onChange={e => setNewItem({ ...newItem, location: e.target.value })}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700">Capacidad</label>
+                                    <input
+                                        type="text"
+                                        className="w-full border rounded px-3 py-2 mt-1"
+                                        placeholder="Ej. 10 pax"
+                                        value={newItem.capacity}
+                                        onChange={e => setNewItem({ ...newItem, capacity: e.target.value })}
                                     />
                                 </div>
                             </div>
