@@ -43,10 +43,8 @@ router.get('/availability', async (req, res) => {
             }
         });
 
-        // 3. Fetch all catalog items with stock
-        const allItems = await prisma.catalogItem.findMany({
-            where: { stock: { gt: 0 } } // Only track items that are "inventory" (stock > 0)
-        });
+        // 3. Fetch all catalog items (including out of stock to allow editing)
+        const allItems = await prisma.catalogItem.findMany();
 
         // 4. Map availability
         const availability = allItems.map(item => {
