@@ -9,14 +9,15 @@ echo "================================================"
 echo "🔄 Running migrations (db push)..."
 npx prisma db push --accept-data-loss
 
-echo "🌱 Seeding database (Synchronous)..."
-# Ejecutando semillas bloqueando el arranque para asegurar que existan los datos
-node prisma/seed-inventory.js
-node prisma/seed-production.js
-echo "✅ Seeding finished."
-
 echo "🔄 Ensuring Prisma Client..."
 npx prisma generate --schema=./prisma/schema.prisma
+
+echo "🌱 Seeding database (in background)..."
+# Las semillas se ejecutan en segundo plano (con &) para no bloquear el inicio del servidor
+# y evitar que el Healthcheck de Docker aborte el contenedor por timeout.
+node prisma/seed-inventory.js &
+node prisma/seed-production.js &
+echo "✅ Seeding started in background."
 
 echo "✅ Ready to start!"
 echo "================================================"
