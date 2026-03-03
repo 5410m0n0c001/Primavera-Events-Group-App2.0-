@@ -14,8 +14,26 @@ const WebsiteDashboard: React.FC = () => {
         )
     })).filter(category => category.links.length > 0);
 
-    const handleCopyLink = (url: string) => {
-        navigator.clipboard.writeText(url).then(() => {
+    const handleCopyLink = (url: string, title: string, category: string) => {
+        let mensajePrefijo = "Conoce";
+        let nombreLimpio = title;
+
+        if (category.includes("BANQUETES")) {
+            mensajePrefijo = title.toLowerCase().includes("menú") || title.toLowerCase().includes("postres")
+                ? "Prueba "
+                : "Conoce el servicio de ";
+            nombreLimpio = title.toLowerCase().includes("nuestros") ? title.replace("Nuestros ", "los ").replace("Nuestras ", "las ") : title;
+        } else if (category.includes("VENUES")) {
+            mensajePrefijo = "Celebra tu evento en ";
+        } else if (category.includes("PAQUETES")) {
+            mensajePrefijo = "Descubre lo que incluye el ";
+        } else if (category.includes("PERSONALES")) {
+            mensajePrefijo = "Conoce el trabajo de ";
+        }
+
+        const mensajeCopiar = `¡Hola! ${mensajePrefijo} ${nombreLimpio} de Primavera Events Group aquí:\n${url}`;
+
+        navigator.clipboard.writeText(mensajeCopiar).then(() => {
             setCopiedLink(url);
             setTimeout(() => setCopiedLink(null), 2000); // Reset toast after 2s
         });
@@ -100,7 +118,7 @@ const WebsiteDashboard: React.FC = () => {
                                         {/* Card Actions */}
                                         <div className="grid grid-cols-2 border-t border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-[#1c1c1e]/50">
                                             <button
-                                                onClick={() => handleCopyLink(link.url)}
+                                                onClick={() => handleCopyLink(link.url, link.title, category.category)}
                                                 className={`py-3 text-sm font-bold flex items-center justify-center gap-2 transition-colors border-r border-gray-100 dark:border-white/5 
                           ${copiedLink === link.url
                                                         ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
