@@ -27,7 +27,8 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
         { view: 'suppliers', emoji: '🚚', label: 'Proveedores' },
         { view: 'catering', emoji: '👨‍🍳', label: 'Catering' },
         { view: 'production', emoji: '🎬', label: 'Producción' },
-        { view: 'crm', emoji: '📞', label: 'CRM' }
+        { view: 'crm', emoji: '📞', label: 'CRM' },
+        { view: 'website', emoji: '🌐', label: 'Sitio Web' }
     ];
 
     const handleViewChange = (view: string) => {

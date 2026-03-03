@@ -10,9 +10,10 @@ import CateringDashboard from './components/Catering/CateringDashboard';
 import ProductionDashboard from './components/Production/ProductionDashboard';
 import AnalyticsDashboard from './components/Analytics/AnalyticsDashboard';
 import VenuesManager from './components/Venues/VenuesManager';
+import WebsiteDashboard from './components/Website/WebsiteDashboard';
 
 function App() {
-  const [view, setView] = useState<'quote' | 'crm' | 'calendar' | 'inventory' | 'suppliers' | 'finance' | 'catering' | 'production' | 'analytics' | 'venues'>('quote');
+  const [view, setView] = useState<'quote' | 'crm' | 'calendar' | 'inventory' | 'suppliers' | 'finance' | 'catering' | 'production' | 'analytics' | 'venues' | 'website'>('quote');
   const [darkMode, setDarkMode] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -56,6 +57,7 @@ function App() {
             { id: 'catering', label: 'Catering', icon: '🍽️' },
             { id: 'production', label: 'Producción', icon: '🎭' },
             { id: 'analytics', label: 'Analytics', icon: '📈' },
+            { id: 'website', label: 'Sitio Web', icon: '🌐' },
           ].map((item) => (
             <button
               key={item.id}
@@ -127,6 +129,7 @@ function App() {
           {view === 'production' && <ProductionDashboard />}
           {view === 'analytics' && <AnalyticsDashboard />}
           {view === 'venues' && <VenuesManager />}
+          {view === 'website' && <WebsiteDashboard />}
         </div>
       </main>
 
