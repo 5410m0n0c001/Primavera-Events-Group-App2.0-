@@ -34,21 +34,13 @@ const WebsiteDashboard: React.FC = () => {
         const textoCompartir = `¡Hola! ${mensajePrefijo} ${nombreLimpio} de Primavera Events Group aquí:`;
         const mensajeCopiar = `${textoCompartir}\n${url}`;
 
-        if (navigator.share) {
-            navigator.share({
-                title: nombreLimpio,
-                text: textoCompartir,
-                url: url
-            }).catch((error) => console.log('Error sharing:', error));
-        } else {
-            navigator.clipboard.writeText(mensajeCopiar).then(() => {
-                setCopiedLink(url);
-                setTimeout(() => setCopiedLink(null), 2000);
-            }).catch(err => {
-                console.error("Failed to copy", err);
-                alert("No se pudo copiar el enlace al portapapeles.");
-            });
-        }
+        navigator.clipboard.writeText(mensajeCopiar).then(() => {
+            setCopiedLink(url);
+            setTimeout(() => setCopiedLink(null), 2000);
+        }).catch(err => {
+            console.error("Failed to copy", err);
+            prompt("Copia el siguiente texto:", mensajeCopiar);
+        });
     };
 
     const handleOpenLink = (url: string) => {
