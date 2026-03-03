@@ -33,7 +33,8 @@ const ProductionDashboard: React.FC = () => {
 
     // --- CATALOG STATE ---
     const [selectedElements, setSelectedElements] = useState<FloorplanElement[]>([]);
-    const [isCatalogExpanded, setIsCatalogExpanded] = useState(false);
+    const [isCatalogExpanded, setIsCatalogExpanded] = useState(true);
+    const [isControlsExpanded, setIsControlsExpanded] = useState(true);
 
     // --- CANVAS STATE ---
     // --- CANVAS STATE ---
@@ -250,7 +251,7 @@ const ProductionDashboard: React.FC = () => {
             {view === 'layout' && (
                 <div className="flex-1 flex flex-col md:flex-row overflow-hidden md:overflow-hidden overflow-y-auto">
                     {/* LEFT PANEL: CATALOG */}
-                    <div className={`border-b md:border-b-0 md:border-r border-gray-200 bg-white z-10 transition-all duration-300 ease-in-out flex flex-col w-full ${isCatalogExpanded ? 'md:w-96' : 'md:w-72'} shrink-0 order-1`}>
+                    <div className={`border-b md:border-b-0 md:border-r border-gray-200 bg-white z-10 transition-all duration-300 ease-in-out flex flex-col h-full shrink-0 order-1 ${isCatalogExpanded ? 'w-full md:w-80' : 'w-full md:w-16'}`}>
                         <FloorplanCatalog
                             onAddElement={handleAddElement}
                             selectedElements={selectedElements}
@@ -319,7 +320,7 @@ const ProductionDashboard: React.FC = () => {
                     </div>
 
                     {/* RIGHT PANEL: CONTROLS */}
-                    <div className="w-full md:w-72 bg-white border-t md:border-t-0 md:border-l border-gray-200 flex flex-col overflow-y-auto z-10 p-4 space-y-4 shadow-lg shrink-0 order-3 h-auto md:h-auto">
+                    <div className={`bg-white border-t md:border-t-0 md:border-l border-gray-200 flex flex-col overflow-y-auto z-10 shadow-lg shrink-0 order-3 h-auto md:h-full transition-all duration-300 ease-in-out ${isControlsExpanded ? 'w-full md:w-80 p-4 space-y-4' : 'w-full md:w-16 p-2 space-y-2 items-center'}`}>
                         <FloorplanControls
                             canvasWidth={canvasWidth}
                             canvasHeight={canvasHeight}
@@ -327,6 +328,8 @@ const ProductionDashboard: React.FC = () => {
                             zoom={zoom}
                             onZoomChange={setZoom}
                             onCreateCustomElement={handleCreateCustomElement}
+                            isExpanded={isControlsExpanded}
+                            onToggleExpand={() => setIsControlsExpanded(!isControlsExpanded)}
                         />
 
                         {/* Selected Element Editor */}

@@ -9,12 +9,11 @@ echo "================================================"
 echo "🔄 Running migrations (db push)..."
 npx prisma db push --accept-data-loss
 
-echo "🌱 Seeding database in background..."
-# Run seeding in background to not block server startup
-mkdir -p logs
-npx ts-node prisma/seed-inventory.ts > logs/seed-inventory.log 2>&1 &
-npx ts-node prisma/seed-production.ts > logs/seed-production.log 2>&1 &
-echo "⚠️  Seeding started in background. Check logs/seed-*.log for details."
+echo "🌱 Seeding database (Synchronous)..."
+# Ejecutando semillas bloqueando el arranque para asegurar que existan los datos
+node prisma/seed-inventory.js
+node prisma/seed-production.js
+echo "✅ Seeding finished."
 
 echo "🔄 Ensuring Prisma Client..."
 npx prisma generate --schema=./prisma/schema.prisma
