@@ -14,7 +14,7 @@ const WebsiteDashboard: React.FC = () => {
         )
     })).filter(category => category.links.length > 0);
 
-    const handleCopyLink = (url: string, title: string, category: string) => {
+    const handleCopyLink = async (url: string, title: string, category: string) => {
         let mensajePrefijo = "Conoce";
         let nombreLimpio = title;
 
@@ -32,8 +32,21 @@ const WebsiteDashboard: React.FC = () => {
         }
 
         const textoCompartir = `¡Hola! ${mensajePrefijo} ${nombreLimpio} de Primavera Events Group aquí:`;
-        const mensajeCopiar = `${textoCompartir}\n${url}`;
 
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: title,
+                    text: textoCompartir,
+                    url: url
+                });
+                return; // Exito
+            } catch (err) {
+                console.log("No se pudo usar navigator.share o cancelado:", err);
+            }
+        }
+
+        const mensajeCopiar = `${textoCompartir}\n${url}`;
         navigator.clipboard.writeText(mensajeCopiar).then(() => {
             setCopiedLink(url);
             setTimeout(() => setCopiedLink(null), 2000);
@@ -60,18 +73,27 @@ const WebsiteDashboard: React.FC = () => {
                     </p>
                 </div>
 
-                {/* Search Bar */}
-                <div className="w-full md:w-96 relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <span className="text-gray-400">🔍</span>
+                {/* Search Bar and Link */}
+                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 w-full md:w-auto">
+                    <button
+                        onClick={() => window.open('https://5410m0n0c001.github.io/banquetes-primavera-project/', '_blank')}
+                        className="divi-btn-share text-sm px-6 py-2.5 whitespace-nowrap"
+                    >
+                        Dashboard digital integral
+                    </button>
+
+                    <div className="w-full md:w-80 relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span className="text-gray-400">🔍</span>
+                        </div>
+                        <input
+                            type="text"
+                            className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-700 rounded-xl leading-5 bg-white dark:bg-[#2c2c2e] text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primavera-gold focus:border-primavera-gold sm:text-sm transition-colors duration-300 shadow-sm"
+                            placeholder="Buscar por nombre o URL..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
-                    <input
-                        type="text"
-                        className="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-700 rounded-xl leading-5 bg-white dark:bg-[#2c2c2e] text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primavera-gold focus:border-primavera-gold sm:text-sm transition-colors duration-300 shadow-sm"
-                        placeholder="Buscar por nombre o URL..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
                 </div>
             </div>
 
@@ -120,20 +142,16 @@ const WebsiteDashboard: React.FC = () => {
                                         </div>
 
                                         {/* Card Actions */}
-                                        <div className="grid grid-cols-2 border-t border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-[#1c1c1e]/50">
+                                        <div className="p-5 pt-0 mt-auto flex flex-col gap-3">
                                             <button
                                                 onClick={() => handleCopyLink(link.url, link.title, category.category)}
-                                                className={`py-3 text-sm font-bold flex items-center justify-center gap-2 transition-colors border-r border-gray-100 dark:border-white/5 
-                          ${copiedLink === link.url
-                                                        ? 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20'
-                                                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'
-                                                    }`}
+                                                className="divi-btn-share w-full text-center flex items-center justify-center gap-2"
                                             >
-                                                {copiedLink === link.url ? '✔️ Copiado' : '🔗 Compartir'}
+                                                {copiedLink === link.url ? '✔️ Copiado' : 'Compartir'}
                                             </button>
                                             <button
                                                 onClick={() => handleOpenLink(link.url)}
-                                                className="py-3 text-sm font-bold flex items-center justify-center gap-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20 transition-colors"
+                                                className="py-2 text-sm font-bold flex items-center justify-center gap-2 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
                                             >
                                                 <span>Ir al sitio</span> ↗
                                             </button>

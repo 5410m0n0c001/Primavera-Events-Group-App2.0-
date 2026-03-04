@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import type { InventoryItem } from '../../types/InventoryTypes';
 import * as XLSX from 'xlsx';
+import InventoryTableV2 from './InventoryTableV2';
 
 interface Category {
     id: string;
@@ -361,120 +362,21 @@ const InventoryDashboard: React.FC = () => {
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="bg-white rounded-lg shadow overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead className="bg-gray-100 text-gray-600 font-bold uppercase text-xs">
-                        <tr>
-                            <th className="p-4">Artículo</th>
-                            <th className="p-4 text-center">Unidad</th>
-                            <th className="p-4 text-center">Total Existente</th>
-                            <th className="p-4 text-center text-red-600">Mal Estado</th>
-                            <th className="p-4 text-center">Reservado</th>
-                            <th className="p-4 text-center">Disponible</th>
-                            {viewMode === 'detailed' && (
-                                <>
-                                    <th className="p-4">Ubicación</th>
-                                    <th className="p-4">Capacidad</th>
-                                    <th className="p-4 text-right">Precio</th>
-                                </>
-                            )}
-                            <th className="p-4 text-center">Estado</th>
-                            <th className="p-4 text-right">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y text-sm">
-                        {loading ? (
-                            <tr><td colSpan={10} className="p-8 text-center text-gray-500">Cargando inventario...</td></tr>
-                        ) : filteredItems.map(item => {
-                            const isEditing = editingId === item.id;
-                            return (
-                                <tr key={item.id} className={isEditing ? 'bg-yellow-50' : 'hover:bg-gray-50'}>
-                                    {/* Name */}
-                                    <td className="p-4 font-medium text-gray-900">
-                                        {isEditing ? (
-                                            <input type="text" className="border rounded px-2 py-1 w-full" value={editForm.name} onChange={e => handleEditChange('name', e.target.value)} />
-                                        ) : item.name}
-                                    </td>
-
-                                    {/* Unit */}
-                                    <td className="p-4 text-center text-gray-500">
-                                        {isEditing ? (
-                                            <input type="text" className="border rounded px-2 py-1 w-16 text-center" value={editForm.unit} onChange={e => handleEditChange('unit', e.target.value)} />
-                                        ) : item.unit}
-                                    </td>
-
-                                    {/* Stock */}
-                                    <td className="p-4 text-center font-bold">
-                                        {isEditing ? (
-                                            <input type="number" className="border rounded px-2 py-1 w-20 text-center" value={editForm.stock} onChange={e => handleEditChange('stock', e.target.value)} />
-                                        ) : item.stock}
-                                    </td>
-
-                                    {/* Mal Estado */}
-                                    <td className="p-4 text-center text-red-600 font-medium">
-                                        {isEditing ? (
-                                            <input type="number" className="border rounded px-2 py-1 w-20 text-center text-red-600" value={editForm.stockDamaged || 0} onChange={e => handleEditChange('stockDamaged', e.target.value)} />
-                                        ) : (item.stockDamaged || 0)}
-                                    </td>
-
-                                    {/* Reserved */}
-                                    <td className="p-4 text-center text-orange-600 font-medium">{item.reserved || 0}</td>
-
-                                    {/* Available */}
-                                    <td className={`p-4 text-center font-bold text-lg ${item.available! <= 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                        {item.available}
-                                    </td>
-
-                                    {/* Detailed Fields */}
-                                    {viewMode === 'detailed' && (
-                                        <>
-                                            <td className="p-4">
-                                                {isEditing ? (
-                                                    <input type="text" placeholder="Bodega A" className="border rounded px-2 py-1 w-full" value={editForm.options?.location || ''} onChange={e => handleOptionChange('location', e.target.value)} />
-                                                ) : <span className="text-gray-500">{item.options?.location || '-'}</span>}
-                                            </td>
-                                            <td className="p-4">
-                                                {isEditing ? (
-                                                    <input type="text" placeholder="10 pax" className="border rounded px-2 py-1 w-full" value={editForm.options?.capacity || ''} onChange={e => handleOptionChange('capacity', e.target.value)} />
-                                                ) : <span className="text-gray-500">{item.options?.capacity || '-'}</span>}
-                                            </td>
-                                            <td className="p-4 text-right">
-                                                {isEditing ? (
-                                                    <input type="number" className="border rounded px-2 py-1 w-24 text-right" value={editForm.price} onChange={e => handleEditChange('price', e.target.value)} />
-                                                ) : `$${Number(item.price).toFixed(2)}`}
-                                            </td>
-                                        </>
-                                    )}
-
-                                    {/* Status Badge */}
-                                    <td className="p-4 text-center">
-                                        {getStatusBadge(item.available)}
-                                    </td>
-
-                                    {/* Actions */}
-                                    <td className="p-4 text-right space-x-2">
-                                        {isEditing ? (
-                                            <>
-                                                <button onClick={() => handleSave(item.id)} className="text-green-600 hover:text-green-800 font-bold">Guardar</button>
-                                                <button onClick={handleEditCancel} className="text-gray-500 hover:text-gray-700">Cancelar</button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <button onClick={() => handleEditStart(item)} className="text-blue-600 hover:text-blue-800" title="Editar">✏️</button>
-                                                <button onClick={() => handleDelete(item.id)} className="text-red-400 hover:text-red-600" title="Eliminar">🗑️</button>
-                                            </>
-                                        )}
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
-
-            <div className="mt-4 text-center text-gray-500 text-xs">
-                Mostrando {filteredItems.length} artículos.
+            {/* Table / Cards View */}
+            <div className="mt-6">
+                <InventoryTableV2
+                    items={filteredItems}
+                    loading={loading}
+                    viewMode={viewMode}
+                    editingId={editingId}
+                    editForm={editForm}
+                    onEditStart={handleEditStart}
+                    onEditCancel={handleEditCancel}
+                    onEditChange={handleEditChange}
+                    onOptionChange={handleOptionChange}
+                    onSave={handleSave}
+                    onDelete={handleDelete}
+                />
             </div>
 
             {/* Create Item Modal */}

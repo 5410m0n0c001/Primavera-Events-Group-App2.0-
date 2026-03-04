@@ -77,6 +77,28 @@
   .animate-fade-in-up {
     animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
+
+  /* Divi Share Button */
+  .divi-btn-share {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    color: #000000 !important;
+    padding: 14px 38px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 10px 0 rgba(0,0,0,0.15), 0 18px 30px rgba(0,0,0,0.12);
+    transition: all 0.2s ease;
+  }
+
+  .divi-btn-share:hover {
+    transform: translateY(4px);
+    box-shadow: 0 6px 0 rgba(0,0,0,0.15), 0 10px 18px rgba(0,0,0,0.14);
+  }
 }
 
 @layer utilities {

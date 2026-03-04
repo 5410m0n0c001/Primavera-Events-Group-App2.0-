@@ -182,47 +182,80 @@ const ProductionDashboard: React.FC = () => {
     };
 
     // --- PDF EXPORT LOGIC ---
-    const exportLayoutPDF = async () => {
-        const element = document.getElementById('layout-export-area');
-        if (!element) return;
+    const exportCombinedPDF = async () => {
+        // Temporarily ensure both export areas are ready
+        const layoutElement = document.getElementById('layout-export-area');
+        const timelineElement = document.getElementById('timeline-export-area');
 
-        try {
-            const canvas = await html2canvas(element, { scale: 2, useCORS: true });
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF({
-                orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
-                unit: 'px',
-                format: [canvas.width, canvas.height]
-            });
-            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-            pdf.save('Plano_Produccion.pdf');
-        } catch (err) {
-            console.error('Error exportando PDF corto:', err);
-            alert('Hubo un error al exportar el plano.');
+        if (!layoutElement || !timelineElement) {
+            alert('Asegúrate de que los elementos estén cargados en pantalla.');
+            return;
         }
-    };
-
-    const exportTimelinePDF = async () => {
-        const element = document.getElementById('timeline-export-area');
-        if (!element) return;
 
         try {
-            const canvas = await html2canvas(element, { scale: 2, useCORS: true });
-            const imgData = canvas.toDataURL('image/png');
+            // We use A4 portrait format
             const pdf = new jsPDF('p', 'mm', 'a4');
             const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            let currentY = 10;
 
-            // Add title
             pdf.setFontSize(16);
-            pdf.text('Itinerario Minuto a Minuto', 10, 10);
+            pdf.text('Reporte de Producción: Day Out', 10, currentY);
+            currentY += 10;
 
-            // Add image below title
-            pdf.addImage(imgData, 'PNG', 5, 20, pdfWidth - 10, pdfHeight);
-            pdf.save('Itinerario.pdf');
+            // 1. Export Layout if it has elements
+            if (layoutObjects.length > 0) {
+                pdf.setFontSize(12);
+                pdf.text('Plano de Distribución:', 10, currentY);
+                currentY += 5;
+
+                const layoutCanvas = await html2canvas(layoutElement, { scale: 2, useCORS: true });
+                const layoutImgData = layoutCanvas.toDataURL('image/png');
+
+                // Calculate reasonable height to fit width
+                const imgWidth = pdfWidth - 20;
+                const imgHeight = (layoutCanvas.height * imgWidth) / layoutCanvas.width;
+
+                pdf.addImage(layoutImgData, 'PNG', 10, currentY, imgWidth, imgHeight);
+                currentY += imgHeight + 10;
+            }
+
+            // 2. Export Timeline if it has elements
+            if (timelineItems.length > 0) {
+                // Check if we need a new page
+                if (currentY > pdf.internal.pageSize.getHeight() - 40) {
+                    pdf.addPage();
+                    currentY = 20;
+                }
+
+                pdf.setFontSize(12);
+                pdf.text('Itinerario (Minuto a Minuto):', 10, currentY);
+                currentY += 10;
+
+                pdf.setFontSize(10);
+                // Print each timeline item text directly instead of taking a screenshot
+                // This guarantees perfect quality and avoids hidden DOM issues
+                timelineItems.forEach((item, idx) => {
+                    // Check page break
+                    if (currentY > pdf.internal.pageSize.getHeight() - 20) {
+                        pdf.addPage();
+                        currentY = 20;
+                    }
+
+                    pdf.setFont('', 'bold');
+                    pdf.text(`${idx + 1}. ${item.time}`, 10, currentY);
+                    pdf.setFont('', 'normal');
+
+                    const textLines = pdf.splitTextToSize(item.description, pdfWidth - 40);
+                    pdf.text(textLines, 30, currentY);
+
+                    currentY += (textLines.length * 5) + 5;
+                });
+            }
+
+            pdf.save('Reporte_DayOut_Primavera.pdf');
         } catch (err) {
-            console.error('Error exportando PDF itinerario:', err);
-            alert('Hubo un error al exportar el itinerario.');
+            console.error('Error exportando PDF:', err);
+            alert('Hubo un error al generar el PDF combinado.');
         }
     };
 
@@ -239,252 +272,250 @@ const ProductionDashboard: React.FC = () => {
                         <button onClick={() => setView('layout')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${view === 'layout' ? 'bg-white shadow text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}>Plano</button>
                         <button onClick={() => setView('timeline')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${view === 'timeline' ? 'bg-white shadow text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}>Minuto a Minuto</button>
                     </div>
-                    {view === 'layout' ? (
-                        <button onClick={exportLayoutPDF} className="px-4 py-2 bg-red-600 text-white rounded shadow text-sm font-bold hover:bg-red-700 transition">📄 Exportar PDF</button>
-                    ) : (
-                        <button onClick={exportTimelinePDF} className="px-4 py-2 bg-red-600 text-white rounded shadow text-sm font-bold hover:bg-red-700 transition">📄 Exportar PDF</button>
-                    )}
+                    <button onClick={exportCombinedPDF} className="px-4 py-2 bg-red-600 text-white rounded shadow text-sm font-bold hover:bg-red-700 transition flex items-center gap-2">
+                        📄 Exportar Day Out PDF
+                    </button>
                 </div>
             </div>
 
             {/* MAIN CONTENT AREA */}
-            {view === 'layout' && (
-                <div className="flex-1 flex flex-col md:flex-row overflow-hidden md:overflow-hidden overflow-y-auto">
-                    {/* LEFT PANEL: CATALOG */}
-                    <div className={`border-b md:border-b-0 md:border-r border-gray-200 bg-white z-10 transition-all duration-300 ease-in-out flex flex-col h-full shrink-0 order-1 ${isCatalogExpanded ? 'w-full md:w-80' : 'w-full md:w-16'}`}>
-                        <FloorplanCatalog
-                            onAddElement={handleAddElement}
-                            selectedElements={selectedElements}
-                            onRemoveElement={handleRemoveElement}
-                            onClearAll={handleClearAll}
-                            isExpanded={isCatalogExpanded}
-                            onToggleExpand={() => setIsCatalogExpanded(!isCatalogExpanded)}
-                        />
-                    </div>
+            <div className={`flex-1 flex flex-col md:flex-row overflow-hidden md:overflow-hidden overflow-y-auto ${view !== 'layout' ? 'absolute opacity-0 pointer-events-none -z-50 w-full h-full' : ''}`}>
+                {/* LEFT PANEL: CATALOG */}
+                <div className={`border-b md:border-b-0 md:border-r border-gray-200 bg-white z-10 transition-all duration-300 ease-in-out flex flex-col h-full shrink-0 order-1 ${isCatalogExpanded ? 'w-full md:w-80' : 'w-full md:w-16'}`}>
+                    <FloorplanCatalog
+                        onAddElement={handleAddElement}
+                        selectedElements={selectedElements}
+                        onRemoveElement={handleRemoveElement}
+                        onClearAll={handleClearAll}
+                        isExpanded={isCatalogExpanded}
+                        onToggleExpand={() => setIsCatalogExpanded(!isCatalogExpanded)}
+                    />
+                </div>
 
-                    {/* CENTER PANEL: CANVAS */}
-                    <div className="flex-1 bg-[#F5F5F7] overflow-hidden relative flex flex-col order-2 min-h-[500px]">
-                        <div className="flex-1 overflow-auto custom-scrollbar p-4 md:p-8 relative flex items-start justify-center">
+                {/* CENTER PANEL: CANVAS */}
+                <div className="flex-1 bg-[#F5F5F7] overflow-hidden relative flex flex-col order-2 min-h-[500px]">
+                    <div className="flex-1 overflow-auto custom-scrollbar p-4 md:p-8 relative flex items-start justify-center">
+                        <div
+                            style={{
+                                transform: `scale(${zoom})`,
+                                transformOrigin: 'top center',
+                                transition: 'transform 0.1s ease-out'
+                            }}
+                        >
+                            {/* We add the layout-export-area id here */}
                             <div
+                                id="layout-export-area"
+                                ref={canvasRef}
+                                onDragOver={handleDragOver}
+                                onDrop={handleDrop}
+                                className="bg-white shadow-2xl relative transition-all duration-300"
                                 style={{
-                                    transform: `scale(${zoom})`,
-                                    transformOrigin: 'top center',
-                                    transition: 'transform 0.1s ease-out'
+                                    width: canvasWidth,
+                                    height: canvasHeight,
+                                    backgroundImage: `radial-gradient(#cbd5e1 1px, transparent 1px)`,
+                                    backgroundSize: '20px 20px'
                                 }}
                             >
-                                {/* We add the layout-export-area id here */}
-                                <div
-                                    id="layout-export-area"
-                                    ref={canvasRef}
-                                    onDragOver={handleDragOver}
-                                    onDrop={handleDrop}
-                                    className="bg-white shadow-2xl relative transition-all duration-300"
-                                    style={{
-                                        width: canvasWidth,
-                                        height: canvasHeight,
-                                        backgroundImage: `radial-gradient(#cbd5e1 1px, transparent 1px)`,
-                                        backgroundSize: '20px 20px'
-                                    }}
-                                >
-                                    {/* Canvas Dimensions Label */}
-                                    <div className="absolute -top-6 left-0 text-[10px] font-bold text-gray-400 uppercase tracking-widest" data-html2canvas-ignore>
-                                        {canvasWidth}px x {canvasHeight}px
-                                    </div>
-
-                                    {/* Objects */}
-                                    {layoutObjects.map(obj => (
-                                        <div
-                                            key={obj.id}
-                                            draggable
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setSelectedLayoutObjectId(obj.id);
-                                            }}
-                                            onDragStart={(e) => handleDragStartObject(e, obj.id)}
-                                            className={`absolute cursor-move flex items-center justify-center text-[10px] font-bold transition-all hover:scale-105 active:scale-95 text-center overflow-hidden select-none hover:shadow-lg hover:z-50 ${obj.shape === 'circle' ? 'rounded-full' : 'rounded-md'} ${obj.colorClass} ${selectedLayoutObjectId === obj.id ? 'ring-4 ring-blue-500 shadow-xl z-50' : ''}`}
-                                            style={{
-                                                left: obj.x,
-                                                top: obj.y,
-                                                width: obj.width,
-                                                height: obj.height,
-                                                lineHeight: '1.1'
-                                            }}
-                                            title={obj.label}
-                                        >
-                                            <span className="px-1 line-clamp-2 pointer-events-none">{obj.label}</span>
-                                        </div>
-                                    ))}
+                                {/* Canvas Dimensions Label */}
+                                <div className="absolute -top-6 left-0 text-[10px] font-bold text-gray-400 uppercase tracking-widest" data-html2canvas-ignore>
+                                    {canvasWidth}px x {canvasHeight}px
                                 </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    {/* RIGHT PANEL: CONTROLS */}
-                    <div className={`bg-white border-t md:border-t-0 md:border-l border-gray-200 flex flex-col overflow-y-auto z-10 shadow-lg shrink-0 order-3 h-auto md:h-full transition-all duration-300 ease-in-out ${isControlsExpanded ? 'w-full md:w-80 p-4 space-y-4' : 'w-full md:w-16 p-2 space-y-2 items-center'}`}>
-                        <FloorplanControls
-                            canvasWidth={canvasWidth}
-                            canvasHeight={canvasHeight}
-                            onCanvasSizeChange={handleCanvasSizeChange}
-                            zoom={zoom}
-                            onZoomChange={setZoom}
-                            onCreateCustomElement={handleCreateCustomElement}
-                            isExpanded={isControlsExpanded}
-                            onToggleExpand={() => setIsControlsExpanded(!isControlsExpanded)}
-                        />
-
-                        {/* Selected Element Editor */}
-                        {selectedLayoutObjectId && (
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 animate-fade-in-up">
-                                <h4 className="font-bold text-sm text-blue-800 mb-3 flex justify-between items-center">
-                                    <span>✏️ Editar Elemento</span>
-                                    <button onClick={() => setSelectedLayoutObjectId(null)} className="text-gray-400 hover:text-gray-600">✕</button>
-                                </h4>
-                                {layoutObjects.filter(obj => obj.id === selectedLayoutObjectId).map(obj => (
-                                    <div key={`edit-${obj.id}`} className="space-y-3">
-                                        <div>
-                                            <label className="block text-[10px] uppercase font-bold text-blue-600/70 mb-1">Nombre / Etiqueta</label>
-                                            <input
-                                                type="text"
-                                                value={obj.label}
-                                                onChange={(e) => handleUpdateSelectedElement({ label: e.target.value })}
-                                                className="w-full px-2 py-1.5 text-sm border border-blue-200 rounded bg-white"
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <label className="block text-[10px] uppercase font-bold text-blue-600/70 mb-1">Ancho (px)</label>
-                                                <input
-                                                    type="number"
-                                                    value={obj.width}
-                                                    onChange={(e) => handleUpdateSelectedElement({ width: parseInt(e.target.value) || 20 })}
-                                                    className="w-full px-2 py-1 border border-blue-200 rounded text-sm bg-white"
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-[10px] uppercase font-bold text-blue-600/70 mb-1">Alto (px)</label>
-                                                <input
-                                                    type="number"
-                                                    value={obj.height}
-                                                    onChange={(e) => handleUpdateSelectedElement({ height: parseInt(e.target.value) || 20 })}
-                                                    className="w-full px-2 py-1 border border-blue-200 rounded text-sm bg-white"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2 pt-2 border-t border-blue-100">
-                                            <button
-                                                onClick={handleDuplicateSelectedElement}
-                                                className="flex-1 px-2 py-1.5 bg-white border border-blue-300 text-blue-700 text-xs font-bold rounded shadow-sm hover:bg-blue-100 transition"
-                                            >
-                                                DUPLICAR
-                                            </button>
-                                            <button
-                                                onClick={handleDeleteSelectedElement}
-                                                className="flex-1 px-2 py-1.5 bg-red-100 border border-red-200 text-red-600 text-xs font-bold rounded shadow-sm hover:bg-red-200 transition"
-                                            >
-                                                ELIMINAR
-                                            </button>
-                                        </div>
+                                {/* Objects */}
+                                {layoutObjects.map(obj => (
+                                    <div
+                                        key={obj.id}
+                                        draggable
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedLayoutObjectId(obj.id);
+                                        }}
+                                        onDragStart={(e) => handleDragStartObject(e, obj.id)}
+                                        className={`absolute cursor-move flex items-center justify-center text-[10px] font-bold transition-all hover:scale-105 active:scale-95 text-center overflow-hidden hover:shadow-lg hover:z-50 ${obj.shape === 'circle' ? 'rounded-full' : 'rounded-md'} ${obj.colorClass} ${selectedLayoutObjectId === obj.id ? 'ring-4 ring-blue-500 shadow-xl z-50' : ''}`}
+                                        style={{
+                                            left: obj.x,
+                                            top: obj.y,
+                                            width: obj.width,
+                                            height: obj.height,
+                                            lineHeight: '1.2',
+                                            padding: '2px', // Give text a little breathing room
+                                            boxSizing: 'border-box'
+                                        }}
+                                        title={obj.label}
+                                    >
+                                        <span className="w-full text-center break-words pointer-events-none" style={{ maxHeight: '100%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            {obj.label}
+                                        </span>
                                     </div>
                                 ))}
                             </div>
-                        )}
-
-                        {/* UPDATE: Pass 'layoutObjects' instead of 'selectedElements' for LIVE position updates */}
-                        <FloorplanMinimap
-                            items={layoutObjects}
-                            canvasWidth={canvasWidth}
-                            canvasHeight={canvasHeight}
-                        />
-                    </div>
-                </div>
-            )}
-
-            {view === 'timeline' && (
-                <div className="p-8 overflow-y-auto h-full bg-[#FAFAFA]">
-                    <div className="max-w-4xl mx-auto">
-                        <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 animate-fade-in-up">
-                            <div className="flex justify-between items-center mb-8">
-                                <div>
-                                    <h2 className="text-3xl font-bold text-gray-800">Minuto a Minuto</h2>
-                                    <p className="text-gray-500">Planifica la secuencia exacta del evento.</p>
-                                </div>
-                                <div className="bg-blue-50 text-blue-600 px-4 py-2 rounded-lg text-sm font-bold">
-                                    {timelineItems.length} Actividades
-                                </div>
-                            </div>
-
-                            {/* ADD NEW ITEM FORM */}
-                            <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-8 flex flex-col md:flex-row gap-4 items-stretch md:items-end">
-                                <div className="w-full md:w-40">
-                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Hora</label>
-                                    <input
-                                        type="time"
-                                        className="w-full h-12 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-lg"
-                                        value={newItemTime}
-                                        onChange={e => setNewItemTime(e.target.value)}
-                                    />
-                                </div>
-                                <div className="flex-grow">
-                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Actividad</label>
-                                    <input
-                                        type="text"
-                                        className="w-full h-12 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Ej. Entrada de Novios con pirotecnia..."
-                                        value={newItemDesc}
-                                        onChange={e => setNewItemDesc(e.target.value)}
-                                        onKeyDown={e => e.key === 'Enter' && addTimelineItem()}
-                                    />
-                                </div>
-                                <button
-                                    onClick={addTimelineItem}
-                                    disabled={!canAdd}
-                                    className="h-12 px-8 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:transform-none"
-                                >
-                                    AGREGAR
-                                </button>
-                            </div>
-
-                            {/* TIMELINE LIST */}
-                            <div id="timeline-export-area" className="relative pl-8 border-l-2 border-dashed border-gray-200 space-y-8 bg-white pb-8">
-                                {timelineItems.length === 0 ? (
-                                    <div className="text-center py-12 text-gray-400 italic">
-                                        No hay actividades programadas. Agrega una arriba.
-                                    </div>
-                                ) : (
-                                    timelineItems.map((item, idx) => (
-                                        <div key={item.id} className="relative group">
-                                            {/* Index Bubble */}
-                                            <div className="absolute -left-[42px] top-1/2 -translate-y-1/2 bg-white text-blue-600 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ring-4 ring-gray-100 shadow-sm z-10">
-                                                {idx + 1}
-                                            </div>
-
-                                            {/* Card */}
-                                            <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all flex justify-between items-center group-hover:border-blue-200">
-                                                <div className="flex items-center gap-6">
-                                                    <div className="bg-gray-100 px-4 py-2 rounded-lg text-xl font-bold text-gray-800 font-mono">
-                                                        {item.time}
-                                                    </div>
-                                                    <div className="text-lg text-gray-700 font-medium">
-                                                        {item.description}
-                                                    </div>
-                                                </div>
-                                                <button
-                                                    onClick={() => removeTimelineItem(item.id)}
-                                                    data-html2canvas-ignore
-                                                    className="w-8 h-8 flex items-center justify-center rounded-full text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors"
-                                                    title="Eliminar actividad"
-                                                >
-                                                    ✕
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
                         </div>
                     </div>
                 </div>
-            )}
+
+                {/* RIGHT PANEL: CONTROLS */}
+                <div className={`bg-white border-t md:border-t-0 md:border-l border-gray-200 flex flex-col overflow-y-auto z-10 shadow-lg shrink-0 order-3 h-auto md:h-full transition-all duration-300 ease-in-out ${isControlsExpanded ? 'w-full md:w-80 p-4 space-y-4' : 'w-full md:w-16 p-2 space-y-2 items-center'}`}>
+                    <FloorplanControls
+                        canvasWidth={canvasWidth}
+                        canvasHeight={canvasHeight}
+                        onCanvasSizeChange={handleCanvasSizeChange}
+                        zoom={zoom}
+                        onZoomChange={setZoom}
+                        onCreateCustomElement={handleCreateCustomElement}
+                        isExpanded={isControlsExpanded}
+                        onToggleExpand={() => setIsControlsExpanded(!isControlsExpanded)}
+                    />
+
+                    {/* Selected Element Editor */}
+                    {selectedLayoutObjectId && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 animate-fade-in-up">
+                            <h4 className="font-bold text-sm text-blue-800 mb-3 flex justify-between items-center">
+                                <span>✏️ Editar Elemento</span>
+                                <button onClick={() => setSelectedLayoutObjectId(null)} className="text-gray-400 hover:text-gray-600">✕</button>
+                            </h4>
+                            {layoutObjects.filter(obj => obj.id === selectedLayoutObjectId).map(obj => (
+                                <div key={`edit-${obj.id}`} className="space-y-3">
+                                    <div>
+                                        <label className="block text-[10px] uppercase font-bold text-blue-600/70 mb-1">Nombre / Etiqueta</label>
+                                        <input
+                                            type="text"
+                                            value={obj.label}
+                                            onChange={(e) => handleUpdateSelectedElement({ label: e.target.value })}
+                                            className="w-full px-2 py-1.5 text-sm border border-blue-200 rounded bg-white"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label className="block text-[10px] uppercase font-bold text-blue-600/70 mb-1">Ancho (px)</label>
+                                            <input
+                                                type="number"
+                                                value={obj.width}
+                                                onChange={(e) => handleUpdateSelectedElement({ width: parseInt(e.target.value) || 20 })}
+                                                className="w-full px-2 py-1 border border-blue-200 rounded text-sm bg-white"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] uppercase font-bold text-blue-600/70 mb-1">Alto (px)</label>
+                                            <input
+                                                type="number"
+                                                value={obj.height}
+                                                onChange={(e) => handleUpdateSelectedElement({ height: parseInt(e.target.value) || 20 })}
+                                                className="w-full px-2 py-1 border border-blue-200 rounded text-sm bg-white"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2 pt-2 border-t border-blue-100">
+                                        <button
+                                            onClick={handleDuplicateSelectedElement}
+                                            className="flex-1 px-2 py-1.5 bg-white border border-blue-300 text-blue-700 text-xs font-bold rounded shadow-sm hover:bg-blue-100 transition"
+                                        >
+                                            DUPLICAR
+                                        </button>
+                                        <button
+                                            onClick={handleDeleteSelectedElement}
+                                            className="flex-1 px-2 py-1.5 bg-red-100 border border-red-200 text-red-600 text-xs font-bold rounded shadow-sm hover:bg-red-200 transition"
+                                        >
+                                            ELIMINAR
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* UPDATE: Pass 'layoutObjects' instead of 'selectedElements' for LIVE position updates */}
+                    <FloorplanMinimap
+                        items={layoutObjects}
+                        canvasWidth={canvasWidth}
+                        canvasHeight={canvasHeight}
+                    />
+                </div>
+            </div>
+
+            <div className={`p-8 overflow-y-auto h-full bg-[#FAFAFA] ${view !== 'timeline' ? 'absolute opacity-0 pointer-events-none -z-50 w-full h-full top-0 left-0' : ''}`}>
+                <div className="max-w-4xl mx-auto">
+                    <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 animate-fade-in-up">
+                        <div className="flex justify-between items-center mb-8">
+                            <div>
+                                <h2 className="text-3xl font-bold text-gray-800">Minuto a Minuto</h2>
+                                <p className="text-gray-500">Planifica la secuencia exacta del evento.</p>
+                            </div>
+                            <div className="bg-blue-50 text-blue-600 px-4 py-2 rounded-lg text-sm font-bold">
+                                {timelineItems.length} Actividades
+                            </div>
+                        </div>
+
+                        {/* ADD NEW ITEM FORM */}
+                        <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-8 flex flex-col md:flex-row gap-4 items-stretch md:items-end">
+                            <div className="w-full md:w-40">
+                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Hora</label>
+                                <input
+                                    type="time"
+                                    className="w-full h-12 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-lg"
+                                    value={newItemTime}
+                                    onChange={e => setNewItemTime(e.target.value)}
+                                />
+                            </div>
+                            <div className="flex-grow">
+                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Actividad</label>
+                                <input
+                                    type="text"
+                                    className="w-full h-12 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Ej. Entrada de Novios con pirotecnia..."
+                                    value={newItemDesc}
+                                    onChange={e => setNewItemDesc(e.target.value)}
+                                    onKeyDown={e => e.key === 'Enter' && addTimelineItem()}
+                                />
+                            </div>
+                            <button
+                                onClick={addTimelineItem}
+                                disabled={!canAdd}
+                                className="h-12 px-8 bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-lg font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:transform-none"
+                            >
+                                AGREGAR
+                            </button>
+                        </div>
+
+                        {/* TIMELINE LIST */}
+                        <div id="timeline-export-area" className="relative pl-8 border-l-2 border-dashed border-gray-200 space-y-8 bg-white pb-8">
+                            {timelineItems.length === 0 ? (
+                                <div className="text-center py-12 text-gray-400 italic">
+                                    No hay actividades programadas. Agrega una arriba.
+                                </div>
+                            ) : (
+                                timelineItems.map((item, idx) => (
+                                    <div key={item.id} className="relative group">
+                                        {/* Index Bubble */}
+                                        <div className="absolute -left-[42px] top-1/2 -translate-y-1/2 bg-white text-blue-600 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ring-4 ring-gray-100 shadow-sm z-10">
+                                            {idx + 1}
+                                        </div>
+
+                                        {/* Card */}
+                                        <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all flex justify-between items-center group-hover:border-blue-200">
+                                            <div className="flex items-center gap-6">
+                                                <div className="bg-gray-100 px-4 py-2 rounded-lg text-xl font-bold text-gray-800 font-mono">
+                                                    {item.time}
+                                                </div>
+                                                <div className="text-lg text-gray-700 font-medium">
+                                                    {item.description}
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => removeTimelineItem(item.id)}
+                                                data-html2canvas-ignore
+                                                className="w-8 h-8 flex items-center justify-center rounded-full text-gray-300 hover:bg-red-50 hover:text-red-500 transition-colors"
+                                                title="Eliminar actividad"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
