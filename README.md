@@ -1,120 +1,110 @@
 # Primavera Events Group
 
-> **Sistema de Gestión de Eventos y Cotizaciones**  
-> **Versión:** 1.1.0  
-> **Estado:** Activo en desarrollo  
-> **Última actualización:** Diciembre 2025
+> **Sistema Digital Integral de Gestión de Eventos y Cotizaciones**  
+> **Versión:** 2.2.0  
+> **Estado:** Producción (Desplegado vía Coolify con base de datos PostgreSQL)  
+> **Última actualización:** Marzo 2026
 
 ---
 
 ## 📌 Visión General del Proyecto
 
-**Primavera Events Group** es un sistema integral de **Event Management & Quotation System** diseñado para centralizar, estandarizar y automatizar el proceso de generación de cotizaciones para eventos sociales y corporativos.
+**Primavera Events Group** es un sistema integral de **Event Management & Quotation System** diseñado para centralizar, estandarizar y automatizar el proceso de generación de propuestas, ventas y operación para eventos sociales y corporativos; compitiendo con los líderes del mercado en las zonas de Morelos y CDMX.
 
-El sistema elimina el uso de hojas de cálculo dispersas, reduce errores humanos en cálculos financieros y permite generar propuestas profesionales en formato PDF de manera consistente.
+El sistema cuenta con un **Dashboard Digital Integral** que elimina el uso de hojas de cálculo dispersas, reduce errores humanos en cálculos financieros y permite generar de manera consistente cotizaciones profesionales en PDF, un análisis financiero automatizado, y documentos operativos para producción (Layouts, itinerarios).
 
 ### 🎯 Usuarios Objetivo
 
-- Vendedores
-- Coordinadores de eventos
+- Directores y Líderes del Proyecto
+- Vendedores / Ejecutivo de Cuentas
+- Coordinadores de eventos y Productores
 - Administradores
 
 ### 🧩 Problemas que Resuelve
 
-- Falta de control sobre precios y versiones de cotizaciones
-- Errores manuales en cálculos de IVA y totales
-- Procesos lentos y poco profesionales para generar propuestas
+- Falta de control sobre precios, inventarios de extras, y versiones de cotizaciones.
+- Errores manuales en cálculos de IVA, y costos totales por invitado.
+- Procesos lentos y poco profesionales para generar e interactuar con propuestas.
+- Dificultades logísticas resueltas mediante layouts de producción y flujos paso a paso para la operación el día del evento.
+- Ausencia de demostraciones de la propuesta de valor y rentabilidad antes de la contratación.
 
 ---
 
 ## 🧰 Stack Tecnológico
 
+El proyecto es un **Monorepo** estructurado bajo una arquitectura cliente-servidor, preparado para despliegue automatizado.
+
 ### Frontend
-- React + TypeScript
-- Vite
-- Tailwind CSS
+- **Core:** React + TypeScript + Vite
+- **Estilos:** Tailwind CSS
+- **Generación de Reportes / PDF:** `html2canvas`, `jspdf`, `xlsx`
+- **Interacción Nativa:** Web Share API (`navigator.share`) para compartir cotizaciones desde cualquier dispositivo.
 
 ### Backend
-- Node.js
-- Express
-- Prisma ORM
+- **Core:** Node.js + Express
+- **ORM:** Prisma
+- **Autenticación y Seguridad:** JWT, `bcryptjs`, Helmet, Express Rate Limit
+- **Generación de PDF Oficial:** `pdfkit`
 
-### Base de Datos
-- SQLite (desarrollo)
-- PostgreSQL (producción – planeado)
-
-### Otros
-- Generación de PDF
-- Git + GitHub para control de versiones
+### Base de Datos e Infraestructura
+- **Producción:** PostgreSQL (Orquestado por Coolify)
+- **Desarrollo:** SQLite
+- **Despliegue:** CI/CD Docker containers para cliente y servidor administrados de forma centralizada.
 
 ---
 
-## 🏗️ Arquitectura
+## 🏗️ Arquitectura y Principio Clave
 
 📐 Diagrama técnico de alto nivel:  
-👉 [`docs/architecture.md`](docs/architecture.md)
+👉 [`docs/architecture.md`](docs/architecture.md) & [`TECHNICAL_DOCS.md`](TECHNICAL_DOCS.md)
 
-**Principio clave:**  
-- El **frontend calcula** para una experiencia fluida (UX)  
-- El **backend valida y recalcula** como fuente de verdad (seguridad)
-
----
-
-## 🧩 Módulos Principales
-
-### A. Gestión de Cotizaciones (Core)
-
-- Creación y edición de propuestas económicas
-- Selección dinámica de servicios y locaciones
-- Generación de cotizaciones finales en PDF
-
-**Inputs:**  
-- Servicios seleccionados  
-- Número de invitados  
-- Fecha del evento  
-
-**Outputs:**  
-- Totales calculados  
-- Costo por persona  
-- PDF profesional  
+**Principio de Responsabilidad:**  
+- El **frontend calcula** para ofrecer una experiencia fluida e inmediata en tiempo real (UX de primer nivel).
+- El **backend valida, recalcula y autoriza** siendo la única fuente de verdad (Evita hackeos en precios desde el frontend).
 
 ---
 
-### B. Calculadora en Tiempo Real (Sticky Sidebar)
+## 🧩 Ecosistema y Módulos Principales
 
-- Totales siempre visibles
-- Actualización inmediata ante cambios
-- Desglose de impuestos y costo por invitado
+### A. Dashboard Digital Integral
+
+- Epicentro de información y enrutamiento a todos los componentes del sistema.
+- Interfaz moderna para agrupar reportes corporativos, control de locaciones, y creación de proyectos.
+
+### B. Gestión de Cotizaciones y Ventas (Core)
+
+- Creación y edición de propuestas económicas y selección dinámica de servicios.
+- **Calculadora en Tiempo Real (Sticky Sidebar):** Desglose total visible en todo momento calculado con cada interacción.
+- Opción rápida para **Compartir (Share Button):** Integración nativa a sistemas iOS/Android para enviar la propuesta a través de WhatsApp, E-mail, etc.
+
+### C. Módulo de Locaciones, Servicios Extra y Valor Financiero
+
+- **Gestión de Capacidades:** Control estricto de aforos y requerimientos base para cada locación del catálogo.
+- **Sitemap Extras:** Control estratégico del up-selling (Video, Fotografía, Iluminación, etc.) priorizando aquellos servicios de alto impacto en el ticket.
+- **Análisis Comparativo:** Herramienta integral para demostrar a prospectos el costo beneficio del paquete integral frente a contrataciones independientes en el mercado.
+
+### D. Producción, Logística y Reportes
+
+- **Layout de Producción:** Configuración física de los espacios.
+- **Itinerario Minuto a Minuto:** Cronograma logístico inmutable para la coordinación del gran día.
+- Generación de PDF sin recortes (optimizando visualización de tablas largas en móviles).
 
 ---
 
-### C. Gestión de Locaciones
-
-- Administración de espacios
-- Control de capacidad y precios base
-- Validación de aforo vs número de invitados
-
----
-
-### D. Backend & Validación
-
-- Reglas de negocio centralizadas
-- Prevención de manipulación de precios desde el cliente
-- Generación final de PDF
-
----
-
-## 🔁 Flujo Crítico de Cotización
+## 🔁 Flujo Crítico Operativo
 
 ```text
-Usuario
+Usuario (Ejecutivo / Cliente Interno)
   ↓
-Wizard State (QuoteDraft)
+Ingreso al Dashboard Digital
   ↓
-Cálculo derivado (useMemo)
+Configuración: Locación, Invitados, Fechas, Servicios, Extras
   ↓
-QuoteBreakdown (Preview UI)
+Visualización Financiera en Tiempo Real (Cálculos de ROI e IVA)
   ↓
-Validación Backend
+Validación y Persistencia (Backend vía ORM)
   ↓
-Generación de PDF
+Exportación Multicanal:
+  ├─> Generar Link con Share API y compartir viá App Nativa (WhatsApp, Mail)
+  └─> Imprimir Comprobantes PDF Logísticos / Excel Financieros
+```

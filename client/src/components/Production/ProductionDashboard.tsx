@@ -183,7 +183,6 @@ const ProductionDashboard: React.FC = () => {
 
     // --- PDF EXPORT LOGIC ---
     const exportCombinedPDF = async () => {
-        // Temporarily ensure both export areas are ready
         const layoutElement = document.getElementById('layout-export-area');
         const timelineElement = document.getElementById('timeline-export-area');
 
@@ -193,6 +192,17 @@ const ProductionDashboard: React.FC = () => {
         }
 
         try {
+            // Un-hide containers forcefully for html2canvas
+            const layoutContainer = document.getElementById('layout-container');
+            const timelineContainer = document.getElementById('timeline-container');
+
+            if (layoutContainer) {
+                layoutContainer.classList.remove('opacity-0', 'absolute', '-z-50');
+            }
+            if (timelineContainer) {
+                timelineContainer.classList.remove('opacity-0', 'absolute', '-z-50');
+            }
+
             // We use A4 portrait format
             const pdf = new jsPDF('p', 'mm', 'a4');
             const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -208,7 +218,12 @@ const ProductionDashboard: React.FC = () => {
                 pdf.text('Plano de Distribución:', 10, currentY);
                 currentY += 5;
 
-                const layoutCanvas = await html2canvas(layoutElement, { scale: 2, useCORS: true });
+                // html2canvas requires elements to be visible in viewport usually
+                const layoutCanvas = await html2canvas(layoutElement, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff'
+                });
                 const layoutImgData = layoutCanvas.toDataURL('image/png');
 
                 // Calculate reasonable height to fit width
@@ -221,38 +236,38 @@ const ProductionDashboard: React.FC = () => {
 
             // 2. Export Timeline if it has elements
             if (timelineItems.length > 0) {
-                // Check if we need a new page
                 if (currentY > pdf.internal.pageSize.getHeight() - 40) {
                     pdf.addPage();
-                    currentY = 20;
+                    currentY = 10;
                 }
 
                 pdf.setFontSize(12);
                 pdf.text('Itinerario (Minuto a Minuto):', 10, currentY);
-                currentY += 10;
+                currentY += 5;
 
-                pdf.setFontSize(10);
-                // Print each timeline item text directly instead of taking a screenshot
-                // This guarantees perfect quality and avoids hidden DOM issues
-                timelineItems.forEach((item, idx) => {
-                    // Check page break
-                    if (currentY > pdf.internal.pageSize.getHeight() - 20) {
-                        pdf.addPage();
-                        currentY = 20;
-                    }
-
-                    pdf.setFont('', 'bold');
-                    pdf.text(`${idx + 1}. ${item.time}`, 10, currentY);
-                    pdf.setFont('', 'normal');
-
-                    const textLines = pdf.splitTextToSize(item.description, pdfWidth - 40);
-                    pdf.text(textLines, 30, currentY);
-
-                    currentY += (textLines.length * 5) + 5;
+                const timelineCanvas = await html2canvas(timelineElement, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff'
                 });
+                const timelineImgData = timelineCanvas.toDataURL('image/png');
+
+                const imgWidth = pdfWidth - 20;
+                const imgHeight = (timelineCanvas.height * imgWidth) / timelineCanvas.width;
+
+                pdf.addImage(timelineImgData, 'PNG', 10, currentY, imgWidth, imgHeight);
             }
 
             pdf.save('Reporte_DayOut_Primavera.pdf');
+
+            // Restore visibility state
+            if (view !== 'layout' && layoutContainer) {
+                layoutContainer.classList.add('opacity-0', 'absolute', '-z-50');
+            }
+            if (view !== 'timeline' && timelineContainer) {
+                timelineContainer.classList.add('opacity-0', 'absolute', '-z-50');
+            }
+
         } catch (err) {
             console.error('Error exportando PDF:', err);
             alert('Hubo un error al generar el PDF combinado.');
@@ -279,7 +294,7 @@ const ProductionDashboard: React.FC = () => {
             </div>
 
             {/* MAIN CONTENT AREA */}
-            <div className={`flex-1 flex flex-col md:flex-row overflow-hidden md:overflow-hidden overflow-y-auto ${view !== 'layout' ? 'absolute opacity-0 pointer-events-none -z-50 w-full h-full' : ''}`}>
+            <div id="layout-container" className={`flex-1 flex flex-col md:flex-row overflow-hidden md:overflow-hidden overflow-y-auto ${view !== 'layout' ? 'absolute opacity-0 pointer-events-none -z-50 w-full h-full' : ''}`}>
                 {/* LEFT PANEL: CATALOG */}
                 <div className={`border-b md:border-b-0 md:border-r border-gray-200 bg-white z-10 transition-all duration-300 ease-in-out flex flex-col h-full shrink-0 order-1 ${isCatalogExpanded ? 'w-full md:w-80' : 'w-full md:w-16'}`}>
                     <FloorplanCatalog
@@ -331,21 +346,29 @@ const ProductionDashboard: React.FC = () => {
                                             setSelectedLayoutObjectId(obj.id);
                                         }}
                                         onDragStart={(e) => handleDragStartObject(e, obj.id)}
-                                        className={`absolute cursor-move flex items-center justify-center text-[10px] font-bold transition-all hover:scale-105 active:scale-95 text-center overflow-hidden hover:shadow-lg hover:z-50 ${obj.shape === 'circle' ? 'rounded-full' : 'rounded-md'} ${obj.colorClass} ${selectedLayoutObjectId === obj.id ? 'ring-4 ring-blue-500 shadow-xl z-50' : ''}`}
+                                        className={`absolute cursor-move flex items-center justify-center font-bold transition-all hover:scale-105 active:scale-95 text-center hover:shadow-lg hover:z-50 ${obj.shape === 'circle' ? 'rounded-full' : 'rounded-md'} ${obj.colorClass} ${selectedLayoutObjectId === obj.id ? 'ring-4 ring-blue-500 shadow-xl z-50' : ''}`}
                                         style={{
                                             left: obj.x,
                                             top: obj.y,
                                             width: obj.width,
                                             height: obj.height,
-                                            lineHeight: '1.2',
-                                            padding: '2px', // Give text a little breathing room
                                             boxSizing: 'border-box'
                                         }}
                                         title={obj.label}
                                     >
-                                        <span className="w-full text-center break-words pointer-events-none" style={{ maxHeight: '100%', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <div style={{
+                                            fontSize: '11px',
+                                            lineHeight: '1.1',
+                                            color: '#1f2937', // Text-gray-800 explicit for html2canvas
+                                            width: '100%',
+                                            maxHeight: '100%',
+                                            overflow: 'hidden',
+                                            wordWrap: 'break-word',
+                                            pointerEvents: 'none',
+                                            textAlign: 'center'
+                                        }}>
                                             {obj.label}
-                                        </span>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -432,7 +455,7 @@ const ProductionDashboard: React.FC = () => {
                 </div>
             </div>
 
-            <div className={`p-8 overflow-y-auto h-full bg-[#FAFAFA] ${view !== 'timeline' ? 'absolute opacity-0 pointer-events-none -z-50 w-full h-full top-0 left-0' : ''}`}>
+            <div id="timeline-container" className={`p-8 overflow-y-auto h-full bg-[#FAFAFA] ${view !== 'timeline' ? 'absolute opacity-0 pointer-events-none -z-50 w-full h-full top-0 left-0' : ''}`}>
                 <div className="max-w-4xl mx-auto">
                     <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 animate-fade-in-up">
                         <div className="flex justify-between items-center mb-8">

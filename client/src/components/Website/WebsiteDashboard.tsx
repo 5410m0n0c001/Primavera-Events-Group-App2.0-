@@ -15,24 +15,38 @@ const WebsiteDashboard: React.FC = () => {
     })).filter(category => category.links.length > 0);
 
     const handleCopyLink = async (url: string, title: string, category: string) => {
-        let mensajePrefijo = "Conoce";
-        let nombreLimpio = title;
+        let mensajeCompleto = "";
 
-        if (category.includes("BANQUETES")) {
-            mensajePrefijo = title.toLowerCase().includes("menú") || title.toLowerCase().includes("postres")
-                ? "Prueba "
-                : "Conoce el servicio de ";
-            nombreLimpio = title.toLowerCase().includes("nuestros") ? title.replace("Nuestros ", "los ").replace("Nuestras ", "las ") : title;
+        if (category.includes("PRINCIPALES")) {
+            mensajeCompleto = `¡Hola! Explora todo lo que Primavera Events Group tiene para ofrecerte en nuestro sitio oficial:\n${url}`;
+        } else if (category.includes("WEDDING")) {
+            mensajeCompleto = `¡Hola! Descubre cómo podemos hacer realidad la boda de tus sueños con nuestro servicio de Wedding & Event Planning:\n${url}`;
+        } else if (category.includes("BANQUETES")) {
+            mensajeCompleto = `¡Hola! Conoce nuestras exquisitas opciones gastronómicas. Mira lo que incluye el ${title}:\n${url}`;
         } else if (category.includes("VENUES")) {
-            mensajePrefijo = "Celebra tu evento en ";
+            mensajeCompleto = `¡Hola! Celebra tu evento en uno de nuestros hermosos espacios. Mira todo lo que tiene la ${title} para ti:\n${url}`;
         } else if (category.includes("PAQUETES")) {
-            mensajePrefijo = "Descubre lo que incluye el ";
+            mensajeCompleto = `¡Hola! Simplifica la organización de tu evento. Descubre todo lo que incluye nuestro ${title}:\n${url}`;
         } else if (category.includes("PERSONALES")) {
-            mensajePrefijo = "Conoce el trabajo de ";
+            mensajeCompleto = `¡Hola! Conecta directamente con nuestro equipo. Aquí tienes la tarjeta de presentación de ${title}:\n${url}`;
+        } else if (category.includes("SISTEMAS")) {
+            mensajeCompleto = `Acceso al sistema interno de Primavera Events Group:\n${url}`;
+        } else {
+            mensajeCompleto = `¡Hola! Te comparto este enlace de Primavera Events Group: ${title}\n${url}`;
         }
 
-        const textoCompartir = `¡Hola! ${mensajePrefijo} ${nombreLimpio} de Primavera Events Group aquí:`;
+        const textoCompartir = mensajeCompleto.split('\n')[0]; // Usar solo el texto sin la URL para APIs que separan campos
 
+        // Intentar copiar al portapapeles siempre como cortesía primero
+        try {
+            await navigator.clipboard.writeText(mensajeCompleto);
+            setCopiedLink(url);
+            setTimeout(() => setCopiedLink(null), 3000);
+        } catch (e) {
+            console.error("Error copiando al portapapeles:", e);
+        }
+
+        // Forzar navigator.share en todos los dispositivos según solicitud del usuario
         if (navigator.share) {
             try {
                 await navigator.share({
@@ -40,20 +54,13 @@ const WebsiteDashboard: React.FC = () => {
                     text: textoCompartir,
                     url: url
                 });
-                return; // Exito
             } catch (err) {
-                console.log("No se pudo usar navigator.share o cancelado:", err);
+                console.log("No se pudo usar navigator.share o el usuario canceló:", err);
             }
+        } else {
+            console.warn("navigator.share no está soportado en este navegador/contexto.");
+            alert("Tu navegador no soporta la función nativa de compartir. El enlace ha sido copiado al portapapeles.");
         }
-
-        const mensajeCopiar = `${textoCompartir}\n${url}`;
-        navigator.clipboard.writeText(mensajeCopiar).then(() => {
-            setCopiedLink(url);
-            setTimeout(() => setCopiedLink(null), 2000);
-        }).catch(err => {
-            console.error("Failed to copy", err);
-            prompt("Copia el siguiente texto:", mensajeCopiar);
-        });
     };
 
     const handleOpenLink = (url: string) => {
