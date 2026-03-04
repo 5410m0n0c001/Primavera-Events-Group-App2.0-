@@ -299,7 +299,7 @@ const InventoryDashboard: React.FC = () => {
             <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".xlsx, .xls, .csv" className="hidden" />
 
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-gray-800">Gestión de Inventario</h1>
+                <h1 className="text-3xl font-bold text-gray-800">Gestión de Inventario <span className="text-sm font-normal text-purple-600 bg-purple-100 px-2 py-1 rounded-full align-middle ml-2">V2 Optimizada</span></h1>
                 <div className="flex gap-2">
                     <button onClick={handleImportClick} className="px-4 py-2 bg-green-600 text-white rounded shadow hover:bg-green-700">
                         📥 Importar Excel

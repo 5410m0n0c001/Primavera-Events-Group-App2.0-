@@ -39,7 +39,26 @@ const WebsiteDashboard: React.FC = () => {
 
         // Intentar copiar al portapapeles siempre como cortesía primero
         try {
-            await navigator.clipboard.writeText(mensajeCompleto);
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(mensajeCompleto);
+            } else {
+                // Fallback robusto para entornos HTTP (ej. IP directa)
+                const textArea = document.createElement("textarea");
+                textArea.value = mensajeCompleto;
+                // Prevenir scroll interactuable
+                textArea.style.top = "0";
+                textArea.style.left = "0";
+                textArea.style.position = "fixed";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.error('Fallback: Error al copiar', err);
+                }
+                document.body.removeChild(textArea);
+            }
             setCopiedLink(url);
             setTimeout(() => setCopiedLink(null), 3000);
         } catch (e) {
