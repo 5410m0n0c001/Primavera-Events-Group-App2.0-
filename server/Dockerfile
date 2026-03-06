@@ -13,7 +13,7 @@ COPY package*.json ./
 COPY prisma ./prisma/
 
 # Instalar TODAS las dependencias para build
-RUN npm ci
+RUN npm install
 
 # Generar Prisma Client
 RUN npx prisma generate
