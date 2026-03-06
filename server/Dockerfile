@@ -4,24 +4,20 @@
 FROM node:20-alpine AS dependencies
 
 WORKDIR /app
-ENV NODE_ENV=development
 
 # Instalar herramientas de build
-RUN apk add --no-cache \
-    python3 \
-    make \
-    g++ \
-    openssl
+RUN apk add --no-cache python3 make g++ openssl
 
 # Copiar archivos de dependencias
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Instalar TODAS las dependencias (incluyendo devDependencies para Prisma)
-RUN npm install
+# Instalar TODAS las dependencias para build
+RUN npm ci
 
 # Generar Prisma Client
 RUN npx prisma generate
+
 
 # ══════════════════════════════════════════════════════
 # STAGE 2: BUILDER - Compilar aplicación (TypeScript)
@@ -40,7 +36,17 @@ COPY . .
 RUN npm run build
 
 # ══════════════════════════════════════════════════════
-# STAGE 3: PRODUCTION - Runtime optimizado
+# STAGE 3: PRUNE - Filtrar DevDependencies
+# ══════════════════════════════════════════════════════
+FROM node:20-alpine AS pruner
+WORKDIR /app
+COPY --from=dependencies /app/package*.json ./
+COPY --from=dependencies /app/node_modules ./node_modules
+# Eliminar las dev dependencies para el stage final usando npm prune
+RUN npm prune --omit=dev
+
+# ══════════════════════════════════════════════════════
+# STAGE 4: PRODUCTION - Runtime optimizado
 # ══════════════════════════════════════════════════════
 FROM node:20-alpine AS production
 
@@ -52,9 +58,9 @@ RUN apk add --no-cache \
     openssl \
     dumb-init
 
-# Copiar archivos necesarios desde builder
+# Copiar archivos necesarios desde builder y pruner
 COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=pruner /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/dist ./dist
 

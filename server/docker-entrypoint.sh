@@ -5,9 +5,8 @@ echo "================================================"
 echo "🚀 Primavera Events - Backend Initialization"
 echo "================================================"
 
-# FORCING SCHEMA SYNC: bypassing migration mismatch since we deleted the local migration folder
-echo "🔄 Running migrations (db push)..."
-npx prisma db push --accept-data-loss
+echo "🔄 Running migrations (migrate deploy)..."
+npx prisma migrate deploy
 
 echo "🔄 Ensuring Prisma Client..."
 npx prisma generate --schema=./prisma/schema.prisma
