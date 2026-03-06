@@ -375,3 +375,56 @@ model Income {
   @@index([eventId])
   @@map("incomes")
 }
+
+// --- CRM & CALENDAR MODULE (Sofia AI Integration) ---
+
+model Lead {
+  id              String    @id @default(cuid())
+  name            String?
+  phone           String?
+  email           String?
+  eventType       String?
+  eventDate       DateTime?
+  guestCount      Int?
+  budget          String?
+  preferredVenue  String?
+  preferredContact String?
+  bestTime        String?
+  discountCoupon  String?
+  notes           String?
+  status          LeadStatus @default(NEW)
+  source          String     @default("chat_sofia")
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  appointment     Appointment?
+}
+
+model Appointment {
+  id          String    @id @default(cuid())
+  leadId      String    @unique
+  lead        Lead      @relation(fields: [leadId], references: [id])
+  scheduledAt DateTime
+  duration    Int       @default(60) // minutos
+  type        String    @default("consulta") // consulta, degustacion, visita_venue
+  status      AppointmentStatus @default(PENDING)
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL_SENT
+  NEGOTIATION
+  CLOSED_WON
+  CLOSED_LOST
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}

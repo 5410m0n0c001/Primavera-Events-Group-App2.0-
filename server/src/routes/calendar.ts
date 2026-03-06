@@ -1,8 +1,18 @@
 import { Router } from 'express';
 import { PrismaClient } from '@prisma/client';
+import { prisma } from '../prisma';
+import { calendarService } from '../services/calendarService';
+import rateLimit from 'express-rate-limit';
 
 const router = Router();
-import { prisma } from '../prisma';
+
+const publicLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000,
+    max: 20,
+    message: { error: 'Too many requests, please try again later.' }
+});
+
+// ==== EVENT ENDPOINTS ====
 
 // GET all events (for calendar view)
 router.get('/', async (req, res) => {
@@ -143,6 +153,69 @@ router.delete('/:id', async (req, res) => {
         res.json({ message: 'Event deleted' });
     } catch (error) {
         res.status(500).json({ error: 'Error deleting event' });
+    });
+
+// ==== SOFIA & PUBLIC CALENDAR ENDPOINTS ====
+
+// GET /api/calendar/availability
+router.get('/availability', publicLimiter, async (req, res) => {
+    try {
+        const { date, venueId } = req.query;
+        if (!date) return res.status(400).json({ error: 'Date is required' });
+
+        const availability = await calendarService.checkAvailability(date as string, venueId as string);
+        res.json(availability);
+    } catch (error: any) {
+        console.error('Error checking availability:', error);
+        res.status(400).json({ error: error.message || 'Failed to check availability' });
+    }
+});
+
+// POST /api/calendar/book
+router.post('/book', publicLimiter, async (req, res) => {
+    try {
+        const { leadId, scheduledAt, type, notes } = req.body;
+
+        if (!leadId || !scheduledAt) {
+            return res.status(400).json({ error: 'leadId and scheduledAt are required' });
+        }
+
+        const appointment = await calendarService.bookAppointment(leadId, scheduledAt, type, notes);
+        res.status(201).json(appointment);
+    } catch (error: any) {
+        console.error('Error booking appointment:', error);
+        res.status(400).json({ error: error.message || 'Failed to book appointment' });
+    }
+});
+
+// ==== ADMIN APPOINTMENT ENDPOINTS ====
+// Note: Auth middleware is applied in index.ts for /api/calendar/admin/*
+
+// GET /api/calendar/admin/today
+router.get('/admin/today', async (req, res) => {
+    try {
+        const appointments = await calendarService.getTodayAppointments();
+        res.json({ appointments });
+    } catch (error) {
+        console.error('Error fetching today appointments:', error);
+        res.status(500).json({ error: 'Failed to fetch appointments' });
+    }
+});
+
+// GET /api/calendar/admin/range
+router.get('/admin/range', async (req, res) => {
+    try {
+        const { start, end } = req.query;
+        if (!start || !end) return res.status(400).json({ error: 'start and end dates are required' });
+
+        const appointments = await calendarService.getAppointmentsByRange(
+            new Date(start as string),
+            new Date(end as string)
+        );
+        res.json({ appointments });
+    } catch (error) {
+        console.error('Error fetching appointments by range:', error);
+        res.status(500).json({ error: 'Failed to fetch appointments' });
     }
 });
 

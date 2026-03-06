@@ -18,6 +18,10 @@ import analyticsRoutes from './routes/analytics';
 import venueRoutes from './routes/venue.routes';
 import quotesRoutes from './routes/quotes';
 import exportsRoutes from './routes/exports';
+import crmRoutes from './routes/crm';
+import authRoutes from './routes/auth';
+import quoteSimulationRoutes from './routes/quoteSimulation';
+import aiChatRoutes from './routes/aiChat';
 
 import { prisma } from './prisma'; // Use singleton
 
@@ -114,6 +118,15 @@ console.log('🔍 [DEBUG] Registering routes...');
 app.use('/api/analytics', authenticate, analyticsRoutes);
 app.use('/api/quotes', authenticate, quotesRoutes);
 app.use('/api/events', authenticate, exportsRoutes);
+
+// Sofia AI Public & Private Integrations
+app.use('/api/ai-chat', aiChatRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/quote-simulation', quoteSimulationRoutes);
+
+// CRM has both public limits and private routes, the routes file handles public, authenticate handles private
+app.use('/api/crm/admin', authenticate);
+app.use('/api/crm', crmRoutes);
 
 diagnosticEndpoints(app); // 🩺 Diagnostic Endpoints
 
