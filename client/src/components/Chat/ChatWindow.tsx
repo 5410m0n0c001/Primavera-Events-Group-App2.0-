@@ -76,9 +76,30 @@ export default function ChatWindow({ isAdmin }: Props) {
         if (isMuted || !window.speechSynthesis) return;
         window.speechSynthesis.cancel(); // Stop talking first
         const utterance = new SpeechSynthesisUtterance(text);
+
+        // Explicitly try to find a female Spanish voice (Sabina, Paulina, Helena, Laura, etc.)
+        const voices = window.speechSynthesis.getVoices();
+        const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
+
+        if (spanishVoices.length > 0) {
+            const preferredNames = ['sabina', 'paulina', 'helena', 'laura', 'monica', 'google español', 'female', 'mujer'];
+            let selectedVoice = null;
+
+            for (const name of preferredNames) {
+                selectedVoice = spanishVoices.find(v => v.name.toLowerCase().includes(name) || v.voiceURI.toLowerCase().includes(name));
+                if (selectedVoice) break;
+            }
+
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            } else {
+                utterance.voice = spanishVoices[0]; // Fallback to first Spanish voice
+            }
+        }
+
         utterance.lang = 'es-MX';
         utterance.rate = 1.0;
-        utterance.pitch = 1.1;
+        utterance.pitch = 1.2; // Slightly higher pitch for a more feminine tone as fallback
         window.speechSynthesis.speak(utterance);
     };
 
