@@ -12,8 +12,11 @@ RUN apk add --no-cache python3 make g++ openssl
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Instalar TODAS las dependencias para build
 RUN npm install
+
+# Create initial migration for baselining
+RUN mkdir -p prisma/migrations/0_init && \
+    npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > prisma/migrations/0_init/migration.sql
 
 # Generar Prisma Client
 RUN npx prisma generate
