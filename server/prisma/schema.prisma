@@ -84,6 +84,7 @@ model Venue {
   name        String
   description String?
   address     String?
+  link        String? // Link to external website, social media, or map
   capacity    Int
 
   // Pricing

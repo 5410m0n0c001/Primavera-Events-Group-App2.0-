@@ -12,6 +12,7 @@ const VenueForm: React.FC<VenueFormProps> = ({ venue, onSave, onCancel }) => {
         name: '',
         description: '',
         address: '',
+        link: '',
         capacity: 0,
         priceRent: 0,
         pricePerHour: 0,
@@ -100,6 +101,17 @@ const VenueForm: React.FC<VenueFormProps> = ({ venue, onSave, onCancel }) => {
                             type="text"
                             name="address"
                             value={formData.address || ''}
+                            onChange={handleChange}
+                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-purple-500 focus:border-purple-500"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Enlace (Sitio Web/Maps)</label>
+                        <input
+                            type="text"
+                            name="link"
+                            value={formData.link || ''}
                             onChange={handleChange}
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-purple-500 focus:border-purple-500"
                         />

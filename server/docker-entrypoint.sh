@@ -5,13 +5,8 @@ echo "================================================"
 echo "🚀 Primavera Events - Backend Initialization"
 echo "================================================"
 
-echo "🔄 Running migrations (migrate deploy)..."
-npx prisma migrate deploy || (
-  echo "⚠️ migrate deploy falló (posiblemente la BD no está vacía sin historial). Intentando baselining..."
-  npx prisma migrate resolve --applied 0_init
-  echo "🔄 Reintentando migrate deploy..."
-  npx prisma migrate deploy
-)
+echo "🔄 Forcing Database Schema Sync (db push)..."
+npx prisma db push --accept-data-loss
 
 echo "🔄 Ensuring Prisma Client..."
 npx prisma generate --schema=./prisma/schema.prisma
