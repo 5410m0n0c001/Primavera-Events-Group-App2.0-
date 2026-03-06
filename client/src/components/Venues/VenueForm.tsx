@@ -207,11 +207,10 @@ const VenueForm: React.FC<VenueFormProps> = ({ venue, onSave, onCancel }) => {
                                 Guardar Locación
                             </button>
                         </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
-            </div >
-        </div >
     );
 };
 
