@@ -43,7 +43,9 @@ async function callGeminiStreamOrWait(historyItems: any[], systemInstruction: st
     if (!response.ok) {
         const errText = await response.text();
         console.error('Gemini API Error:', response.status, errText);
-        throw new Error(`Error de Gemini API: ${response.status}`);
+        const err: any = new Error(`Error de Gemini API: ${response.status}`);
+        err.status = response.status;
+        throw err;
     }
 
     const data = await response.json();
@@ -274,7 +276,8 @@ router.post('/', chatLimiter, async (req, res) => {
         res.json({ reply: replyText });
     } catch (error: any) {
         console.error('Sofia AI Chat Error:', error);
-        res.status(500).json({ error: 'Network communication with Sofia failed' });
+        const status = error.status || 500;
+        res.status(status).json({ error: 'Network communication with Sofia failed' });
     }
 });
 
@@ -324,7 +327,8 @@ router.post('/admin', authenticate, async (req, res) => {
 
     } catch (error: any) {
         console.error('Sofia Admin AI Chat Error:', error);
-        res.status(500).json({ error: 'Network communication with Sofia (Admin) failed' });
+        const status = error.status || 500;
+        res.status(status).json({ error: 'Network communication with Sofia (Admin) failed' });
     }
 });
 
