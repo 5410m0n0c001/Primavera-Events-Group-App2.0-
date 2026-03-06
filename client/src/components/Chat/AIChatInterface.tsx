@@ -9,6 +9,19 @@ interface Props {
 
 export default function AIChatInterface({ onLoginClick, adminToken, onLogout }: Props) {
     const [showChat, setShowChat] = useState(false);
+    const [clickCount, setClickCount] = useState(0);
+
+    const handleSecretClick = () => {
+        setClickCount(prev => {
+            const newCount = prev + 1;
+            if (newCount >= 3) {
+                onLoginClick();
+                return 0;
+            }
+            setTimeout(() => setClickCount(0), 2000); // Reset after 2s
+            return newCount;
+        });
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#F5F5F7] to-[#E5E5EA] dark:from-black dark:to-[#1c1c1e] text-[#1D1D1F] dark:text-white flex flex-col relative overflow-hidden transition-colors duration-500">
@@ -22,9 +35,12 @@ export default function AIChatInterface({ onLoginClick, adminToken, onLogout }: 
 
                 {/* Header / Brand */}
                 <div className={`transition-all duration-700 w-full flex flex-col items-center ${showChat ? 'opacity-0 h-0 overflow-hidden scale-95' : 'opacity-100 mb-12 scale-100'}`}>
-                    <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full mb-6 bg-gradient-to-tr from-primavera-gold to-yellow-200 shadow-[0_0_40px_rgba(212,175,55,0.4)] flex items-center justify-center relative overflow-hidden group">
+                    <div
+                        onClick={handleSecretClick}
+                        className="w-24 h-24 sm:w-32 sm:h-32 rounded-full mb-6 bg-gradient-to-tr from-primavera-gold to-yellow-200 shadow-[0_0_40px_rgba(212,175,55,0.4)] flex items-center justify-center relative overflow-hidden group cursor-pointer"
+                    >
                         <div className="absolute inset-0 bg-white/20 backdrop-blur-sm group-hover:scale-110 transition-transform duration-500"></div>
-                        <span className="text-4xl sm:text-5xl relative z-10">✨</span>
+                        <span className="text-4xl sm:text-5xl relative z-10 select-none">✨</span>
                     </div>
 
                     <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
@@ -97,15 +113,6 @@ export default function AIChatInterface({ onLoginClick, adminToken, onLogout }: 
                 </div>
 
             </div>
-
-            {/* Discrete Admin Login Button */}
-            <button
-                onClick={onLoginClick}
-                title="Admin Access"
-                className="fixed bottom-4 right-4 w-8 h-8 rounded-full bg-transparent hover:bg-gray-200/50 dark:hover:bg-gray-800/50 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors z-50 opacity-30 hover:opacity-100 focus:outline-none"
-            >
-                <span className="text-xs">🔒</span>
-            </button>
 
         </div>
     );
