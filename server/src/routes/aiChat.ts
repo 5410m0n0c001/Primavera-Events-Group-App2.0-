@@ -232,7 +232,7 @@ router.post('/', chatLimiter, async (req, res) => {
     try {
         const { message, history } = req.body;
 
-        let geminiHistory = Array.isArray(history) ? mapToGeminiHistory(history) : [];
+        let geminiHistory: any[] = Array.isArray(history) ? mapToGeminiHistory(history) : [];
         geminiHistory.push({ role: 'user', parts: [{ text: message }] });
 
         let modelResponse = await callGeminiStreamOrWait(geminiHistory, SYSTEM_PROMPT_CLIENT, sofiaTools);
