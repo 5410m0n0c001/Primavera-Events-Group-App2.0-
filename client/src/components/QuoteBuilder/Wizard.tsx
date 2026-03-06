@@ -8,17 +8,16 @@ import QuoteBreakdown from './QuoteBreakdown';
 // Mock Data for MVP - Replace with API calls
 const DATA_CATEGORIES = [
     {
-        id: 'cat_packages', title: 'Paquetes de Eventos', items: [
-            { id: 'pkg_1', name: 'Glow Graduation Elite', price: 949, unit: 'persona', description: 'Banquete 4 tiempos, DJ, Letras Gigantes, Cabina Selfie', category: 'Paquetes' },
-            { id: 'pkg_2', name: 'Paquete Gobernador', price: 899, unit: 'persona', description: 'Venue: Convenciones Presidente. 3 tiempos, Coctel, DJ 8 hrs', category: 'Paquetes' },
-            { id: 'pkg_3', name: 'Paquete Presidente', price: 899, unit: 'persona', description: 'Venue: Convenciones Presidente. 4 tiempos, Capitán, Pista 5x5', category: 'Paquetes' },
-            { id: 'pkg_4', name: 'Destino Yolomecatl', price: 899, unit: 'persona', description: 'Venue: Jardín Yolomecatl. Paquete Presidente integrado + Baños', category: 'Paquetes' },
-            { id: 'pkg_5', name: 'Esencia Floral', price: 999, unit: 'persona', description: 'Venue: Villa San Gaspar. 3 tiempos (60%), Back Vintage, Letras', category: 'Paquetes' },
-            { id: 'pkg_6', name: 'Imperial Ecuestre', price: 749, unit: 'persona', description: 'Venue: Jardín Salón Los Caballos. 4 tiempos, menú infantil, Silla Crossback', category: 'Paquetes' },
-            { id: 'pkg_7', name: 'Linaje Pura Sangre', price: 899, unit: 'persona', description: 'Venue: Rancho Los Potrillos. Paquete Presidente Estándar', category: 'Paquetes' },
-            { id: 'pkg_8', name: 'Armonía Zarabanda', price: 1700, unit: 'persona', description: 'Venue: Quinta Zarabanda. Hospedaje VIP, Pista Pixel 5x5', category: 'Paquetes' },
-            { id: 'pkg_9', name: 'Vuelo Esmeralda', price: 2199, unit: 'persona', description: 'Venue: Jardín Tsu Nuum. Hotel 60px, Robot LED, Cortesías', category: 'Paquetes' },
-            { id: 'pkg_10', name: 'Nature\'s Majesty', price: 1399, unit: 'persona', description: 'Venue: Finca Los Isabeles. Hospedaje 14px, Suite Nupcial', category: 'Paquetes' }
+        id: 'cat_packages', title: 'Paquetes de Eventos Oficiales', items: [
+            { id: 'pkg_gob', name: 'Paquete Gobernador', price: 900, unit: 'persona', description: 'Venue: Convenciones Presidente. 3 tiempos, Coctel, DJ 8 hrs', category: 'Paquetes' },
+            { id: 'pkg_pres', name: 'Paquete Presidente', price: 1100, unit: 'persona', description: 'Venue: Convenciones Presidente. 4 tiempos, Capitán, Grupo Musical', category: 'Paquetes' },
+            { id: 'pkg_yolo', name: 'Destino Yolomecatl', price: 850, unit: 'persona', description: 'Venue: Jardín Yolomecatl. Paquete base con locación incluida', category: 'Paquetes' },
+            { id: 'pkg_flor', name: 'Esencia Floral', price: 950, unit: 'persona', description: 'Venue: Villa San Gaspar. Boda íntima (Max 200px), Back Fotográfico', category: 'Paquetes' },
+            { id: 'pkg_ecues', name: 'Imperial Ecuestre', price: 800, unit: 'persona', description: 'Venue: Jardín Los Caballos. 4 tiempos, DJ Residente, Letras 1.10m', category: 'Paquetes' },
+            { id: 'pkg_pura', name: 'Linaje Pura Sangre', price: 1050, unit: 'persona', description: 'Venue: Rancho Los Potrillos. Bodas Charras. Toro Mecánico incluido', category: 'Paquetes' },
+            { id: 'pkg_zara', name: 'Armonía Zarabanda', price: 1250, unit: 'persona', description: 'Venue: Quinta Zarabanda. Suite VIP', category: 'Paquetes' },
+            { id: 'pkg_vuelo', name: 'Vuelo Esmeralda', price: 1350, unit: 'persona', description: 'Venue: Jardín Tsu Nuum. Hotel 60px', category: 'Paquetes' },
+            { id: 'pkg_natur', name: 'Nature\'s Majesty', price: 1150, unit: 'persona', description: 'Venue: Finca Los Isabeles. Hospedaje 14px', category: 'Paquetes' }
         ]
     },
     {
@@ -32,25 +31,69 @@ const DATA_CATEGORIES = [
     },
     {
         id: 'cat_furniture', title: 'Mobiliario Individual', items: [
-            { id: 'fur_round_tab', name: 'Mesa Redonda (10 pax)', price: 150, unit: 'pza', description: 'Inventario Físico', category: 'Mobiliario' },
-            { id: 'fur_sq_wood', name: 'Mesa Cuadrada Madera', price: 250, unit: 'pza', description: 'Para 4 pax', category: 'Mobiliario' },
-            { id: 'fur_marble', name: 'Mesa Rectangular Mármol', price: 400, unit: 'pza', description: 'Mesa Premium', category: 'Mobiliario' },
-            { id: 'fur_tab', name: 'Tablón Básico', price: 120, unit: 'pza', description: '2.44x0.76m', category: 'Mobiliario' },
-            { id: 'fur_chal_cross', name: 'Silla Cross Back (Miel/Nogal)', price: 65, unit: 'pza', description: 'Inventario Físico', category: 'Mobiliario' },
-            { id: 'fur_chal_tiff', name: 'Silla Tiffany (Blanca/Choco)', price: 45, unit: 'pza', description: 'Clásica', category: 'Mobiliario' },
-            { id: 'fur_lounge', name: 'Sala Lounge Madera', price: 1200, unit: 'set', description: 'Para 8 personas', category: 'Mobiliario' },
-            { id: 'fur_bar', name: 'Periquera Alta (Set)', price: 450, unit: 'set', description: 'Mesa + Bancos', category: 'Mobiliario' }
+            { id: 'fur_smi', name: 'Silla cross back miel', price: 45, unit: 'pz', description: 'Madera natural', category: 'Sillas' },
+            { id: 'fur_sno', name: 'Silla cross back nogal', price: 45, unit: 'pz', description: 'Madera oscura', category: 'Sillas' },
+            { id: 'fur_stb', name: 'Silla tiffany laqueada blanca', price: 35, unit: 'pz', description: 'Elegante', category: 'Sillas' },
+            { id: 'fur_std', name: 'Silla tiffany dorada', price: 35, unit: 'pz', description: 'Premium', category: 'Sillas' },
+            { id: 'fur_svc', name: 'Silla versalles caoba', price: 40, unit: 'pz', description: 'Clásica', category: 'Sillas' },
+            { id: 'fur_sdm', name: 'Silla diana madera', price: 45, unit: 'pz', description: 'Exclusiva', category: 'Sillas' },
+            { id: 'fur_spr', name: 'Silla praga', price: 50, unit: 'pz', description: 'Estilo contemporaneo', category: 'Sillas' },
+            { id: 'fur_mre', name: 'Mesa redonda (10 personas)', price: 80, unit: 'pz', description: 'Tradicional', category: 'Mesas' },
+            { id: 'fur_mtb', name: 'Tablón', price: 70, unit: 'pz', description: '2.44x0.76m', category: 'Mesas' },
+            { id: 'fur_mcm', name: 'Mesa cuadrada de madera', price: 90, unit: 'pz', description: 'Madera robusta', category: 'Mesas' },
+            { id: 'fur_mrm', name: 'Mesa rectangular tipo mármol', price: 120, unit: 'pz', description: 'Diseño VIP', category: 'Mesas' },
+            { id: 'fur_pam', name: 'Periquera alta madera', price: 80, unit: 'pz', description: 'Cocktails', category: 'Salas Lounge' },
+            { id: 'fur_pat', name: 'Periquera alta metal', price: 80, unit: 'pz', description: 'Industrial', category: 'Salas Lounge' },
+            { id: 'fur_slm', name: 'Sala lounge madera', price: 150, unit: 'set', description: 'Comodidad', category: 'Salas Lounge' },
+            { id: 'fur_blc', name: 'Banca larga con respaldo', price: 80, unit: 'pz', description: 'Ceremonias', category: 'Salas Lounge' }
         ]
     },
     {
-        id: 'cat_structures', title: 'Estructuras y Carpas', items: [
-            { id: 'str_pag', name: 'Carpa Tipo Pagoda', price: 2500, unit: 'pza', description: '6x6m', category: 'Estructuras' },
-            { id: 'str_dec', name: 'Letras Gigantes', price: 1500, unit: 'set', description: 'XV, LOVE, Corazón', category: 'Estructuras' },
-            { id: 'str_arc', name: 'Portería / Arco Metálico', price: 800, unit: 'pza', description: 'Negra o Dorada', category: 'Estructuras' }
+        id: 'cat_glassware', title: 'Cristalería, Loza y Plaquetería', items: [
+            { id: 'gls_cgb', name: 'Copa globo', price: 12, unit: 'pz', description: 'Para bebidas preparadas', category: 'Cristalería' },
+            { id: 'gls_cfl', name: 'Copa flauta', price: 12, unit: 'pz', description: 'Para brindis', category: 'Cristalería' },
+            { id: 'gls_cvt', name: 'Copa vino tinto', price: 12, unit: 'pz', description: 'Clásica', category: 'Cristalería' },
+            { id: 'gls_caz', name: 'Copa de color azul', price: 15, unit: 'pz', description: 'Estilizada', category: 'Cristalería' },
+            { id: 'gls_cam', name: 'Copa vino ámbar', price: 15, unit: 'pz', description: 'Vintage', category: 'Cristalería' },
+            { id: 'loz_pbc', name: 'Plato base de concha dorado', price: 18, unit: 'pz', description: 'Premium', category: 'Loza' },
+            { id: 'loz_pbt', name: 'Plato base talavera', price: 18, unit: 'pz', description: 'Tradicional', category: 'Loza' },
+            { id: 'loz_pbg', name: 'Plato base gótico negro', price: 20, unit: 'pz', description: 'Elegante oscuro', category: 'Loza' },
+            { id: 'loz_ptc', name: 'Plato trinche cuadrado', price: 12, unit: 'pz', description: 'Minimalista', category: 'Loza' },
+            { id: 'cuc_tce', name: 'Trinche dorado acero', price: 15, unit: 'pz', description: 'Para carne o ensalada', category: 'Cuchillería' },
+            { id: 'cuc_scd', name: 'Cuchara sopera dorada', price: 15, unit: 'pz', description: 'Vajilla VIP', category: 'Cuchillería' },
+            { id: 'cuc_cpn', name: 'Cuchillo dorado carnicero', price: 15, unit: 'pz', description: 'Acero inoxidable', category: 'Cuchillería' }
+        ]
+    },
+    {
+        id: 'cat_mantels', title: 'Mantelería y Caminos', items: [
+            { id: 'mtl_mbr', name: 'Mantel blanco redondo', price: 40, unit: 'pz', description: 'Para mesas de 10', category: 'Mantelería' },
+            { id: 'mtl_cmo', name: 'Cubre mantel organza', price: 25, unit: 'pz', description: 'Varios colores', category: 'Mantelería' },
+            { id: 'mtl_fbc', name: 'Faldón / Bambalina', price: 35, unit: 'pz', description: 'Color sólido', category: 'Mantelería' },
+            { id: 'mtl_mvl', name: 'Mantel vintage encaje', price: 50, unit: 'pz', description: 'Estilo romántico', category: 'Mantelería' },
+            { id: 'cam_ary', name: 'Camino azul rey', price: 15, unit: 'pz', description: 'Tela premium', category: 'Caminos Color' },
+            { id: 'cam_ama', name: 'Camino azul marino', price: 15, unit: 'pz', description: 'Clásico', category: 'Caminos Color' },
+            { id: 'cam_vbd', name: 'Camino verde bandera', price: 15, unit: 'pz', description: 'Brillante', category: 'Caminos Color' },
+            { id: 'cam_rpa', name: 'Camino rojo pasión', price: 15, unit: 'pz', description: 'Romántico', category: 'Caminos Color' },
+            { id: 'cam_dor', name: 'Camino dorado u oro', price: 15, unit: 'pz', description: 'VIP', category: 'Caminos Color' },
+            { id: 'cam_bgh', name: 'Camino beige/hueso', price: 15, unit: 'pz', description: 'Boho', category: 'Caminos Color' }
+        ]
+    },
+    {
+        id: 'cat_structures', title: 'Decoración y Estructuras', items: [
+            { id: 'dec_lg1', name: 'Letras Gigantes 1.10m', price: 600, unit: 'set', description: 'Love / XV', category: 'Decoración Iluminada' },
+            { id: 'dec_lg8', name: 'Letras Gigantes 1.80m', price: 900, unit: 'set', description: 'Máximo impacto', category: 'Decoración Iluminada' },
+            { id: 'dec_cgi', name: 'Corazón Gigante Iluminado', price: 700, unit: 'pz', description: 'Fondo de fotos', category: 'Decoración Iluminada' },
+            { id: 'str_por', name: 'Portería perimetral 3x3x2.5', price: 1500, unit: 'pz', description: 'Metálica', category: 'Estructuras Gigantes' },
+            { id: 'str_som', name: 'Sombrillas 3m', price: 300, unit: 'pz', description: 'Blanco/Crudo', category: 'Estructuras Gigantes' },
+            { id: 'dec_spl', name: 'Sillón Princesa', price: 350, unit: 'pz', description: 'Estilo Imperio', category: 'Decoración Base' },
+            { id: 'dec_cbl', name: 'Cabildo madera ceremonia', price: 400, unit: 'pz', description: 'Estilo rústico', category: 'Decoración Base' }
         ]
     },
     {
         id: 'cat_extras', title: 'Extras y Barras', items: [
+            { id: 'ext_hmd', name: 'Hielera mediana', price: 100, unit: 'pz', description: 'Básica', category: 'Equipo y Accesorios' },
+            { id: 'ext_hrb', name: 'Hielera redonda blanca grande', price: 150, unit: 'pz', description: 'Eventos masivos', category: 'Equipo y Accesorios' },
+            { id: 'ext_jcr', name: 'Jarra cristalina de mesa', price: 25, unit: 'pz', description: 'Centro de mesa', category: 'Equipo y Accesorios' },
             { id: 'ext_bar', name: 'Barra Mix (Toppings)', price: 4500, unit: 'servicio', description: 'Dulces y Salados', category: 'Extras' },
             { id: 'ext_shots', name: 'Carrito de Shots', price: 3500, unit: 'servicio', description: 'Con personal', category: 'Extras' },
             { id: 'ext_esqu', name: 'Carrito de Esquites', price: 2500, unit: 'servicio', description: 'Con personal', category: 'Extras' }
@@ -134,7 +177,11 @@ const QuoteWizard: React.FC = () => {
     // Dynamic Quantity Scaling when guestCount changes
     // This solves the bug: "los datos no son dinámicos al cambiar el número de invitados"
     React.useEffect(() => {
+        // Only run if there are selected items to update
+        if (draft.selectedItems.length === 0) return;
+
         setDraft(prev => {
+            let hasChanges = false;
             const updatedItems = prev.selectedItems.map(si => {
                 const isPerPerson = si.item?.unit?.toLowerCase() === 'persona' || si.item?.unit?.toLowerCase() === 'pax';
                 if (!isPerPerson && !si.item?.name?.toLowerCase().includes('mesero') && !si.item?.name?.toLowerCase().includes('mesa')) {
@@ -142,10 +189,14 @@ const QuoteWizard: React.FC = () => {
                 }
 
                 // Re-apply smart quantity rule
-                let suggestedQty = 1;
+                let suggestedQty = si.quantity;
                 if (isPerPerson) suggestedQty = prev.guestCount;
                 if (si.item?.name?.toLowerCase().includes('mesero')) suggestedQty = Math.ceil(prev.guestCount / 15);
                 if (si.item?.name?.toLowerCase().includes('mesa') && !si.item?.name?.toLowerCase().includes('principal')) suggestedQty = Math.ceil(prev.guestCount / 10);
+
+                if (suggestedQty !== si.quantity) {
+                    hasChanges = true;
+                }
 
                 return {
                     ...si,
@@ -153,12 +204,13 @@ const QuoteWizard: React.FC = () => {
                     cost: suggestedQty * si.unitPrice
                 };
             });
-            return { ...prev, selectedItems: updatedItems };
+            // Prevent infinite loop by returning exact same reference if nothing actually changed
+            return hasChanges ? { ...prev, selectedItems: updatedItems } : prev;
         });
-    }, [draft.guestCount]);
+    }, [draft.guestCount]); // Solo debe reaccionar al cambio del contador de invitados
 
-    // Capacity Validation (No longer based merely on 'Locaciones' mock category, checking guestCount vs static threshold for warnings)
-    const locationCapacity = 500; // Max venue capacity for Primavera
+    // Capacity Validation checks absolute max venue size.
+    const locationCapacity = 800; // Max venue capacity for C.C Presidente
     const isOverCapacity = draft.guestCount > locationCapacity;
 
     const handleToggleItem = (item: any, quantity: number) => {
