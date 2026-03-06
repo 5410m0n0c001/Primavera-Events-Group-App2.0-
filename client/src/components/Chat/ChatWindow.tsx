@@ -32,7 +32,7 @@ export default function ChatWindow({ isAdmin }: Props) {
         // Initial Greeting
         const greeting = isAdmin
             ? "Hola. Soy Sofía en modo Administrador. ¿Qué métricas, reportes de CRM o citas de hoy necesitas investigar?"
-            : "¡Hola! Soy Sofía ✨. Me emociona ayudarte a planear el evento perfecto en Primavera. ¿Con quién tengo el placer de hablar?";
+            : "¡Hola! ¡Bienvenido! Soy Sofía ✨. Me emociona ayudarte a planear el evento perfecto en Primavera. ¿Con quién tengo el placer de hablar?";
 
         setMessages([{
             id: Date.now().toString(),
@@ -126,8 +126,8 @@ export default function ChatWindow({ isAdmin }: Props) {
                 >
                     <div className="flex flex-col gap-1 max-w-[85%] sm:max-w-[75%]">
                         <div className={`p-4 rounded-2xl ${msg.role === 'user'
-                                ? 'bg-blue-500 text-white rounded-tr-sm shadow-md'
-                                : 'bg-white dark:bg-[#1c1c1e] text-gray-800 dark:text-gray-100 rounded-tl-sm shadow-[0_2px_15px_rgba(0,0,0,0.04)] border border-gray-100 dark:border-[#2c2c2e]'
+                            ? 'bg-blue-500 text-white rounded-tr-sm shadow-md'
+                            : 'bg-white dark:bg-[#1c1c1e] text-gray-800 dark:text-gray-100 rounded-tl-sm shadow-[0_2px_15px_rgba(0,0,0,0.04)] border border-gray-100 dark:border-[#2c2c2e]'
                             } whitespace-pre-wrap leading-relaxed text-[15px] sm:text-[16px] font-sans`}
                         >
                             {msg.content}
