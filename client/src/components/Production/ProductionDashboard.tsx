@@ -181,7 +181,8 @@ const ProductionDashboard: React.FC = () => {
         setTimelineItems(items => items.filter(item => item.id !== id));
     };
 
-    // --- PDF EXPORT LOGIC ---
+    const [isExporting, setIsExporting] = useState(false);
+
     const exportCombinedPDF = async () => {
         const layoutElement = document.getElementById('layout-export-area');
         const timelineElement = document.getElementById('timeline-export-area');
@@ -192,24 +193,31 @@ const ProductionDashboard: React.FC = () => {
         }
 
         try {
+            setIsExporting(true);
+
             // Un-hide containers forcefully for html2canvas
             const layoutContainer = document.getElementById('layout-container');
             const timelineContainer = document.getElementById('timeline-container');
 
-            if (layoutContainer) {
-                layoutContainer.classList.remove('opacity-0', 'absolute', '-z-50');
-            }
-            if (timelineContainer) {
-                timelineContainer.classList.remove('opacity-0', 'absolute', '-z-50');
-            }
+            if (layoutContainer) layoutContainer.classList.remove('opacity-0');
+            if (timelineContainer) timelineContainer.classList.remove('opacity-0');
+
+            // Temporarily remove zoom for crisp layout rendering
+            const zoomContainer = layoutElement.parentElement;
+            const originalTransform = zoomContainer ? zoomContainer.style.transform : '';
+            if (zoomContainer) zoomContainer.style.transform = 'scale(1)';
+
+            // Wait for repaint
+            await new Promise(r => setTimeout(r, 400));
 
             // We use A4 portrait format
             const pdf = new jsPDF('p', 'mm', 'a4');
             const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
             let currentY = 10;
 
             pdf.setFontSize(16);
-            pdf.text('Reporte de Producción: Day Out', 10, currentY);
+            pdf.text('Reporte de Producción', 10, currentY);
             currentY += 10;
 
             // 1. Export Layout if it has elements
@@ -218,25 +226,30 @@ const ProductionDashboard: React.FC = () => {
                 pdf.text('Plano de Distribución:', 10, currentY);
                 currentY += 5;
 
-                // html2canvas requires elements to be visible in viewport usually
                 const layoutCanvas = await html2canvas(layoutElement, {
                     scale: 2,
                     useCORS: true,
                     backgroundColor: '#ffffff'
                 });
-                const layoutImgData = layoutCanvas.toDataURL('image/png');
+                const layoutImgData = layoutCanvas.toDataURL('image/jpeg', 0.8);
 
-                // Calculate reasonable height to fit width
                 const imgWidth = pdfWidth - 20;
-                const imgHeight = (layoutCanvas.height * imgWidth) / layoutCanvas.width;
+                let imgHeight = (layoutCanvas.height * imgWidth) / layoutCanvas.width;
 
-                pdf.addImage(layoutImgData, 'PNG', 10, currentY, imgWidth, imgHeight);
+                // Scale down if it exceeds page height
+                if (imgHeight > pdfHeight - currentY - 10) {
+                    imgHeight = pdfHeight - currentY - 10;
+                    const newImgWidth = (layoutCanvas.width * imgHeight) / layoutCanvas.height;
+                    pdf.addImage(layoutImgData, 'JPEG', 10 + (imgWidth - newImgWidth) / 2, currentY, newImgWidth, imgHeight);
+                } else {
+                    pdf.addImage(layoutImgData, 'JPEG', 10, currentY, imgWidth, imgHeight);
+                }
                 currentY += imgHeight + 10;
             }
 
             // 2. Export Timeline if it has elements
             if (timelineItems.length > 0) {
-                if (currentY > pdf.internal.pageSize.getHeight() - 40) {
+                if (currentY > pdfHeight - 40) {
                     pdf.addPage();
                     currentY = 10;
                 }
@@ -250,27 +263,26 @@ const ProductionDashboard: React.FC = () => {
                     useCORS: true,
                     backgroundColor: '#ffffff'
                 });
-                const timelineImgData = timelineCanvas.toDataURL('image/png');
+                const timelineImgData = timelineCanvas.toDataURL('image/jpeg', 0.8);
 
                 const imgWidth = pdfWidth - 20;
-                const imgHeight = (timelineCanvas.height * imgWidth) / timelineCanvas.width;
+                let imgHeight = (timelineCanvas.height * imgWidth) / timelineCanvas.width;
 
-                pdf.addImage(timelineImgData, 'PNG', 10, currentY, imgWidth, imgHeight);
+                pdf.addImage(timelineImgData, 'JPEG', 10, currentY, imgWidth, imgHeight);
             }
 
-            pdf.save('Reporte_DayOut_Primavera.pdf');
+            pdf.save('Reporte_Produccion_Primavera.pdf');
 
-            // Restore visibility state
-            if (view !== 'layout' && layoutContainer) {
-                layoutContainer.classList.add('opacity-0', 'absolute', '-z-50');
-            }
-            if (view !== 'timeline' && timelineContainer) {
-                timelineContainer.classList.add('opacity-0', 'absolute', '-z-50');
-            }
+            // Restore state
+            if (zoomContainer) zoomContainer.style.transform = originalTransform;
+            if (view !== 'layout' && layoutContainer) layoutContainer.classList.add('opacity-0');
+            if (view !== 'timeline' && timelineContainer) timelineContainer.classList.add('opacity-0');
 
+            setIsExporting(false);
         } catch (err) {
             console.error('Error exportando PDF:', err);
-            alert('Hubo un error al generar el PDF combinado.');
+            alert('Hubo un error al generar el PDF combinado. Revisa la consola para más detalles.');
+            setIsExporting(false);
         }
     };
 
@@ -287,8 +299,8 @@ const ProductionDashboard: React.FC = () => {
                         <button onClick={() => setView('layout')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${view === 'layout' ? 'bg-white shadow text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}>Plano</button>
                         <button onClick={() => setView('timeline')} className={`px-4 py-1.5 rounded-md text-sm font-bold transition-all ${view === 'timeline' ? 'bg-white shadow text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}>Minuto a Minuto</button>
                     </div>
-                    <button onClick={exportCombinedPDF} className="px-4 py-2 bg-red-600 text-white rounded shadow text-sm font-bold hover:bg-red-700 transition flex items-center gap-2">
-                        📄 Exportar Day Out PDF
+                    <button onClick={exportCombinedPDF} disabled={isExporting} className="px-4 py-2 bg-red-600 disabled:bg-red-400 text-white rounded shadow text-sm font-bold hover:bg-red-700 transition flex items-center gap-2">
+                        {isExporting ? '⏳ Generando PDF...' : '📄 Exportar Day Out PDF'}
                     </button>
                 </div>
             </div>
