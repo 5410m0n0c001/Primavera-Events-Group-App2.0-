@@ -398,6 +398,7 @@ model Lead {
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   appointment     Appointment?
+  pedidos         Pedido[]
 }
 
 model Appointment {
@@ -428,4 +429,115 @@ enum AppointmentStatus {
   CONFIRMED
   CANCELLED
   COMPLETED
+}
+
+// --- RENTALS MODULE ---
+
+model Pedido {
+  id                String        @id @default(cuid())
+
+  // Cliente
+  clienteNombre     String
+  clienteTelefono   String
+  clienteEmail      String?
+  leadId            String?       // relación opcional con CRM
+  lead              Lead?         @relation(fields: [leadId], references: [id])
+
+  // Evento asociado
+  eventoTipo        String?       // boda, xv, graduación, etc.
+  eventoDescripcion String?
+
+  // Logística de entrega
+  fechaEntrega      DateTime
+  horaEntrega       String        // "10:00", "14:30", etc.
+  direccionEntrega  String
+  entregadoPor      String?       // nombre del repartidor
+  condicionEntrega  String?       // "completo", "con observaciones", notas
+
+  // Logística de recolección
+  fechaRecoleccion  DateTime
+  horaRecoleccion   String
+  recibidoPor       String?       // quien recibe en destino
+  recolectadoPor    String?       // quien va a recoger
+  condicionRetorno  String?       // al regresar el mobiliario
+
+  // Facturación
+  requiereFactura   Boolean       @default(false)
+  rfc               String?
+  razonSocial       String?
+  emailFactura      String?
+  usoCFDI           String?       // G03, D10, etc.
+  regimenFiscal     String?
+
+  // Costos
+  subtotal          Float         @default(0)
+  costoFlete        Float         @default(0)
+  descuento         Float         @default(0)
+  iva               Float         @default(0)
+  total             Float         @default(0)
+
+  // Estado y seguimiento
+  status            PedidoStatus  @default(BORRADOR)
+  notas             String?
+  numeroPedido      String        @unique  // PED-2026-001
+
+  // Auditoría
+  creadoPor         String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // Relaciones
+  items             PedidoItem[]
+  
+  @@index([leadId])
+  @@index([numeroPedido])
+}
+
+model PedidoItem {
+  id              String          @id @default(cuid())
+  pedidoId        String
+  pedido          Pedido          @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  inventarioId    String
+  inventario      InventarioItem  @relation(fields: [inventarioId], references: [id])
+
+  descripcion     String          // nombre del artículo al momento del pedido
+  cantidad        Int
+  precioUnitario  Float
+  subtotal        Float
+
+  condicionSalida  String?        // estado del artículo al salir
+  condicionRetorno String?        // estado al regresar
+  observaciones    String?
+
+  @@index([pedidoId])
+  @@index([inventarioId])
+}
+
+model InventarioItem {
+  id            String        @id @default(cuid())
+  nombre        String
+  descripcion   String?
+  categoria     String        // mesas, sillas, loza, cristalería, mantelería, etc.
+  subcategoria  String?
+  stockTotal    Int           @default(0)
+  stockDisponible Int         @default(0)
+  precioRenta   Float         @default(0)
+  unidad        String        @default("pieza")
+  activo        Boolean       @default(true)
+  imagen        String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  pedidoItems   PedidoItem[]
+}
+
+enum PedidoStatus {
+  BORRADOR
+  CONFIRMADO
+  EN_PREPARACION
+  ENTREGADO
+  RECOLECTADO
+  COMPLETADO
+  CANCELADO
 }

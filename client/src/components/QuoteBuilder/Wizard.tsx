@@ -8,60 +8,52 @@ import QuoteBreakdown from './QuoteBreakdown';
 // Mock Data for MVP - Replace with API calls
 const DATA_CATEGORIES = [
     {
-        id: 'cat_locations', title: 'Locaciones y Espacios', items: [
-            { id: 'loc_1', name: 'Salón Principal', price: 15000, unit: 'renta', description: 'Capacidad 200 pax', category: 'Locaciones' },
-            { id: 'loc_2', name: 'Jardín Exterior', price: 12000, unit: 'renta', description: 'Capacidad 300 pax', category: 'Locaciones' }
-        ]
-    },
-    {
-        id: 'cat_menu', title: 'Menú y Catering', items: [
-            { id: 'menu_1', name: 'Menú 3 Tiempos', price: 450, unit: 'persona', description: 'Entrada, plato fuerte, postre', category: 'Catering' },
-            { id: 'menu_2', name: 'Taquiza Premium', price: 280, unit: 'persona', description: '5 guisados a elegir', category: 'Catering' }
-        ]
-    },
-    {
-        id: 'cat_furniture', title: 'Mobiliario', items: [
-            { id: 'fur_1', name: 'Mesa Redonda 10 pax', price: 350, unit: 'pza', description: 'Incluye mantel blanco', category: 'Mobiliario' },
-            { id: 'fur_2', name: 'Silla Tiffany Dorada', price: 45, unit: 'pza', description: 'Con cojín', category: 'Mobiliario' },
-            { id: 'fur_3', name: 'Sala Lounge', price: 1200, unit: 'set', description: 'Para 8 personas', category: 'Mobiliario' }
-        ]
-    },
-    {
-        id: 'cat_staff', title: 'Personal', items: [
-            { id: 'stf_1', name: 'Mesero', price: 800, unit: 'turno', description: '1 por cada 15 invitados', category: 'Personal' },
-            { id: 'stf_2', name: 'Bartender', price: 950, unit: 'turno', description: '1 por cada 50 invitados', category: 'Personal' },
-            { id: 'stf_3', name: 'Coordinador de Evento', price: 3500, unit: 'evento', description: 'Gestión completa', category: 'Personal' }
-        ]
-    },
-    {
-        id: 'cat_drinks', title: 'Bebidas y Barras', items: [
-            { id: 'drk_1', name: 'Barra Libre Nacional', price: 250, unit: 'persona', description: '4 horas', category: 'Bebidas' },
-            { id: 'drk_2', name: 'Refrescos y Hielo', price: 45, unit: 'persona', description: 'Ilimitado', category: 'Bebidas' }
-        ]
-    },
-    {
-        id: 'cat_decor', title: 'Decoración', items: [
-            { id: 'dec_1', name: 'Centro de Mesa Floral', price: 650, unit: 'pza', description: 'Flor de temporada', category: 'Decoración' },
-            { id: 'dec_2', name: 'Iluminación Arquitectónica', price: 4500, unit: 'paquete', description: '10 luces LED', category: 'Decoración' }
-        ]
-    },
-    {
-        id: 'cat_music', title: 'Entretenimiento', items: [
-            { id: 'mus_1', name: 'DJ Profesional', price: 8500, unit: 'evento', description: '5 horas + equipo', category: 'Entretenimiento' },
-            { id: 'mus_2', name: 'Grupo Versátil', price: 18000, unit: 'evento', description: '3 sets de 45 min', category: 'Entretenimiento' }
+        id: 'cat_packages', title: 'Paquetes de Eventos', items: [
+            { id: 'pkg_1', name: 'Glow Graduation Elite', price: 949, unit: 'persona', description: 'Banquete 4 tiempos, DJ, Letras Gigantes, Cabina Selfie', category: 'Paquetes' },
+            { id: 'pkg_2', name: 'Paquete Gobernador', price: 899, unit: 'persona', description: 'Venue: Convenciones Presidente. 3 tiempos, Coctel, DJ 8 hrs', category: 'Paquetes' },
+            { id: 'pkg_3', name: 'Paquete Presidente', price: 899, unit: 'persona', description: 'Venue: Convenciones Presidente. 4 tiempos, Capitán, Pista 5x5', category: 'Paquetes' },
+            { id: 'pkg_4', name: 'Destino Yolomecatl', price: 899, unit: 'persona', description: 'Venue: Jardín Yolomecatl. Paquete Presidente integrado + Baños', category: 'Paquetes' },
+            { id: 'pkg_5', name: 'Esencia Floral', price: 999, unit: 'persona', description: 'Venue: Villa San Gaspar. 3 tiempos (60%), Back Vintage, Letras', category: 'Paquetes' },
+            { id: 'pkg_6', name: 'Imperial Ecuestre', price: 749, unit: 'persona', description: 'Venue: Jardín Salón Los Caballos. 4 tiempos, menú infantil, Silla Crossback', category: 'Paquetes' },
+            { id: 'pkg_7', name: 'Linaje Pura Sangre', price: 899, unit: 'persona', description: 'Venue: Rancho Los Potrillos. Paquete Presidente Estándar', category: 'Paquetes' },
+            { id: 'pkg_8', name: 'Armonía Zarabanda', price: 1700, unit: 'persona', description: 'Venue: Quinta Zarabanda. Hospedaje VIP, Pista Pixel 5x5', category: 'Paquetes' },
+            { id: 'pkg_9', name: 'Vuelo Esmeralda', price: 2199, unit: 'persona', description: 'Venue: Jardín Tsu Nuum. Hotel 60px, Robot LED, Cortesías', category: 'Paquetes' },
+            { id: 'pkg_10', name: 'Nature\'s Majesty', price: 1399, unit: 'persona', description: 'Venue: Finca Los Isabeles. Hospedaje 14px, Suite Nupcial', category: 'Paquetes' }
         ]
     },
     {
         id: 'cat_photo', title: 'Fotografía y Video', items: [
-            { id: 'pho_1', name: 'Paquete Foto Boda', price: 12000, unit: 'paquete', description: 'Cobertura 8 horas', category: 'Foto/Video' },
-            { id: 'pho_2', name: 'Video Highlights', price: 8000, unit: 'paquete', description: 'Video 5 min', category: 'Foto/Video' }
+            { id: 'pho_1', name: 'Bodas: Eternal Promise', price: 9900, unit: 'paquete', description: 'Fotos ilimitadas, álbum 200 fotos, sesión previa', category: 'Foto/Video' },
+            { id: 'pho_2', name: 'Bodas: Royal Cinematic', price: 13900, unit: 'paquete', description: '2 cámaras, drone 4K, photobook 100 fotos', category: 'Foto/Video' },
+            { id: 'pho_3', name: 'XV: Memoria Clásica', price: 9350, unit: 'paquete', description: '7 hrs continuas, álbum, 100 fotos impresas', category: 'Foto/Video' },
+            { id: 'pho_4', name: 'XV: Experiencia Deluxe', price: 10900, unit: 'paquete', description: 'Sesión previa exterior + videoclip', category: 'Foto/Video' },
+            { id: 'pho_5', name: 'XV: Cinematic Prestige', price: 13900, unit: 'paquete', description: 'Grabación a 2 cámaras + Drone 4K', category: 'Foto/Video' }
         ]
     },
     {
-        id: 'cat_extras', title: 'Extras y Servicios', items: [
-            { id: 'ext_1', name: 'Pastel de Boda', price: 3500, unit: 'pieza', description: 'Para 100 personas', category: 'Extras' },
-            { id: 'ext_2', name: 'Mesa de Dulces', price: 4500, unit: 'servicio', description: 'Variedad de enchilados y dulces', category: 'Extras' },
-            { id: 'ext_3', name: 'Invitaciones Impresas', price: 45, unit: 'pza', description: 'Diseño personalizado', category: 'Extras' }
+        id: 'cat_furniture', title: 'Mobiliario Individual', items: [
+            { id: 'fur_round_tab', name: 'Mesa Redonda (10 pax)', price: 150, unit: 'pza', description: 'Inventario Físico', category: 'Mobiliario' },
+            { id: 'fur_sq_wood', name: 'Mesa Cuadrada Madera', price: 250, unit: 'pza', description: 'Para 4 pax', category: 'Mobiliario' },
+            { id: 'fur_marble', name: 'Mesa Rectangular Mármol', price: 400, unit: 'pza', description: 'Mesa Premium', category: 'Mobiliario' },
+            { id: 'fur_tab', name: 'Tablón Básico', price: 120, unit: 'pza', description: '2.44x0.76m', category: 'Mobiliario' },
+            { id: 'fur_chal_cross', name: 'Silla Cross Back (Miel/Nogal)', price: 65, unit: 'pza', description: 'Inventario Físico', category: 'Mobiliario' },
+            { id: 'fur_chal_tiff', name: 'Silla Tiffany (Blanca/Choco)', price: 45, unit: 'pza', description: 'Clásica', category: 'Mobiliario' },
+            { id: 'fur_lounge', name: 'Sala Lounge Madera', price: 1200, unit: 'set', description: 'Para 8 personas', category: 'Mobiliario' },
+            { id: 'fur_bar', name: 'Periquera Alta (Set)', price: 450, unit: 'set', description: 'Mesa + Bancos', category: 'Mobiliario' }
+        ]
+    },
+    {
+        id: 'cat_structures', title: 'Estructuras y Carpas', items: [
+            { id: 'str_pag', name: 'Carpa Tipo Pagoda', price: 2500, unit: 'pza', description: '6x6m', category: 'Estructuras' },
+            { id: 'str_dec', name: 'Letras Gigantes', price: 1500, unit: 'set', description: 'XV, LOVE, Corazón', category: 'Estructuras' },
+            { id: 'str_arc', name: 'Portería / Arco Metálico', price: 800, unit: 'pza', description: 'Negra o Dorada', category: 'Estructuras' }
+        ]
+    },
+    {
+        id: 'cat_extras', title: 'Extras y Barras', items: [
+            { id: 'ext_bar', name: 'Barra Mix (Toppings)', price: 4500, unit: 'servicio', description: 'Dulces y Salados', category: 'Extras' },
+            { id: 'ext_shots', name: 'Carrito de Shots', price: 3500, unit: 'servicio', description: 'Con personal', category: 'Extras' },
+            { id: 'ext_esqu', name: 'Carrito de Esquites', price: 2500, unit: 'servicio', description: 'Con personal', category: 'Extras' }
         ]
     }
 ];
@@ -139,10 +131,35 @@ const QuoteWizard: React.FC = () => {
     };
 
 
-    // Capacity Validation
-    const selectedLocation = draft.selectedItems.find(i => i.item?.category === 'Locaciones');
-    const locationCapacity = selectedLocation ? (selectedLocation.item?.description?.match(/\d+/)?.[0] ? parseInt(selectedLocation.item.description.match(/\d+/)[0]) : 0) : 0;
-    const isOverCapacity = locationCapacity > 0 && draft.guestCount > locationCapacity;
+    // Dynamic Quantity Scaling when guestCount changes
+    // This solves the bug: "los datos no son dinámicos al cambiar el número de invitados"
+    React.useEffect(() => {
+        setDraft(prev => {
+            const updatedItems = prev.selectedItems.map(si => {
+                const isPerPerson = si.item?.unit?.toLowerCase() === 'persona' || si.item?.unit?.toLowerCase() === 'pax';
+                if (!isPerPerson && !si.item?.name?.toLowerCase().includes('mesero') && !si.item?.name?.toLowerCase().includes('mesa')) {
+                    return si; // Keep same quantity if it doesn't auto-scale
+                }
+
+                // Re-apply smart quantity rule
+                let suggestedQty = 1;
+                if (isPerPerson) suggestedQty = prev.guestCount;
+                if (si.item?.name?.toLowerCase().includes('mesero')) suggestedQty = Math.ceil(prev.guestCount / 15);
+                if (si.item?.name?.toLowerCase().includes('mesa') && !si.item?.name?.toLowerCase().includes('principal')) suggestedQty = Math.ceil(prev.guestCount / 10);
+
+                return {
+                    ...si,
+                    quantity: suggestedQty,
+                    cost: suggestedQty * si.unitPrice
+                };
+            });
+            return { ...prev, selectedItems: updatedItems };
+        });
+    }, [draft.guestCount]);
+
+    // Capacity Validation (No longer based merely on 'Locaciones' mock category, checking guestCount vs static threshold for warnings)
+    const locationCapacity = 500; // Max venue capacity for Primavera
+    const isOverCapacity = draft.guestCount > locationCapacity;
 
     const handleToggleItem = (item: any, quantity: number) => {
         setDraft(prev => {
@@ -486,7 +503,7 @@ const QuoteWizard: React.FC = () => {
                             <span className="text-xl">⚠️</span>
                             <div>
                                 <strong>Capacidad Excedida</strong>
-                                <p>La locación seleccionada ({selectedLocation?.item?.name}) soporta {locationCapacity} pax, pero tienes {draft.guestCount} invitados.</p>
+                                <p>Tus recintos soportan un máximo operativo regular de {locationCapacity} personas, pero tienes configurado {draft.guestCount} invitados. Confirme logística.</p>
                             </div>
                         </div>
                     )}

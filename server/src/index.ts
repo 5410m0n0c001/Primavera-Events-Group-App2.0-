@@ -22,6 +22,8 @@ import crmRoutes from './routes/crm';
 import authRoutes from './routes/auth';
 import quoteSimulationRoutes from './routes/quoteSimulation';
 import aiChatRoutes from './routes/aiChat';
+import pedidosRoutes from './routes/pedidos';
+import inventarioRoutes from './routes/inventario';
 
 import { prisma } from './prisma'; // Use singleton
 
@@ -114,6 +116,8 @@ app.use('/api/income', authenticate, incomeRoutes);
 app.use('/api/catering', authenticate, cateringRoutes);
 app.use('/api/production', authenticate, productionRoutes);
 app.use('/api/venues', authenticate, venueRoutes);
+app.use('/api/pedidos', authenticate, pedidosRoutes);
+app.use('/api/inventario', authenticate, inventarioRoutes);
 console.log('🔍 [DEBUG] Registering routes...');
 app.use('/api/analytics', authenticate, analyticsRoutes);
 app.use('/api/quotes', authenticate, quotesRoutes);

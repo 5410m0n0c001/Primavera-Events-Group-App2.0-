@@ -13,8 +13,9 @@ import VenuesManager from './components/Venues/VenuesManager';
 import WebsiteDashboard from './components/Website/WebsiteDashboard';
 import AIChatInterface from './components/Chat/AIChatInterface';
 import AdminLogin from './components/Auth/AdminLogin';
+import PedidosDashboard from './components/Pedidos/PedidosDashboard';
 
-export type ViewState = 'quote' | 'events' | 'floorplans' | 'inventory' | 'catalog' | 'landing' | 'budget' | 'exports' | 'aiChat' | 'adminLogin' | 'crm' | 'calendar' | 'suppliers' | 'finance' | 'catering' | 'production' | 'analytics' | 'venues' | 'website';
+export type ViewState = 'quote' | 'events' | 'floorplans' | 'inventory' | 'catalog' | 'landing' | 'budget' | 'exports' | 'aiChat' | 'adminLogin' | 'crm' | 'calendar' | 'suppliers' | 'finance' | 'catering' | 'production' | 'analytics' | 'venues' | 'website' | 'pedidos';
 
 function App() {
   const [view, setView] = useState<ViewState>('aiChat');
@@ -56,7 +57,8 @@ function App() {
             { id: 'calendar', label: 'Calendario', icon: '📅' },
             { id: 'venues', label: 'Locaciones', icon: '🏰' },
             { id: 'inventory', label: 'Inventario', icon: '📦' },
-            { id: 'suppliers', label: 'Proveedores', icon: '🚚' },
+            { id: 'pedidos', label: 'Renta de Mobiliario', icon: '🚚' },
+            { id: 'suppliers', label: 'Proveedores', icon: '🚛' },
             { id: 'finance', label: 'Finanzas', icon: '📊' },
             { id: 'catering', label: 'Catering', icon: '🍽️' },
             { id: 'production', label: 'Producción', icon: '🎭' },
@@ -143,6 +145,7 @@ function App() {
         {view === 'crm' && <ClientList />}
         {view === 'calendar' && <CalendarView />}
         {view === 'inventory' && <InventoryDashboard />}
+        {view === 'pedidos' && <PedidosDashboard />}
         {view === 'suppliers' && <SupplierList />}
         {view === 'finance' && <FinanceDashboard />}
         {view === 'catering' && <CateringDashboard />}

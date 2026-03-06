@@ -104,7 +104,8 @@ export const websiteUrls: WebsiteCategory[] = [
         icon: "⚙️",
         links: [
             { title: "Dashboard de Proyecto Corporativo", url: "https://primaveraeventsgroup.com/dashboard-de-proyecto-corporativo/" },
-            { title: "Cotización Demo", url: "https://primaveraeventsgroup.com/cotizacion-demo/" }
+            { title: "Cotización Demo", url: "https://primaveraeventsgroup.com/cotizacion-demo/" },
+            { title: "Módulo de Pedidos de Renta", url: "#" }
         ]
     }
 ];

@@ -28,6 +28,22 @@ export const ClientDetailsModal: React.FC<ClientDetailsModalProps> = ({
     onEdit,
     onDelete,
 }) => {
+    const [pedidos, setPedidos] = React.useState<any[]>([]);
+    const [loadingPedidos, setLoadingPedidos] = React.useState(false);
+
+    React.useEffect(() => {
+        if (isOpen && client) {
+            setLoadingPedidos(true);
+            fetch(`/api/pedidos?leadId=${client.id}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data)) setPedidos(data);
+                })
+                .catch(err => console.error("Error fetching pedidos:", err))
+                .finally(() => setLoadingPedidos(false));
+        }
+    }, [isOpen, client]);
+
     if (!isOpen || !client) return null;
 
     return (
@@ -75,15 +91,37 @@ export const ClientDetailsModal: React.FC<ClientDetailsModalProps> = ({
                     <div>
                         <label className="text-xs font-bold text-gray-500 uppercase">Tipo</label>
                         <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-bold ${client.type === 'ACTIVE' ? 'bg-green-100 text-green-800' :
-                                client.type === 'PROSPECT' ? 'bg-yellow-100 text-yellow-800' :
-                                    'bg-gray-100 text-gray-800'
+                            client.type === 'PROSPECT' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-800'
                             }`}>
                             {client.type}
                         </span>
                     </div>
                 </div>
 
-                <div className="p-6 pt-0 flex gap-3 justify-end">
+                {/* Historial de Pedidos de Renta */}
+                <div className="p-6 pt-0 border-t border-gray-100 dark:border-white/5 mt-4">
+                    <h3 className="text-sm font-bold text-primavera-gold uppercase mt-4 mb-2">🚚 Pedidos de Renta Asociados</h3>
+                    {loadingPedidos ? (
+                        <p className="text-xs text-gray-400">Cargando...</p>
+                    ) : pedidos.length === 0 ? (
+                        <p className="text-xs text-gray-400">Este cliente no tiene pedidos de renta grabados.</p>
+                    ) : (
+                        <ul className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
+                            {pedidos.map(p => (
+                                <li key={p.id} className="flex justify-between items-center text-sm bg-gray-50 dark:bg-black/40 p-2 rounded">
+                                    <div>
+                                        <p className="font-semibold text-gray-800 dark:text-gray-200">{p.numeroPedido}</p>
+                                        <p className="text-xs text-gray-500">{new Date(p.fechaEntrega).toLocaleDateString()} - <span className="font-medium">{p.status}</span></p>
+                                    </div>
+                                    <span className="font-bold text-green-600 dark:text-green-400">${p.total?.toFixed(2) || '0.00'}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+
+                <div className="p-6 pt-0 flex gap-3 justify-end border-t border-gray-100 dark:border-white/5 mt-4 pt-4">
                     <button
                         onClick={() => {
                             onEdit(client);
