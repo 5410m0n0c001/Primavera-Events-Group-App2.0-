@@ -10,15 +10,22 @@ interface Props {
 export default function AIChatInterface({ onLoginClick, adminToken, onLogout }: Props) {
     const [showChat, setShowChat] = useState(false);
     const [clickCount, setClickCount] = useState(0);
+    const timeoutRef = React.useRef<any>(null);
 
     const handleSecretClick = () => {
         setClickCount(prev => {
             const newCount = prev + 1;
             if (newCount >= 3) {
+                if (timeoutRef.current) clearTimeout(timeoutRef.current);
                 onLoginClick();
                 return 0;
             }
-            setTimeout(() => setClickCount(0), 2000); // Reset after 2s
+
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            timeoutRef.current = setTimeout(() => {
+                setClickCount(0);
+            }, 2000);
+
             return newCount;
         });
     };
