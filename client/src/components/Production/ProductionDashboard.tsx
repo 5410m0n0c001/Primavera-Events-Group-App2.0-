@@ -271,7 +271,19 @@ const ProductionDashboard: React.FC = () => {
                 pdf.addImage(timelineImgData, 'JPEG', 10, currentY, imgWidth, imgHeight);
             }
 
-            pdf.save('Reporte_Produccion_Primavera.pdf');
+            // Generate and force-download the PDF
+            const pdfBlob = pdf.output('blob');
+            const blobUrl = URL.createObjectURL(pdfBlob);
+            const downloadLink = document.createElement('a');
+            downloadLink.href = blobUrl;
+            downloadLink.download = 'Reporte_Produccion_Primavera.pdf';
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+
+            // Clean up memory after a small delay
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
 
             // Restore state
             if (zoomContainer) zoomContainer.style.transform = originalTransform;
