@@ -64,10 +64,11 @@ function App() {
             { id: 'website', label: 'Sitio Web', icon: '🌐' },
             { id: 'exports', label: 'Exportar Datos', icon: '📤' },
             { id: 'aiChat', label: 'AI Chat', icon: '🤖' },
+            { id: 'ext-dashboard', label: 'Dashboard Transformación Digital', icon: '🚀', externalUrl: 'https://5410m0n0c001.github.io/banquetes-primavera-project/' },
           ].map((item) => (
             <button
               key={item.id}
-              onClick={() => setView(item.id as any)}
+              onClick={() => item.externalUrl ? window.open(item.externalUrl, '_blank') : setView(item.id as any)}
               title={!isSidebarOpen ? item.label : undefined}
               className={`w-full text-left ${isSidebarOpen ? 'px-4 py-3.5' : 'px-0 py-3.5 justify-center'} rounded-2xl text-[15px] font-medium transition-all duration-300 group flex items-center ${isSidebarOpen ? 'gap-4' : 'gap-0'} ${view === item.id
                 ? 'bg-white dark:bg-[#2c2c2e] shadow-[0_2px_12px_rgba(0,0,0,0.04)] text-black dark:text-white scale-[1.02]'

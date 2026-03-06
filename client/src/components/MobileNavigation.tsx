@@ -9,6 +9,7 @@ interface NavItem {
     view: string;
     emoji: string;
     label: string;
+    externalUrl?: string;
 }
 
 export const MobileNavigation: React.FC<MobileNavigationProps> = ({
@@ -28,11 +29,16 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
         { view: 'catering', emoji: '👨‍🍳', label: 'Catering' },
         { view: 'production', emoji: '🎬', label: 'Producción' },
         { view: 'crm', emoji: '📞', label: 'CRM' },
-        { view: 'website', emoji: '🌐', label: 'Sitio Web' }
+        { view: 'website', emoji: '🌐', label: 'Sitio Web' },
+        { view: 'ext-dashboard', emoji: '🚀', label: 'Dashboard Digital', externalUrl: 'https://5410m0n0c001.github.io/banquetes-primavera-project/' }
     ];
 
-    const handleViewChange = (view: string) => {
-        onViewChange(view);
+    const handleViewChange = (item: NavItem) => {
+        if (item.externalUrl) {
+            window.open(item.externalUrl, '_blank');
+        } else {
+            onViewChange(item.view);
+        }
         setIsOpen(false);
     };
 
@@ -75,7 +81,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
                             return (
                                 <button
                                     key={item.view}
-                                    onClick={() => handleViewChange(item.view)}
+                                    onClick={() => handleViewChange(item)}
                                     className={`w-full flex items-center gap-3 px-6 py-4 transition-colors text-left ${isActive
                                         ? 'bg-yellow-50 text-yellow-700 border-l-4 border-yellow-500'
                                         : 'text-gray-700 hover:bg-gray-50'
