@@ -8,7 +8,7 @@ import { prisma } from '../prisma';
 router.post('/seed', async (req, res) => {
     try {
         const MOCK_VENUES = [
-            { name: 'C.C Presidente', capacity: 800, priceRent: 0, link: '', description: 'Banquete Masivo Presidente. (Paquetes: Gobernador, Presidente, Linaje Pura Sangre). Cuenta con aire acondicionado, exclusividad y capitán VIP.', features: [{ name: 'A/C', type: 'Amenity', value: 'Incluido' }, { name: 'Área Kids', type: 'Amenity', value: 'Sí' }, { name: 'Capitán VIP', type: 'Service', value: 'Incluido' }] },
+            { name: 'C.C Presidente (Convenciones)', capacity: 800, priceRent: 0, link: '', description: 'Banquete Masivo Presidente. (Paquetes: Gobernador, Presidente, Linaje Pura Sangre). Cuenta con aire acondicionado, exclusividad y capitán VIP.', features: [{ name: 'A/C', type: 'Amenity', value: 'Incluido' }, { name: 'Área Kids', type: 'Amenity', value: 'Sí' }, { name: 'Capitán VIP', type: 'Service', value: 'Incluido' }] },
             { name: 'Jardín Salón Yolomecatl', capacity: 400, priceRent: 0, link: '', description: 'Acatlipa, Temixco. (Paquete Destino Yolomecatl). Ideal para grandes celebraciones con jardín y capilla.', features: [{ name: 'Pantalla Gigante', type: 'Amenity', value: 'Incluido' }, { name: 'Jardín', type: 'Amenity', value: 'Extenso' }, { name: 'Capilla', type: 'Amenity', value: 'Consagrada' }] },
             { name: 'Priv. Las Fuentes San Gaspar', capacity: 200, priceRent: 0, link: '', description: 'Jiutepec. (Paquete Esencia Floral). Boda íntima o XV años. Cascada y servicio de valet parking.', features: [{ name: 'Cascada', type: 'Amenity', value: 'Iluminada' }, { name: 'Área Consagrada', type: 'Amenity', value: 'Sí' }, { name: 'Valet', type: 'Service', value: 'Opcional' }] },
             { name: 'Jardín Salón Los Caballos', capacity: 300, priceRent: 0, link: '', description: 'Ocotepec. (Paquete Imperial Ecuestre). Especialidad en XV años.', features: [{ name: 'Personalizado', type: 'Service', value: 'Sí' }, { name: 'DJ Residente', type: 'Service', value: 'Top' }] },
@@ -18,8 +18,23 @@ router.post('/seed', async (req, res) => {
             { name: 'Finca Los Isabeles', capacity: 250, priceRent: 0, link: '', description: 'Bodas estilo naturaleza (Paquete Nature\'s Majesty). Hospedaje para 14px.', features: [{ name: 'Hospedaje 14px', type: 'Amenity', value: 'Cabañas' }, { name: 'Mesa Tipo Mármol', type: 'Furniture', value: 'Premium' }] }
         ];
 
+        // Wipe old mock venues aggressively using raw names to kill duplicates like "Convenciones Presidente"
+        const oldNames = ['Convenciones Presidente', 'C.C Presidente', 'Jardín Salón Yolomecatl', 'Priv. Las Fuentes San Gaspar', 'Jardín Salón Los Caballos', 'Rancho Los Potrillos', 'Quinta Zarabanda', 'Jardín Tsu Nuum', 'Finca Los Isabeles'];
+
+        // Find existing to delete to avoid constraints if no events attached
+        for (const name of oldNames) {
+            const matches = await prisma.venue.findMany({ where: { OR: [{ name: { contains: name } }] } });
+            for (const match of matches) {
+                const count = await prisma.event.count({ where: { venueId: match.id } });
+                if (count === 0) {
+                    await prisma.venueFeature.deleteMany({ where: { venueId: match.id } });
+                    await prisma.venue.delete({ where: { id: match.id } });
+                }
+            }
+        }
+
+        // Fresh insert
         for (const venue of MOCK_VENUES) {
-            // Check if exists
             const exists = await prisma.venue.findFirst({ where: { name: venue.name } });
             if (!exists) {
                 await prisma.venue.create({
@@ -36,7 +51,7 @@ router.post('/seed', async (req, res) => {
                 });
             }
         }
-        res.json({ message: 'Venues seeded' });
+        res.json({ message: 'Venues seeded safely. Duplicates without events removed.' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Failed to seed venues' });

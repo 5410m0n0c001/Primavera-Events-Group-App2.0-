@@ -9,148 +9,160 @@ const prisma = new PrismaClient();
 router.post('/seed', async (req, res) => {
     try {
         const inventario = [
-            // SILLAS (Nogal, Miel, Cross, Tiffany, etc)
-            { nombre: "Silla cross back miel", categoria: "Sillas", precioRenta: 45 },
-            { nombre: "Silla cross back nogal", categoria: "Sillas", precioRenta: 45 },
-            { nombre: "Silla tiffany laqueada blanca", categoria: "Sillas", precioRenta: 35 },
-            { nombre: "Silla tiffany dorada", categoria: "Sillas", precioRenta: 35 },
-            { nombre: "Silla tiffany plateada", categoria: "Sillas", precioRenta: 35 },
-            { nombre: "Silla versalles caoba", categoria: "Sillas", precioRenta: 40 },
-            { nombre: "Silla diana madera", categoria: "Sillas", precioRenta: 45 },
-            { nombre: "Silla praga", categoria: "Sillas", precioRenta: 50 },
-            { nombre: "Silla acojinada cromada", categoria: "Sillas", precioRenta: 20 },
-            { nombre: "Silla acojinada esmaltada", categoria: "Sillas", precioRenta: 18 },
-            { nombre: "Silla de adulto plastico sin funda", categoria: "Sillas", precioRenta: 12 },
-            { nombre: "Silla infantil plastica", categoria: "Sillas", precioRenta: 10 },
-            { nombre: "Funda francesa blanca o negra (silla plastico)", categoria: "Blancos Plástico", precioRenta: 10 },
-            { nombre: "Cinta tornasol o de color", categoria: "Blancos Plástico", precioRenta: 5 },
-            // MESAS (Redondas, rectangulares, tablones, etc)
-            { nombre: "Mesa redonda (10 personas)", categoria: "Mesas", precioRenta: 80 },
-            { nombre: "Tablón", categoria: "Mesas", precioRenta: 70 },
+            // ESTRUCTURAS DE MESAS Y DESCANSO
+            { nombre: "base de madera plegable para mesa", categoria: "Estructuras", precioRenta: 30 },
+            { nombre: "cubo metálico base", categoria: "Estructuras", precioRenta: 40 },
+            { nombre: "base metálica alta (centro de mesa)", categoria: "Estructuras", precioRenta: 50 },
+            { nombre: "descanso metálico", categoria: "Estructuras", precioRenta: 25 },
+            { nombre: "descansó de madera", categoria: "Estructuras", precioRenta: 35 },
+
+            // MESAS
+            { nombre: "mesa redonda", categoria: "Mesas", precioRenta: 80 },
+            { nombre: "tablon", categoria: "Mesas", precioRenta: 70 },
             { nombre: "Mesa cuadrada de madera", categoria: "Mesas", precioRenta: 90 },
-            { nombre: "Mesa rectangular tipo mármol", categoria: "Mesas", precioRenta: 120 },
-            { nombre: "Mesa rectangular de madera color miel", categoria: "Mesas", precioRenta: 100 },
-            { nombre: "Mesa rectangular de madera color nogal clásico", categoria: "Mesas", precioRenta: 100 },
-            { nombre: "Mesa plegable cuadrada", categoria: "Mesas", precioRenta: 60 },
-            { nombre: "Mesa infantil", categoria: "Mesas", precioRenta: 50 },
-            { nombre: "Mesa madera blanca ceremonia", categoria: "Ceremonia", precioRenta: 90 },
+            { nombre: "Mesa rectangular tipo marmol", categoria: "Mesas", precioRenta: 120 },
+            { nombre: "mesa rectangular de madera color miel", categoria: "Mesas", precioRenta: 100 },
+            { nombre: "mesa rectangular de madera color nogal clasico", categoria: "Mesas", precioRenta: 100 },
+            { nombre: "mesa plegable cuadrada", categoria: "Mesas", precioRenta: 60 },
+            { nombre: "mesa infantil", categoria: "Mesas", precioRenta: 50 },
+            { nombre: "mesa madera blanca ceremonia", categoria: "Ceremonia", precioRenta: 90 },
+            { nombre: "mesa de centro", categoria: "Salas Lounge", precioRenta: 70 },
+
             // PERIQUERAS Y SALAS LOUNGE
-            { nombre: "Periquera alta madera", categoria: "Salas Lounge", precioRenta: 80 },
+            { nombre: "periquera alta madera", categoria: "Salas Lounge", precioRenta: 80 },
             { nombre: "Periquera alta metal", categoria: "Salas Lounge", precioRenta: 80 },
             { nombre: "Sala lounge madera", categoria: "Salas Lounge", precioRenta: 150 },
-            { nombre: "Banca larga sintética plegable de exterior", categoria: "Salas Lounge", precioRenta: 60 },
-            { nombre: "Mesa de centro", categoria: "Salas Lounge", precioRenta: 70 },
-            { nombre: "Banca larga con respaldo", categoria: "Salas Lounge", precioRenta: 80 },
-            { nombre: "Banca larga sin respaldo", categoria: "Salas Lounge", precioRenta: 60 },
-            { nombre: "Banco log", categoria: "Salas Lounge", precioRenta: 40 },
-            { nombre: "Banco indivi", categoria: "Salas Lounge", precioRenta: 35 },
-            { nombre: "Banco periquero de madera respaldo caoba o nogal", categoria: "Salas Lounge", precioRenta: 45 },
-            // ESTRUCTURAS DE MESAS Y DESCANSO
-            { nombre: "Base de madera plegable para mesa", categoria: "Estructuras", precioRenta: 30 },
-            { nombre: "Cubo metálico base", categoria: "Estructuras", precioRenta: 40 },
-            { nombre: "Base metálica alta (centro de mesa)", categoria: "Estructuras", precioRenta: 50 },
-            { nombre: "Descanso metálico", categoria: "Estructuras", precioRenta: 25 },
-            { nombre: "Descanso de madera", categoria: "Estructuras", precioRenta: 35 },
-            // CRISTALERIA COPA Y VASO
-            { nombre: "Copa globo", categoria: "Cristalería", precioRenta: 12 },
-            { nombre: "Copa flauta", categoria: "Cristalería", precioRenta: 12 },
-            { nombre: "Copa vino tinto", categoria: "Cristalería", precioRenta: 12 },
-            { nombre: "Copa vino blanco", categoria: "Cristalería", precioRenta: 12 },
-            { nombre: "Copa de color azul", categoria: "Cristalería", precioRenta: 15 },
-            { nombre: "Copa vino ámbar", categoria: "Cristalería", precioRenta: 15 },
-            { nombre: "Copa vino rosa", categoria: "Cristalería", precioRenta: 15 },
-            { nombre: "Copa vino verde", categoria: "Cristalería", precioRenta: 15 },
-            { nombre: "Copa vino uva", categoria: "Cristalería", precioRenta: 15 },
-            { nombre: "Vaso high ball", categoria: "Cristalería", precioRenta: 8 },
-            { nombre: "Vaso cacharrero", categoria: "Cristalería", precioRenta: 8 },
-            { nombre: "Vaso old fashion", categoria: "Cristalería", precioRenta: 10 },
-            { nombre: "Caballito tequilero", categoria: "Cristalería", precioRenta: 6 },
-            // LOZA Y PLAQUÉ
-            { nombre: "Platón blanco o de barro", categoria: "Loza", precioRenta: 20 },
-            { nombre: "Platón para botana o centro", categoria: "Loza", precioRenta: 25 },
-            { nombre: "Plato base de concha dorado", categoria: "Loza", precioRenta: 18 },
-            { nombre: "Plato base talavera", categoria: "Loza", precioRenta: 18 },
-            { nombre: "Plato base gótico negro", categoria: "Loza", precioRenta: 20 },
-            { nombre: "Plato base de mimbre", categoria: "Loza", precioRenta: 15 },
-            { nombre: "Plato base de acero inoxidable", categoria: "Loza", precioRenta: 22 },
-            { nombre: "Plato trinche cuadrado", categoria: "Loza", precioRenta: 12 },
-            { nombre: "Plato trinche redondo", categoria: "Loza", precioRenta: 10 },
-            { nombre: "Plato sopero o medio", categoria: "Loza", precioRenta: 10 },
-            { nombre: "Plato tazón consome", categoria: "Loza", precioRenta: 12 },
-            { nombre: "Plato pastelero cuadrado", categoria: "Loza", precioRenta: 10 },
-            { nombre: "Plato pastelero redondo", categoria: "Loza", precioRenta: 8 },
-            { nombre: "Plato para taza", categoria: "Loza", precioRenta: 6 },
-            { nombre: "Taza cafetera o para crema", categoria: "Loza", precioRenta: 8 },
-            { nombre: "Azucareras chicas", categoria: "Loza", precioRenta: 12 },
-            { nombre: "Ceniceros", categoria: "Loza", precioRenta: 10 },
-            { nombre: "Salseras", categoria: "Loza", precioRenta: 8 },
-            { nombre: "Saleros", categoria: "Loza", precioRenta: 5 },
-            { nombre: "Panera de lujo canasta forrada", categoria: "Loza", precioRenta: 25 },
-            // CUCHILES Y TENEDORERÍA
-            { nombre: "Trinche para carne ensalada", categoria: "Cuchillería", precioRenta: 8 },
-            { nombre: "Trinche de bambú para carne o ensalada", categoria: "Cuchillería", precioRenta: 12 },
-            { nombre: "Trinche dorado acero para carne o ensalada", categoria: "Cuchillería", precioRenta: 15 },
-            { nombre: "Cuchara sopera", categoria: "Cuchillería", precioRenta: 8 },
-            { nombre: "Cuchara sopera dorada", categoria: "Cuchillería", precioRenta: 15 },
-            { nombre: "Cuchara cafetera o pastelera", categoria: "Cuchillería", precioRenta: 6 },
-            { nombre: "Cuchara cafetera o pastelera plata de ley", categoria: "Cuchillería", precioRenta: 12 },
-            { nombre: "Cuchillo plano carnicero", categoria: "Cuchillería", precioRenta: 8 },
-            { nombre: "Cuchillo de bambú carnicero", categoria: "Cuchillería", precioRenta: 12 },
-            { nombre: "Cuchillo dorado de acero inox carnicero", categoria: "Cuchillería", precioRenta: 15 },
-            { nombre: "Cuchillo para mantequilla y pan", categoria: "Cuchillería", precioRenta: 6 },
-            // MANTELERÍA
-            { nombre: "Mantel blanco redondo", categoria: "Mantelería", precioRenta: 40 },
-            { nombre: "Cubre mantel de color o estampado organza u otro", categoria: "Mantelería", precioRenta: 25 },
-            { nombre: "Faldón o bambalina de color", categoria: "Mantelería", precioRenta: 35 },
-            { nombre: "Bambalina tergal blanco, tablón rectangular", categoria: "Mantelería", precioRenta: 30 },
-            { nombre: "Bambalina plizada 1 metro mesa novios, principal, regalo cristal, oval", categoria: "Mantelería", precioRenta: 40 },
-            { nombre: "Mantel camino rectangular o cuadrado", categoria: "Mantelería", precioRenta: 20 },
-            { nombre: "Mantel de encaje redondo o rectangular o cuadrado estilo vintage", categoria: "Mantelería", precioRenta: 50 },
-            { nombre: "Servilleta de tela varios colores o blanca", categoria: "Mantelería", precioRenta: 8 },
-            // CAMINOS
-            { nombre: "Camino azul rey", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino azul plumbago", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino azul marino", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino azul marino satín", categoria: "Mantelería: Caminos Color", precioRenta: 18 },
-            { nombre: "Camino azul cielo", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino azul turquesa", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino verde jade", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino verde bandera", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino verde manzana", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino verde agua o menta", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino amarillo canario", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino rosa palo", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino rosa fucsia o mexicano", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino rojo tinto", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino rojo pasión", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino dorado u oro", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino beige/arena/hueso/camel", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino café con leche / chocolate", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino gris mate / plata", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino lila / morado / uva", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino negro", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            { nombre: "Camino naranja mate", categoria: "Mantelería: Caminos Color", precioRenta: 15 },
-            // ADICIONALES (DECORACION LUMINOSA Y CEREMONIA)
-            { nombre: "Sillón princesa", categoria: "Decoración", precioRenta: 350 },
-            { nombre: "Cabildo madera ceremonia", categoria: "Decoración", precioRenta: 400 },
-            { nombre: "Reclinatorio blanco ceremonial", categoria: "Decoración", precioRenta: 150 },
-            { nombre: "Letras gigantes XV 1.10m", categoria: "Decoración Iluminada", precioRenta: 600 },
-            { nombre: "Letras gigantes VX 1.80m", categoria: "Decoración Iluminada", precioRenta: 900 },
-            { nombre: "Corazón gigante", categoria: "Decoración Iluminada", precioRenta: 700 },
-            { nombre: "Portería perimetral de 3x3x2.5", categoria: "Estructuras Gigantes", precioRenta: 1500 },
-            { nombre: "Poste extra portería", categoria: "Estructuras Gigantes", precioRenta: 200 },
-            { nombre: "Sombrillas 3m", categoria: "Estructuras Gigantes", precioRenta: 300 },
-            // SERVICIO DE BANQUETERÍA O RESTAURANT
-            { nombre: "Pérgolas un toldo sin carpa con cortinas", categoria: "Estructuras Gigantes", precioRenta: 2500 },
-            { nombre: "Hielera mediana", categoria: "Equipo y Accesorios", precioRenta: 100 },
-            { nombre: "Hielera redonda blanca grande", categoria: "Equipo y Accesorios", precioRenta: 150 },
-            { nombre: "Pinzas para hielo acero", categoria: "Equipo y Accesorios", precioRenta: 15 },
-            { nombre: "Charola de servicio antideslizante", categoria: "Equipo y Accesorios", precioRenta: 30 },
-            { nombre: "Jarra cristalina de mesa", categoria: "Equipo y Accesorios", precioRenta: 25 },
+            { nombre: "banca larga sin respaldo", categoria: "Salas Lounge", precioRenta: 60 },
+            { nombre: "banca larga con respaldo", categoria: "Salas Lounge", precioRenta: 80 },
+            { nombre: "banco individual con respaldo", categoria: "Salas Lounge", precioRenta: 45 },
+
+            // SILLAS
+            { nombre: "silla diana negra", categoria: "Sillas", precioRenta: 45 },
+            { nombre: "Silla diana blanca", categoria: "Sillas", precioRenta: 45 },
+            { nombre: "silla diana madera", categoria: "Sillas", precioRenta: 45 },
+            { nombre: "silla versalles dorada", categoria: "Sillas", precioRenta: 40 },
+            { nombre: "silla versalles plata", categoria: "Sillas", precioRenta: 40 },
+            { nombre: "silla versalles blanca", categoria: "Sillas", precioRenta: 40 },
+            { nombre: "silla versalles caoba", categoria: "Sillas", precioRenta: 40 },
+            { nombre: "silla versalles transparente", categoria: "Sillas", precioRenta: 45 },
+            { nombre: "silla romana", categoria: "Sillas", precioRenta: 35 },
+            { nombre: "silla chavari Blanca", categoria: "Sillas", precioRenta: 35 },
+            { nombre: "silla chavari dorada", categoria: "Sillas", precioRenta: 35 },
+            { nombre: "silla tiffany laqueada blanca", categoria: "Sillas", precioRenta: 35 },
+            { nombre: "silla tiffany dorada", categoria: "Sillas", precioRenta: 35 },
+            { nombre: "silla tiffany chocolate", categoria: "Sillas", precioRenta: 35 },
+            { nombre: "silla avant gaard blanca", categoria: "Sillas", precioRenta: 30 },
+            { nombre: "silla Versalle baby", categoria: "Sillas Infantiles", precioRenta: 20 },
+            { nombre: "silla tiffany baby", categoria: "Sillas Infantiles", precioRenta: 20 },
+            { nombre: "silla cross back", categoria: "Sillas", precioRenta: 45 },
+            { nombre: "silla cross back negra", categoria: "Sillas", precioRenta: 45 },
+            { nombre: "silla Avant garde baby", categoria: "Sillas Infantiles", precioRenta: 20 },
+            { nombre: "silla praga", categoria: "Sillas", precioRenta: 50 },
+            { nombre: "silla medallon", categoria: "Sillas", precioRenta: 50 },
+
+            // LOZA
+            { nombre: "plato base concha dorado", categoria: "Loza", precioRenta: 18 },
+            { nombre: "plato base talavera", categoria: "Loza", precioRenta: 18 },
+            { nombre: "plato base cristal con OrIlla dorada", categoria: "Loza", precioRenta: 20 },
+            { nombre: "plato base gotico rojo", categoria: "Loza", precioRenta: 20 },
+            { nombre: "plato base ratan", categoria: "Loza", precioRenta: 15 },
+            { nombre: "plato base gotico negro", categoria: "Loza", precioRenta: 20 },
+            { nombre: "plato trinche blanco", categoria: "Loza", precioRenta: 10 },
+            { nombre: "plato trinche cuadrado", categoria: "Loza", precioRenta: 12 },
+            { nombre: "plato trinche tinto", categoria: "Loza", precioRenta: 12 },
+            { nombre: "plato trinche color pastel", categoria: "Loza", precioRenta: 12 },
+            { nombre: "plato trinche negro mate", categoria: "Loza", precioRenta: 12 },
+            { nombre: "plato pozolero /sopera", categoria: "Loza", precioRenta: 10 },
+            { nombre: "plato postre cuadradoblanco", categoria: "Loza", precioRenta: 8 },
+            { nombre: "plato postro redondoblanco", categoria: "Loza", precioRenta: 8 },
+            { nombre: "tazon para crema", categoria: "Loza", precioRenta: 8 },
+            { nombre: "taza para cafe", categoria: "Loza", precioRenta: 8 },
+            { nombre: "platones al centro", categoria: "Loza", precioRenta: 25 },
+
+            // CUCHILLERIA
+            { nombre: "cubierto dorado", categoria: "Cuchillería", precioRenta: 15 },
+            { nombre: "cubierto silver", categoria: "Cuchillería", precioRenta: 10 },
+            { nombre: "pinzas /cucharon", categoria: "Cuchillería", precioRenta: 10 },
+
+            // CRISTALERIA
+            { nombre: "vaso jaibolero/ agua", categoria: "Cristalería", precioRenta: 8 },
+            { nombre: "copa flauta", categoria: "Cristalería", precioRenta: 12 },
+            { nombre: "copa globo", categoria: "Cristalería", precioRenta: 12 },
+            { nombre: "copa vino tinto", categoria: "Cristalería", precioRenta: 12 },
+            { nombre: "copa vino color ambar", categoria: "Cristalería", precioRenta: 15 },
+            { nombre: "copa vino color uva", categoria: "Cristalería", precioRenta: 15 },
+            { nombre: "copa vino tinto color azul", categoria: "Cristalería", precioRenta: 15 },
+            { nombre: "copa martinera", categoria: "Cristalería", precioRenta: 12 },
+            { nombre: "copa coñaquera", categoria: "Cristalería", precioRenta: 12 },
+            { nombre: "copa margarita", categoria: "Cristalería", precioRenta: 12 },
+            { nombre: "caballitos", categoria: "Cristalería", precioRenta: 6 },
+            { nombre: "jarra cristalina", categoria: "Cristalería", precioRenta: 25 },
+
+            // EQUIPO y ACCESORIOS
+            { nombre: "hielera de mesa", categoria: "Equipo", precioRenta: 100 },
+            { nombre: "hielera de pizo", categoria: "Equipo", precioRenta: 120 },
+            { nombre: "hielera grande (cielo)", categoria: "Equipo", precioRenta: 150 },
+            { nombre: "samover chico", categoria: "Equipo", precioRenta: 80 },
+            { nombre: "samover mediano", categoria: "Equipo", precioRenta: 100 },
+            { nombre: "samover grande", categoria: "Equipo", precioRenta: 150 },
+            { nombre: "saleros / ceniceros", categoria: "Accesorios", precioRenta: 5 },
+            { nombre: "charola mesero antideslizante redonda", categoria: "Accesorios", precioRenta: 30 },
+            { nombre: "tortillero de peltre", categoria: "Accesorios", precioRenta: 15 },
+            { nombre: "tortillero de palma", categoria: "Accesorios", precioRenta: 10 },
+            { nombre: "panera de teka", categoria: "Accesorios", precioRenta: 25 },
+            { nombre: "tabla pastel", categoria: "Accesorios", precioRenta: 50 },
+            { nombre: "tabla de Quesos", categoria: "Accesorios", precioRenta: 40 },
+
+            // MANTELERIA
+            { nombre: "mantel blanco redondo", categoria: "Mantelería", precioRenta: 40 },
+            { nombre: "tablero de madera y mantel rojo", categoria: "Mantelería", precioRenta: 60 },
+            { nombre: "mantel vintage encaje", categoria: "Mantelería", precioRenta: 50 },
+            { nombre: "faldón / bamabalina", categoria: "Mantelería", precioRenta: 35 },
+            { nombre: "funda francesa", categoria: "Mantelería", precioRenta: 15 },
+            { nombre: "cubre organza", categoria: "Mantelería", precioRenta: 25 },
+            { nombre: "banda / moño", categoria: "Mantelería", precioRenta: 10 },
+            { nombre: "servilleta tela", categoria: "Mantelería", precioRenta: 8 },
+            { nombre: "servilleta de lino", categoria: "Mantelería", precioRenta: 12 },
+            { nombre: "camino de color ( preguntar disponibilidad de color)", categoria: "Mantelería", precioRenta: 15 },
+
+            // ESTRUCTURAS GIGANTES Y CARPAS
+            { nombre: "sombrilla 3 metros", categoria: "Carpas", precioRenta: 300 },
+            { nombre: "domo de 10x10 a 6 metros de atura", categoria: "Carpas", precioRenta: 4500 },
+            { nombre: "Pista cristal (iluminada) (1.20x1.20)", categoria: "Pistas", precioRenta: 250 },
+            { nombre: "pista pintada a Mano (1.20 x 1.20)", categoria: "Pistas", precioRenta: 200 },
+            { nombre: "pista iluminada led pixel (1.20 x1.220)", categoria: "Pistas", precioRenta: 300 },
+            { nombre: "Tarima basica de 10 / 15 y 30 cms alto (1.20*1.20)", categoria: "Pistas", precioRenta: 150 },
+            { nombre: "Charolados (negro O Blanco) (1.20x1.20)", categoria: "Pistas", precioRenta: 180 },
+            { nombre: "tapete pasto sintentico ( 2 x 10 metros)", categoria: "Decoración", precioRenta: 400 },
+            { nombre: "Letras gigantes 1.20 metros Iluminadas", categoria: "Decoración", precioRenta: 600 },
+            { nombre: "Letras gigantes 1.80 metros iluinadas", categoria: "Decoración", precioRenta: 900 },
+            { nombre: "cabildo de ceremonia de madera", categoria: "Decoración", precioRenta: 400 },
+            { nombre: "corazon gigante Iluminado (back fotos)", categoria: "Decoración", precioRenta: 700 },
+            { nombre: "porterias 3x3 perimetrales (1 tramo )", categoria: "Estructuras Gigantes", precioRenta: 1500 },
+            { nombre: "sillas principe O princesa (sillón) (por unidad o pieza)", categoria: "Decoración", precioRenta: 350 },
         ];
 
         let createdCount = 0;
         let updatedCount = 0;
+        let deletedCount = 0;
+        let deactivatedCount = 0;
+
+        // Limpiar catálogo antiguo no coincidente
+        const newNames = inventario.map(i => i.nombre);
+        const oldItems = await prisma.inventarioItem.findMany({
+            where: { nombre: { notIn: newNames } },
+            include: { _count: { select: { pedidoItems: true } } }
+        });
+
+        for (const old of oldItems) {
+            if (old._count.pedidoItems === 0) {
+                await prisma.inventarioItem.delete({ where: { id: old.id } });
+                deletedCount++;
+            } else {
+                await prisma.inventarioItem.update({ where: { id: old.id }, data: { activo: false } });
+                deactivatedCount++;
+            }
+        }
 
         for (const item of inventario) {
             const existingItem = await prisma.inventarioItem.findFirst({
@@ -184,7 +196,7 @@ router.post('/seed', async (req, res) => {
                 createdCount++;
             }
         }
-        res.json({ message: 'Inventario seeded successfully', created: createdCount, updated: updatedCount });
+        res.json({ message: 'Inventario seeded successfully', created: createdCount, updated: updatedCount, deleted: deletedCount, deactivated: deactivatedCount });
     } catch (error) {
         console.error('Error seeding inventario:', error);
         res.status(500).json({ error: 'Error seeding inventario' });
