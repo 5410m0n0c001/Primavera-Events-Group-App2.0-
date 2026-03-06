@@ -14,10 +14,6 @@ COPY prisma ./prisma/
 
 RUN npm install
 
-# Create initial migration for baselining
-RUN mkdir -p prisma/migrations/0_init && \
-    npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > prisma/migrations/0_init/migration.sql
-
 # Generar Prisma Client
 RUN npx prisma generate
 
@@ -37,6 +33,10 @@ COPY . .
 
 # Compilar TypeScript
 RUN npm run build
+
+# Create initial migration here so it is not overwritten by COPY . .
+RUN mkdir -p prisma/migrations/0_init && \
+    npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script > prisma/migrations/0_init/migration.sql
 
 # ══════════════════════════════════════════════════════
 # STAGE 3: PRUNE - Filtrar DevDependencies
