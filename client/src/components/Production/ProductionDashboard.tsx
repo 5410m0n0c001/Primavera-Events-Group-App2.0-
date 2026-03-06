@@ -271,19 +271,18 @@ const ProductionDashboard: React.FC = () => {
                 pdf.addImage(timelineImgData, 'JPEG', 10, currentY, imgWidth, imgHeight);
             }
 
-            // Generate and force-download the PDF
+            // Para asegurar que el usuario siempre pueda ver/descargar el PDF incluso si Chromium bloquea la extensión
             const pdfBlob = pdf.output('blob');
             const blobUrl = URL.createObjectURL(pdfBlob);
-            const downloadLink = document.createElement('a');
-            downloadLink.href = blobUrl;
-            downloadLink.download = 'Reporte_Produccion_Primavera.pdf';
-            downloadLink.style.display = 'none';
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
 
-            // Clean up memory after a small delay
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+            // 1. Abrimos el PDF en una nueva pestaña (Preview/Print/Save)
+            window.open(blobUrl, '_blank');
+
+            // 2. Intentamos la descarga estandar de jsPDF como alternativa dual
+            pdf.save('Reporte_Produccion_Primavera.pdf');
+
+            // Limpiamos memoria
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
 
             // Restore state
             if (zoomContainer) zoomContainer.style.transform = originalTransform;
