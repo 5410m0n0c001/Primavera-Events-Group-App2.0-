@@ -258,7 +258,7 @@ export const pedidosService = {
                 }
             }
 
-            const cleanData = { ...data };
+            const cleanData: any = { ...data };
             delete cleanData.items;
 
             return await tx.pedido.update({
