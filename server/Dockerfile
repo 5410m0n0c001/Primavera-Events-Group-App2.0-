@@ -25,6 +25,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Instalar openssl para que Prisma pueda generar la migración
+RUN apk add --no-cache openssl
+
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=dependencies /app/package*.json ./
 
