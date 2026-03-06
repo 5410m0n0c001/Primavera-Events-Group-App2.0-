@@ -5,6 +5,85 @@ import { pedidosService } from '../services/pedidosService';
 const router = Router();
 const prisma = new PrismaClient();
 
+// POST /api/inventario/seed - Sembrar base base de datos en prod
+router.post('/seed', async (req, res) => {
+    try {
+        const inventario = [
+            // MESAS
+            { nombre: "Mesa redonda", categoria: "Mesas", precioRenta: 80 },
+            { nombre: "Mesa tablón", categoria: "Mesas", precioRenta: 70 },
+            { nombre: "Mesa cuadrada de madera", categoria: "Mesas", precioRenta: 90 },
+            { nombre: "Mesa rectangular tipo mármol", categoria: "Mesas", precioRenta: 120 },
+            { nombre: "Mesa rectangular madera miel", categoria: "Mesas", precioRenta: 100 },
+            { nombre: "Mesa rectangular madera nogal clásico", categoria: "Mesas", precioRenta: 100 },
+            { nombre: "Mesa plegable cuadrada", categoria: "Mesas", precioRenta: 60 },
+            { nombre: "Mesa infantil", categoria: "Mesas", precioRenta: 50 },
+            { nombre: "Mesa madera blanca ceremonia", categoria: "Mesas", precioRenta: 90 },
+            { nombre: "Periquera alta madera", categoria: "Mesas", precioRenta: 80 },
+            { nombre: "Periquera alta metal", categoria: "Mesas", precioRenta: 80 },
+            { nombre: "Mesa de centro", categoria: "Mesas", precioRenta: 70 },
+            { nombre: "Sala lounge madera", categoria: "Mesas", precioRenta: 150 },
+            // SILLAS Y BANCAS
+            { nombre: "Silla Tiffany blanca", categoria: "Sillas", precioRenta: 25 },
+            { nombre: "Silla Tiffany chocolate", categoria: "Sillas", precioRenta: 25 },
+            { nombre: "Silla Tiffany blanca infantil", categoria: "Sillas", precioRenta: 20 },
+            { nombre: "Silla Cross Back nogal", categoria: "Sillas", precioRenta: 35 },
+            { nombre: "Silla Cross Back miel", categoria: "Sillas", precioRenta: 35 },
+            { nombre: "Silla metálica Boss", categoria: "Sillas", precioRenta: 30 },
+            { nombre: "Silla metálica Lotus", categoria: "Sillas", precioRenta: 30 },
+            { nombre: "Banco log", categoria: "Sillas", precioRenta: 40 },
+            // DECORACION Y CEREMONIA
+            { nombre: "Letra gigante XV 1.10m", categoria: "Decoración", precioRenta: 300 },
+            { nombre: "Letra gigante XV 1.80m", categoria: "Decoración", precioRenta: 450 },
+            { nombre: "Corazón gigante", categoria: "Decoración", precioRenta: 350 },
+            { nombre: "Cruz madera ceremonia", categoria: "Ceremonia", precioRenta: 150 },
+            // MANTELERÍA
+            { nombre: "Mantel blanco redondo", categoria: "Mantelería", precioRenta: 30 },
+            { nombre: "Camino palo de rosa", categoria: "Mantelería", precioRenta: 15 },
+        ];
+
+        let createdCount = 0;
+        let updatedCount = 0;
+
+        for (const item of inventario) {
+            const existingItem = await prisma.inventarioItem.findFirst({
+                where: { nombre: item.nombre }
+            });
+
+            if (existingItem) {
+                await prisma.inventarioItem.update({
+                    where: { id: existingItem.id },
+                    data: {
+                        precioRenta: item.precioRenta,
+                        categoria: item.categoria,
+                        stockTotal: existingItem.stockTotal === 0 ? 50 : existingItem.stockTotal,
+                        stockDisponible: existingItem.stockDisponible === 0 ? 50 : existingItem.stockDisponible,
+                        unidad: "pieza"
+                    }
+                });
+                updatedCount++;
+            } else {
+                await prisma.inventarioItem.create({
+                    data: {
+                        nombre: item.nombre,
+                        categoria: item.categoria,
+                        precioRenta: item.precioRenta,
+                        stockTotal: 100,
+                        stockDisponible: 100,
+                        unidad: "pieza",
+                        activo: true
+                    }
+                });
+                createdCount++;
+            }
+        }
+        res.json({ message: 'Inventario seeded successfully', created: createdCount, updated: updatedCount });
+    } catch (error) {
+        console.error('Error seeding inventario:', error);
+        res.status(500).json({ error: 'Error seeding inventario' });
+    }
+});
+
 // GET /api/inventario - catálogo completo
 router.get('/', async (req, res) => {
     try {
