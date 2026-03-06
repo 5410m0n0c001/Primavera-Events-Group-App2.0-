@@ -11,9 +11,6 @@ import ProductionDashboard from './components/Production/ProductionDashboard';
 import AnalyticsDashboard from './components/Analytics/AnalyticsDashboard';
 import VenuesManager from './components/Venues/VenuesManager';
 import WebsiteDashboard from './components/Website/WebsiteDashboard';
-import LandingPage from './components/LandingPage';
-import BudgetCalculator from './components/BudgetCalculator';
-import ExportManager from './components/ExportManager';
 import AIChatInterface from './components/Chat/AIChatInterface';
 import AdminLogin from './components/Auth/AdminLogin';
 
@@ -152,7 +149,6 @@ function App() {
         {view === 'analytics' && <AnalyticsDashboard />}
         {view === 'venues' && <VenuesManager />}
         {view === 'website' && <WebsiteDashboard />}
-        {view === 'exports' && <ExportManager />}
       </div>
     </main>
   );
