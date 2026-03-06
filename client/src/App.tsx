@@ -185,13 +185,11 @@ function App() {
   }
 
   return (
-    { renderNavigation() }
-      { renderContent() }
-    </div >
+    <div className="min-h-screen bg-[#F5F5F7] dark:bg-black flex text-[#1D1D1F] dark:text-white transition-colors duration-300">
+      {renderNavigation()}
+      {renderContent()}
+    </div>
   );
 }
 
 export default App;
-
-export default App;
-```
