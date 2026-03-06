@@ -27,6 +27,27 @@ interface LayoutObject {
     catalogueId?: string;
 }
 
+// Category Color Map
+const categoryColors: Record<string, string> = {
+    'acceso': 'bg-teal-100 border-2 border-teal-600 text-teal-900',
+    'estacionamiento': 'bg-gray-200 border-2 border-gray-600 text-gray-900',
+    'coctel': 'bg-pink-100 border-2 border-pink-600 text-pink-900',
+    'jardines': 'bg-green-100 border-2 border-green-600 text-green-900',
+    'invitados': 'bg-indigo-100 border-2 border-indigo-600 text-indigo-900',
+    'buffet': 'bg-orange-100 border-2 border-orange-600 text-orange-900',
+    'cocinas': 'bg-red-100 border-2 border-red-600 text-red-900',
+    'barras': 'bg-purple-100 border-2 border-purple-600 text-purple-900',
+    'escenario': 'bg-yellow-100 border-2 border-yellow-600 text-yellow-900',
+    'pista': 'bg-rose-100 border-2 border-rose-600 text-rose-900',
+    'carpas': 'bg-cyan-100 border-2 border-cyan-600 text-cyan-900',
+    'ceremonia': 'bg-emerald-100 border-2 border-emerald-600 text-emerald-900',
+    'regalos': 'bg-fuchsia-100 border-2 border-fuchsia-600 text-fuchsia-900',
+    'banos': 'bg-sky-100 border-2 border-sky-600 text-sky-900',
+    'staff': 'bg-slate-200 border-2 border-slate-600 text-slate-900',
+    'seguridad': 'bg-red-500 border-2 border-red-800 text-white',
+    'iluminacion': 'bg-amber-100 border-2 border-amber-600 text-amber-900',
+};
+
 const ProductionDashboard: React.FC = () => {
     // --- VIEW STATE ---
     const [view, setView] = useState<'layout' | 'timeline'>('layout');
@@ -73,7 +94,7 @@ const ProductionDashboard: React.FC = () => {
             width: width,
             height: height,
             shape: 'rect',
-            colorClass: 'bg-white border-2 border-gray-800 text-gray-900 shadow-sm'
+            colorClass: categoryColors[element.category] || 'bg-white border-2 border-gray-800 text-gray-900 shadow-sm'
         };
         setLayoutObjects([...layoutObjects, newObj]);
     };
@@ -216,9 +237,38 @@ const ProductionDashboard: React.FC = () => {
             const pdfHeight = pdf.internal.pageSize.getHeight();
             let currentY = 10;
 
-            pdf.setFontSize(16);
-            pdf.text('Reporte de Producción', 10, currentY);
-            currentY += 10;
+            // Header with Logo Attempt
+            try {
+                const logoImg = new Image();
+                logoImg.src = '/logo-primavera.png';
+                // Wait for the logo to load briefly
+                await Promise.race([
+                    new Promise(r => { logoImg.onload = r; logoImg.onerror = r; }),
+                    new Promise(r => setTimeout(r, 1000))
+                ]);
+
+                if (logoImg.complete && logoImg.naturalWidth > 0) {
+                    const logoAspectRatio = logoImg.naturalWidth / logoImg.naturalHeight;
+                    const logoh = 25;
+                    const logow = logoh * logoAspectRatio;
+                    pdf.addImage(logoImg, 'PNG', 10, currentY, logow, logoh);
+
+                    pdf.setFontSize(22);
+                    pdf.setFont("helvetica", "bold");
+                    pdf.text('Reporte de Producción', 10 + logow + 10, currentY + 15);
+                    currentY += Math.max(logoh, 25) + 10;
+                } else {
+                    pdf.setFontSize(22);
+                    pdf.setFont("helvetica", "bold");
+                    pdf.text('Primavera Events - Reporte de Producción', 10, currentY + 10);
+                    currentY += 25;
+                }
+            } catch (e) {
+                pdf.setFontSize(22);
+                pdf.setFont("helvetica", "bold");
+                pdf.text('Primavera Events - Reporte de Producción', 10, currentY + 10);
+                currentY += 25;
+            }
 
             // 1. Export Layout if it has elements
             if (layoutObjects.length > 0) {
@@ -380,12 +430,12 @@ const ProductionDashboard: React.FC = () => {
                                         title={obj.label}
                                     >
                                         <div style={{
-                                            fontSize: '11px',
-                                            lineHeight: '1.1',
-                                            color: '#1f2937', // Text-gray-800 explicit for html2canvas
-                                            width: '100%',
-                                            maxHeight: '100%',
-                                            overflow: 'hidden',
+                                            fontSize: '14px',
+                                            fontWeight: 'bold',
+                                            lineHeight: '1.2',
+                                            color: '#111827',
+                                            textShadow: '0px 0px 4px rgba(255,255,255,0.9)',
+                                            width: '150%',
                                             wordWrap: 'break-word',
                                             pointerEvents: 'none',
                                             textAlign: 'center'
