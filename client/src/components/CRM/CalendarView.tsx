@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, addMonths, subMonths, setMonth, setYear } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 interface Event {
@@ -91,16 +91,38 @@ const CalendarView: React.FC = () => {
         end: endOfMonth(currentDate)
     });
 
+    const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    const currentYear = currentDate.getFullYear();
+    const years = Array.from({ length: 10 }, (_, i) => currentYear - 5 + i);
+
     return (
         <div className="p-6 max-w-6xl mx-auto">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-serif text-primavera-gold font-bold capitalize">
+            <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <h2 className="text-3xl font-serif text-primavera-gold font-bold capitalize hidden md:block">
                     {format(currentDate, 'MMMM yyyy', { locale: es })}
                 </h2>
-                <div className="space-x-2">
-                    <button onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)))} className="px-3 py-1 border rounded hover:bg-gray-100">{'<'}</button>
-                    <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1 border rounded hover:bg-gray-100">Hoy</button>
-                    <button onClick={() => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)))} className="px-3 py-1 border rounded hover:bg-gray-100">{'>'}</button>
+
+                <div className="flex items-center gap-2 w-full md:w-auto bg-white dark:bg-black p-2 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 shrink-0">
+                    <button onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-700 dark:text-gray-300">{'<'}</button>
+
+                    <select
+                        className="p-1.5 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#1c1c1e] text-black dark:text-white font-bold capitalize outline-none focus:border-primavera-gold text-sm"
+                        value={currentDate.getMonth()}
+                        onChange={(e) => setCurrentDate(setMonth(currentDate, parseInt(e.target.value)))}
+                    >
+                        {months.map((m, i) => <option key={m} value={i}>{m}</option>)}
+                    </select>
+
+                    <select
+                        className="p-1.5 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#1c1c1e] text-black dark:text-white font-bold outline-none focus:border-primavera-gold text-sm"
+                        value={currentDate.getFullYear()}
+                        onChange={(e) => setCurrentDate(setYear(currentDate, parseInt(e.target.value)))}
+                    >
+                        {years.map(y => <option key={y} value={y}>{y}</option>)}
+                    </select>
+
+                    <button onClick={() => setCurrentDate(new Date())} className="px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-700 dark:text-gray-300 text-sm font-medium">Hoy</button>
+                    <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition text-gray-700 dark:text-gray-300">{'>'}</button>
                 </div>
             </div>
 

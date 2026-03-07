@@ -32,6 +32,7 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
 
     const [loading, setLoading] = useState(isEdit);
     const [step, setStep] = useState(1);
+    const [mobileTab, setMobileTab] = useState<'catalogo' | 'carrito'>('catalogo');
 
     useEffect(() => {
         if (isEdit) {
@@ -200,11 +201,46 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
             <div className="flex flex-col md:flex-row gap-6 flex-1 overflow-hidden">
                 {step === 1 ? (
                     <>
-                        <div className="flex-[3] flex flex-col min-h-0">
-                            <InventarioSelector onSelect={handleAddItem} fechaEntrega={form.fechaEntrega} />
+                        {/* Tab Switcher for Mobile */}
+                        <div className="flex md:hidden bg-gray-200 dark:bg-gray-800 rounded-lg p-1 shrink-0 mb-2">
+                            <button
+                                type="button"
+                                className={`flex-1 py-1.5 text-[15px] font-bold rounded-md transition ${mobileTab === 'catalogo' ? 'bg-white dark:bg-[#1c1c1e] text-black dark:text-white shadow' : 'text-gray-500 hover:text-gray-700'}`}
+                                onClick={() => setMobileTab('catalogo')}
+                            >
+                                Catálogo
+                            </button>
+                            <button
+                                type="button"
+                                className={`flex-1 py-1.5 text-[15px] font-bold rounded-md transition flex items-center justify-center gap-2 ${mobileTab === 'carrito' ? 'bg-white dark:bg-[#1c1c1e] text-black dark:text-white shadow' : 'text-gray-500 hover:text-gray-700'}`}
+                                onClick={() => setMobileTab('carrito')}
+                            >
+                                Mi Carrito
+                                {form.items.length > 0 && (
+                                    <span className="bg-primavera-gold text-white text-[11px] px-2 py-0.5 rounded-full">{form.items.length}</span>
+                                )}
+                            </button>
                         </div>
 
-                        <div className="flex-[2] flex flex-col space-y-4 min-h-0 ml-0 md:ml-4 border-l-0 md:border-l border-gray-100 dark:border-gray-800 md:pl-6">
+                        <div className={`flex-[3] flex-col min-h-0 md:h-auto overflow-hidden ${mobileTab === 'catalogo' ? 'flex' : 'hidden md:flex'}`}>
+                            <InventarioSelector onSelect={handleAddItem} fechaEntrega={form.fechaEntrega} />
+
+                            {/* Mobile Visual Cue */}
+                            {mobileTab === 'catalogo' && form.items.length > 0 && (
+                                <button
+                                    onClick={() => setMobileTab('carrito')}
+                                    className="md:hidden mt-3 w-full bg-black text-white dark:bg-white dark:text-black font-bold py-3.5 rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.2)] flex justify-between px-5 items-center animate-fade-in-up"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xl">🛒</span>
+                                        <span>Ver {form.items.length} artículos</span>
+                                    </div>
+                                    <span className="text-lg">${subtotal.toFixed(2)} ➔</span>
+                                </button>
+                            )}
+                        </div>
+
+                        <div className={`flex-[2] flex-col space-y-4 min-h-0 ml-0 md:ml-4 border-l-0 md:border-l border-gray-100 dark:border-gray-800 md:pl-6 ${mobileTab === 'carrito' ? 'flex' : 'hidden md:flex'}`}>
                             <div className="flex-1 bg-gray-50 dark:bg-[#2c2c2e] p-4 rounded-xl border border-gray-200 dark:border-gray-800 flex flex-col min-h-0">
                                 <div className="flex justify-between items-center mb-3">
                                     <h3 className="font-bold text-gray-900 dark:text-white">Artículos Seleccionados</h3>

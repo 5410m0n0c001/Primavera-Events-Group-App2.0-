@@ -56,7 +56,7 @@ export default function InventarioSelector({ onSelect, fechaEntrega }: ItemSelec
     const categoriasUnicas = Array.from(new Set(items.map(i => i.categoria)));
 
     return (
-        <div className="bg-gray-50 dark:bg-[#2c2c2e] p-4 rounded-xl border border-gray-200 dark:border-white/10 h-[500px] flex flex-col">
+        <div className="bg-gray-50 dark:bg-[#2c2c2e] p-4 rounded-xl border border-gray-200 dark:border-white/10 h-full flex flex-col overflow-hidden relative">
             <h3 className="font-bold text-gray-800 dark:text-gray-200 mb-3">Catálogo de Inventario</h3>
 
             <input

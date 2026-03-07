@@ -49,6 +49,9 @@ export default function ChatWindow({ isAdmin }: Props) {
             };
             recognition.onerror = (event: any) => {
                 console.error('Speech recognition error:', event.error);
+                if (event.error === 'not-allowed') {
+                    alert('Acceso al micrófono denegado o bloqueado por el navegador (Requiere HTTPS).');
+                }
                 setIsListening(false);
             };
             recognition.onend = () => setIsListening(false);
@@ -64,6 +67,10 @@ export default function ChatWindow({ isAdmin }: Props) {
     }, []);
 
     const toggleListening = () => {
+        if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+            alert('El micrófono sólo funciona en conexiones seguras (HTTPS). Actualmente estás en HTTP.');
+            return;
+        }
         if (isListening) {
             recognitionRef.current?.stop();
         } else {
@@ -74,37 +81,58 @@ export default function ChatWindow({ isAdmin }: Props) {
 
     const speakMessage = (text: string) => {
         if (isMuted || !window.speechSynthesis) return;
-        window.speechSynthesis.cancel(); // Stop talking first
-        const utterance = new SpeechSynthesisUtterance(text);
 
-        // Explicitly try to find a female Spanish voice (Sabina, Paulina, Helena, Laura, etc.)
-        const voices = window.speechSynthesis.getVoices();
-        const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
+        const playVoice = () => {
+            window.speechSynthesis.cancel(); // Stop current speech
+            const utterance = new SpeechSynthesisUtterance(text);
 
-        if (spanishVoices.length > 0) {
-            const preferredNames = ['sabina', 'paulina', 'helena', 'laura', 'monica', 'google español', 'female', 'mujer'];
-            let selectedVoice = null;
+            const voices = window.speechSynthesis.getVoices();
+            const spanishVoices = voices.filter(v => v.lang.startsWith('es'));
 
-            for (const name of preferredNames) {
-                selectedVoice = spanishVoices.find(v => v.name.toLowerCase().includes(name) || v.voiceURI.toLowerCase().includes(name));
-                if (selectedVoice) break;
+            if (spanishVoices.length > 0) {
+                // Focus exclusively on female names standard in Windows/Mac/Android for Spanish
+                const femaleNames = ['sabina', 'helena', 'laura', 'monica', 'dalia', 'mia', 'paul', 'mujer', 'female'];
+                let selectedVoice = null;
+
+                for (const name of femaleNames) {
+                    selectedVoice = spanishVoices.find(v => v.name.toLowerCase().includes(name) || v.voiceURI.toLowerCase().includes(name));
+                    if (selectedVoice) break;
+                }
+
+                // Exclude male known voices if possible
+                if (!selectedVoice) {
+                    selectedVoice = spanishVoices.find(v => !v.name.toLowerCase().includes('pablo') && !v.name.toLowerCase().includes('jorge'));
+                }
+
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                } else {
+                    utterance.voice = spanishVoices[0];
+                }
             }
 
-            if (selectedVoice) {
-                utterance.voice = selectedVoice;
-            } else {
-                utterance.voice = spanishVoices[0]; // Fallback to first Spanish voice
-            }
+            utterance.lang = 'es-MX';
+            utterance.rate = 1.0;
+            utterance.pitch = 1.4; // Force higher pitch (feminine tuning)
+            window.speechSynthesis.speak(utterance);
+        };
+
+        // Handle case where voices aren't loaded yet
+        if (window.speechSynthesis.getVoices().length === 0) {
+            window.speechSynthesis.onvoiceschanged = playVoice;
+        } else {
+            playVoice();
         }
-
-        utterance.lang = 'es-MX';
-        utterance.rate = 1.0;
-        utterance.pitch = 1.2; // Slightly higher pitch for a more feminine tone as fallback
-        window.speechSynthesis.speak(utterance);
     };
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    const playGreetingSound = () => {
+        if (messages.length === 1 && messages[0].content.includes('Hola')) {
+            speakMessage(messages[0].content);
+        }
     };
 
     useEffect(() => {
@@ -215,7 +243,7 @@ export default function ChatWindow({ isAdmin }: Props) {
     };
 
     return (
-        <div className="flex flex-col h-full h-full-ios bg-[#F5F5F7] dark:bg-black p-4 pb-[85px] md:pb-4 gap-4 overflow-y-auto">
+        <div className="flex flex-col h-full h-full-ios bg-[#F5F5F7] dark:bg-black p-4 pb-[85px] md:pb-4 gap-4 overflow-y-auto" onClick={playGreetingSound}>
             {messages.map((msg) => (
                 <div
                     key={msg.id}
