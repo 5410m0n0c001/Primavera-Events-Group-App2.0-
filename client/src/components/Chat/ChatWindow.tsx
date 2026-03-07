@@ -91,7 +91,7 @@ export default function ChatWindow({ isAdmin }: Props) {
 
             if (spanishVoices.length > 0) {
                 // Focus exclusively on female names standard in Windows/Mac/Android for Spanish
-                const femaleNames = ['sabina', 'helena', 'laura', 'monica', 'dalia', 'mia', 'paul', 'mujer', 'female'];
+                const femaleNames = ['sabina', 'helena', 'laura', 'paulina', 'monica', 'dalia', 'victoria', 'luciana', 'marisol'];
                 let selectedVoice = null;
 
                 for (const name of femaleNames) {
@@ -99,9 +99,14 @@ export default function ChatWindow({ isAdmin }: Props) {
                     if (selectedVoice) break;
                 }
 
+                // Try "Google español" native female fallback
+                if (!selectedVoice) {
+                    selectedVoice = spanishVoices.find(v => v.name === 'Google español');
+                }
+
                 // Si no hay mach con los nombres femeninos, nos aseguramos al 100% de EXCLUIR los nombres masculinos nativos
                 if (!selectedVoice) {
-                    const excludedMales = ['pablo', 'jorge', 'raul', 'david', 'carlos'];
+                    const excludedMales = ['pablo', 'jorge', 'raul', 'david', 'carlos', 'diego', 'juan'];
                     selectedVoice = spanishVoices.find(v => !excludedMales.some(male => v.name.toLowerCase().includes(male)));
                 }
 
@@ -114,7 +119,7 @@ export default function ChatWindow({ isAdmin }: Props) {
 
             utterance.lang = 'es-MX';
             utterance.rate = 1.0;
-            utterance.pitch = 1.4; // Force higher pitch (feminine tuning)
+            utterance.pitch = 1.0; // Reset pitch to normal to avoid distortions
             window.speechSynthesis.speak(utterance);
         };
 
@@ -144,7 +149,7 @@ export default function ChatWindow({ isAdmin }: Props) {
         // Initial Greeting
         const greeting = isAdmin
             ? "Hola. Soy Sofía en modo Administrador. ¿Qué métricas, reportes de CRM o citas de hoy necesitas investigar?"
-            : "¡Hola! Soy Sofía ✨. Me emociona ayudarte a planear el evento perfecto en Primavera. ¿Con quién tengo el placer de hablar?";
+            : "¡Hola! Soy Sofía. Me emociona ayudarte a planear el evento perfecto en Primavera. ¿Con quién tengo el placer de hablar?";
 
         setMessages([{
             id: Date.now().toString(),
