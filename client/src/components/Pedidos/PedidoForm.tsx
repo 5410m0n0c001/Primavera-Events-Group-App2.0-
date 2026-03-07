@@ -7,6 +7,21 @@ interface PedidoFormProps {
     onSave: () => void;
 }
 
+const InputLine = ({ label, name, type = "text", req = false, isHalf = false, value, onChange }: any) => (
+    <div className={`flex flex-col mb-4 ${isHalf ? 'w-full md:w-[48%]' : 'w-full'}`}>
+        <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+            {label} {req && <span className="text-red-500">*</span>}
+        </label>
+        <input
+            type={type} name={name}
+            value={value || ''}
+            onChange={onChange}
+            required={req}
+            className="p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-black/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-primavera-gold outline-none transition"
+        />
+    </div>
+);
+
 export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProps) {
     const isEdit = !!pedidoId;
 
@@ -170,20 +185,7 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
 
     if (loading) return <div className="p-8 text-center text-white">Cargando...</div>;
 
-    const InputLine = ({ label, name, type = "text", req = false, isHalf = false }: any) => (
-        <div className={`flex flex-col mb-4 ${isHalf ? 'w-full md:w-[48%]' : 'w-full'}`}>
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                {label} {req && <span className="text-red-500">*</span>}
-            </label>
-            <input
-                type={type} name={name}
-                value={(form as any)[name] || ''}
-                onChange={handleChange}
-                required={req}
-                className="p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-black/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-primavera-gold outline-none transition"
-            />
-        </div>
-    );
+    if (loading) return <div className="p-8 text-center text-white">Cargando...</div>;
 
     return (
         <div className="bg-[#f8f9fa] dark:bg-[#121212] rounded-2xl shadow-2xl border border-gray-200 dark:border-white/10 p-4 md:p-8 w-[95vw] md:w-[90vw] max-w-7xl mx-auto flex flex-col h-[90vh] md:h-[85vh]">
@@ -229,10 +231,10 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
                         <fieldset className="border border-gray-200 dark:border-gray-800 rounded-xl p-4 bg-gray-50/50 dark:bg-black/20">
                             <legend className="px-3 font-bold text-primavera-gold uppercase text-sm tracking-wide bg-white dark:bg-[#1c1c1e] rounded-full border border-gray-200 dark:border-gray-800 py-1">Datos del Cliente</legend>
                             <div className="flex flex-wrap justify-between pt-2">
-                                <InputLine label="Nombre" name="clienteNombre" req isHalf />
-                                <InputLine label="Teléfono" name="clienteTelefono" req isHalf />
-                                <InputLine label="Email" name="clienteEmail" type="email" isHalf />
-                                <InputLine label="Tipo de Evento" name="eventoTipo" isHalf />
+                                <InputLine label="Nombre" name="clienteNombre" value={form.clienteNombre} onChange={handleChange} req isHalf />
+                                <InputLine label="Teléfono" name="clienteTelefono" value={form.clienteTelefono} onChange={handleChange} req isHalf />
+                                <InputLine label="Email" name="clienteEmail" type="email" value={form.clienteEmail} onChange={handleChange} isHalf />
+                                <InputLine label="Tipo de Evento" name="eventoTipo" value={form.eventoTipo} onChange={handleChange} isHalf />
                             </div>
                         </fieldset>
 
@@ -242,15 +244,15 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
 
                             <h4 className="text-sm border-b border-gray-200 dark:border-gray-800 pb-1 mb-2 pt-2 text-gray-500 uppercase tracking-widest font-semibold">Entrega</h4>
                             <div className="flex flex-wrap justify-between">
-                                <InputLine label="Fecha" name="fechaEntrega" type="date" req isHalf />
-                                <InputLine label="Hora" name="horaEntrega" type="time" req isHalf />
-                                <InputLine label="Dirección de Entrega" name="direccionEntrega" req />
+                                <InputLine label="Fecha" name="fechaEntrega" type="date" value={form.fechaEntrega} onChange={handleChange} req isHalf />
+                                <InputLine label="Hora" name="horaEntrega" type="time" value={form.horaEntrega} onChange={handleChange} req isHalf />
+                                <InputLine label="Dirección de Entrega" name="direccionEntrega" value={form.direccionEntrega} onChange={handleChange} req />
                             </div>
 
                             <h4 className="text-sm border-b border-gray-200 dark:border-gray-800 pb-1 mb-2 mt-2 text-gray-500 uppercase tracking-widest font-semibold">Recolección</h4>
                             <div className="flex flex-wrap justify-between">
-                                <InputLine label="Fecha" name="fechaRecoleccion" type="date" req isHalf />
-                                <InputLine label="Hora" name="horaRecoleccion" type="time" req isHalf />
+                                <InputLine label="Fecha" name="fechaRecoleccion" type="date" value={form.fechaRecoleccion} onChange={handleChange} req isHalf />
+                                <InputLine label="Hora" name="horaRecoleccion" type="time" value={form.horaRecoleccion} onChange={handleChange} req isHalf />
                             </div>
                         </fieldset>
 
@@ -259,8 +261,8 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
                             <legend className="px-3 font-bold text-primavera-gold uppercase text-sm tracking-wide bg-white dark:bg-[#1c1c1e] rounded-full border border-gray-200 dark:border-gray-800 py-1">Facturación y Notas</legend>
 
                             <div className="flex flex-wrap justify-between">
-                                <InputLine label="Costo de Flete Extra ($)" name="costoFlete" type="number" isHalf />
-                                <InputLine label="Descuento Autorizado ($)" name="descuento" type="number" isHalf />
+                                <InputLine label="Costo de Flete Extra ($)" name="costoFlete" type="number" value={form.costoFlete} onChange={handleChange} isHalf />
+                                <InputLine label="Descuento Autorizado ($)" name="descuento" type="number" value={form.descuento} onChange={handleChange} isHalf />
                             </div>
 
                             <label className="flex items-center gap-3 mt-2 mb-4 cursor-pointer p-3 bg-white dark:bg-black shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 transition hover:border-primavera-gold w-fit">
@@ -270,10 +272,10 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
 
                             {form.requiereFactura && (
                                 <div className="flex flex-wrap justify-between animate-fade-in-up bg-white dark:bg-black/40 p-4 rounded-xl border border-gray-100 dark:border-gray-800 mb-4 shadow-inner">
-                                    <InputLine label="Razón Social" name="razonSocial" req isHalf />
-                                    <InputLine label="RFC" name="rfc" req isHalf />
-                                    <InputLine label="Email Factura" name="emailFactura" type="email" req isHalf />
-                                    <InputLine label="Uso CFDI" name="usoCFDI" isHalf />
+                                    <InputLine label="Razón Social" name="razonSocial" value={form.razonSocial} onChange={handleChange} req isHalf />
+                                    <InputLine label="RFC" name="rfc" value={form.rfc} onChange={handleChange} req isHalf />
+                                    <InputLine label="Email Factura" name="emailFactura" type="email" value={form.emailFactura} onChange={handleChange} req isHalf />
+                                    <InputLine label="Uso CFDI" name="usoCFDI" value={form.usoCFDI} onChange={handleChange} isHalf />
                                 </div>
                             )}
 
