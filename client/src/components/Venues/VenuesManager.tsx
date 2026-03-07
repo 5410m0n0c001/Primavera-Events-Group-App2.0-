@@ -10,6 +10,7 @@ const VenuesManager: React.FC = () => {
     const [showCalendar, setShowCalendar] = useState(false);
     const [selectedVenue, setSelectedVenue] = useState<Venue | null>(null);
     const [editingVenue, setEditingVenue] = useState<Venue | null>(null);
+    const [viewingVenue, setViewingVenue] = useState<Venue | null>(null);
 
     // Fallback Data in case backend is offline/empty
     const MOCK_VENUES: Venue[] = [
@@ -189,13 +190,13 @@ const VenuesManager: React.FC = () => {
                             >
                                 Editar
                             </button>
-                            <a
-                                href={`/`} target="_blank" rel="noopener noreferrer"
+                            <button
+                                onClick={() => setViewingVenue(venue)}
                                 className="flex-1 border bg-blue-50 border-blue-200 text-blue-700 py-1.5 rounded-lg hover:bg-blue-100 transition text-sm font-medium text-center flex items-center justify-center dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800"
-                                title="Ver tarjeta pública"
+                                title="Ver detalles de locación"
                             >
                                 👁️ Ver
-                            </a>
+                            </button>
                             <button
                                 className="flex-1 bg-purple-600 text-white py-1.5 rounded-lg hover:bg-purple-700 transition text-sm font-medium"
                                 onClick={() => { setSelectedVenue(venue); setShowCalendar(true); }}
@@ -228,6 +229,54 @@ const VenuesManager: React.FC = () => {
                     venueName={selectedVenue.name}
                     onClose={() => setShowCalendar(false)}
                 />
+            )}
+
+            {viewingVenue && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+                    <div className="bg-white dark:bg-[#1c1c1e] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative animate-fade-in-up">
+                        <div className="relative h-64 bg-gray-200 dark:bg-gray-800 rounded-t-2xl">
+                            {viewingVenue.images?.[0] ? (
+                                <img src={viewingVenue.images[0].url} alt={viewingVenue.name} className="w-full h-full object-cover rounded-t-2xl" />
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-6xl">🏢</div>
+                            )}
+                            <button
+                                onClick={() => setViewingVenue(null)}
+                                className="absolute top-4 right-4 bg-black/50 hover:bg-black/80 text-white rounded-full w-8 h-8 flex items-center justify-center transition"
+                            >
+                                ✖
+                            </button>
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 rounded-b-2xl">
+                                <h2 className="text-3xl font-bold text-white">{viewingVenue.name}</h2>
+                                <p className="text-gray-300 capitalize">{viewingVenue.status}</p>
+                            </div>
+                        </div>
+                        <div className="p-6">
+                            <p className="text-gray-700 dark:text-gray-300 text-lg mb-6">{viewingVenue.description}</p>
+
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                <div className="bg-gray-50 dark:bg-black/40 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
+                                    <p className="text-sm text-gray-500 mb-1">Capacidad Máxima</p>
+                                    <p className="text-xl font-bold text-gray-900 dark:text-white">👫 {viewingVenue.capacity} personas</p>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-black/40 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
+                                    <p className="text-sm text-gray-500 mb-1">Costo Base de Renta</p>
+                                    <p className="text-xl font-bold text-green-600 dark:text-green-400">💰 ${viewingVenue.priceRent?.toLocaleString()}</p>
+                                </div>
+                            </div>
+
+                            <h3 className="text-lg font-bold mb-3 text-gray-900 dark:text-white">Características y Amenidades</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {viewingVenue.features.map((f, i) => (
+                                    <span key={i} className="bg-purple-50 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 px-3 py-1.5 rounded-lg border border-purple-100 dark:border-purple-800 text-sm font-medium">
+                                        ✨ {f.name}
+                                    </span>
+                                ))}
+                                {viewingVenue.features.length === 0 && <span className="text-gray-500 italic">No hay características registradas</span>}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
