@@ -33,6 +33,7 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
     const [loading, setLoading] = useState(isEdit);
     const [step, setStep] = useState(1);
     const [mobileTab, setMobileTab] = useState<'catalogo' | 'carrito'>('catalogo');
+    const [showPreview, setShowPreview] = useState(false);
 
     useEffect(() => {
         if (isEdit) {
@@ -157,6 +158,16 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
         }
     };
 
+    const isFormValid = !!(form.clienteNombre && form.clienteTelefono && form.direccionEntrega && form.fechaEntrega && form.items.length > 0);
+
+    const handleOpenPreview = () => {
+        if (!isFormValid) {
+            alert("Por favor, completa los Datos del Cliente, Teléfono, Dirección de Entrega y asegúrate de tener al menos 1 artículo agregado.");
+            return;
+        }
+        setShowPreview(true);
+    };
+
     if (loading) return <div className="p-8 text-center text-white">Cargando...</div>;
 
     const InputLine = ({ label, name, type = "text", req = false, isHalf = false }: any) => (
@@ -275,6 +286,104 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
                                 />
                             </div>
                         </fieldset>
+                    </div>
+                </div>
+            </div>
+
+            {/* Modal de Previsualización (Paso Final) */}
+            <div className={`fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex justify-center items-center p-4 transition-opacity ${showPreview ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                <div className="bg-white dark:bg-[#121212] w-full max-w-4xl max-h-[92vh] rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col overflow-hidden relative border border-primavera-gold/30">
+                    <div className="flex justify-between items-center p-6 bg-gradient-to-r from-gray-900 to-black text-white shrink-0 border-b border-white/10">
+                        <div>
+                            <h3 className="font-extrabold font-serif text-3xl text-primavera-gold tracking-wide">Previsualización Oficial</h3>
+                            <p className="text-sm text-gray-400 mt-1">Revisa que todos los datos y el total sean correctos antes de enviar el pedido al sistema.</p>
+                        </div>
+                        <button onClick={() => setShowPreview(false)} className="text-gray-400 hover:text-white px-4 py-2 border border-gray-700 hover:border-gray-500 rounded-lg transition font-medium">Volver a Editar</button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8 space-y-8 text-gray-800 dark:text-gray-200">
+                        {/* Preview Sections */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <h4 className="font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-xs mb-3 border-b border-gray-200 dark:border-gray-800 pb-2">1. Cliente</h4>
+                                <ul className="space-y-2 text-lg">
+                                    <li><span className="font-semibold">{form.clienteNombre}</span></li>
+                                    <li className="flex items-center gap-2">📞 {form.clienteTelefono}</li>
+                                    {form.clienteEmail && <li className="flex items-center gap-2 text-sm text-gray-500">✉️ {form.clienteEmail}</li>}
+                                    {form.eventoTipo && <li className="mt-2 text-sm"><span className="px-2 py-1 bg-gray-100 dark:bg-white/10 rounded-md">Evento: {form.eventoTipo}</span></li>}
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h4 className="font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-xs mb-3 border-b border-gray-200 dark:border-gray-800 pb-2">2. Logística</h4>
+                                <div className="space-y-4 text-sm">
+                                    <div>
+                                        <p className="text-blue-600 dark:text-blue-400 font-bold mb-1">🚚 Entrega</p>
+                                        <p>{form.fechaEntrega} a las {form.horaEntrega}</p>
+                                        <p className="mt-1 flex items-start gap-1"><span className="text-lg leading-none">📍</span> <span className="font-medium text-base">{form.direccionEntrega}</span></p>
+                                    </div>
+                                    <div className="border-t border-gray-200 dark:border-gray-800 pt-2">
+                                        <p className="text-orange-600 dark:text-orange-400 font-bold mb-1">📦 Recolección</p>
+                                        <p>{form.fechaRecoleccion} a las {form.horaRecoleccion}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 className="font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest text-xs mb-3 border-b border-gray-200 dark:border-gray-800 pb-2">3. Artículos Seleccionados ({form.items.length})</h4>
+                            <div className="bg-gray-50 dark:bg-white/5 rounded-xl p-4 border border-gray-200 dark:border-white/10 max-h-60 overflow-y-auto custom-scrollbar">
+                                <table className="w-full text-left text-sm">
+                                    <thead className="text-xs text-gray-400 border-b border-gray-200 dark:border-white/10">
+                                        <tr>
+                                            <th className="pb-2 font-semibold">Cant</th>
+                                            <th className="pb-2 font-semibold">Descripción</th>
+                                            <th className="pb-2 font-semibold text-right">P. Unitario</th>
+                                            <th className="pb-2 font-semibold text-right">Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100 dark:divide-white/5">
+                                        {form.items.map((item, idx) => (
+                                            <tr key={idx}>
+                                                <td className="py-3 font-bold text-primavera-gold">{item.cantidad}</td>
+                                                <td className="py-3">{item.descripcion}</td>
+                                                <td className="py-3 text-right text-gray-500">${item.precioUnitario.toFixed(2)}</td>
+                                                <td className="py-3 font-semibold text-right">${item.subtotal.toFixed(2)}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {form.notas && (
+                            <div className="bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-900/30 rounded-xl p-4 text-sm text-yellow-800 dark:text-yellow-200">
+                                <span className="font-bold uppercase tracking-widest text-xs block mb-1">Notas del Pedido:</span>
+                                {form.notas}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="bg-gray-100 dark:bg-[#1a1a1a] p-6 md:p-8 shrink-0 border-t border-gray-300 dark:border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
+                        <div className="w-full md:w-auto flex-1 space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                            <div className="flex justify-between items-center md:max-w-xs"><p>Suma Artículos:</p><p className="font-semibold text-gray-800 dark:text-gray-200">${subtotal.toFixed(2)}</p></div>
+                            {form.costoFlete > 0 && <div className="flex justify-between items-center md:max-w-xs"><p>🚚 Flete Autorizado:</p><p className="font-semibold text-gray-800 dark:text-gray-200">+ ${form.costoFlete.toFixed(2)}</p></div>}
+                            {form.descuento > 0 && <div className="flex justify-between items-center md:max-w-xs text-red-500"><p>🔥 Descuento:</p><p className="font-semibold">- ${form.descuento.toFixed(2)}</p></div>}
+                            {form.requiereFactura && <div className="flex justify-between items-center md:max-w-xs border-t border-gray-300 dark:border-gray-700 pt-2"><p>IVA (16%):</p><p className="font-semibold text-gray-800 dark:text-gray-200">${iva.toFixed(2)}</p></div>}
+                        </div>
+
+                        <div className="w-full md:w-auto text-right flex flex-col items-center md:items-end gap-4 bg-white dark:bg-black p-4 md:p-6 rounded-2xl border border-primavera-gold/30 shadow-lg">
+                            <div>
+                                <p className="text-gray-400 font-bold uppercase tracking-widest text-[11px] mb-1">TOTAL OFICIAL A PAGAR</p>
+                                <p className="text-5xl font-black text-green-600 dark:text-green-400 tracking-tighter leading-none">${total.toFixed(2)}</p>
+                            </div>
+                            <button
+                                onClick={handleSubmit}
+                                className="w-full mt-2 py-4 px-8 bg-gradient-to-r from-green-500 to-green-400 hover:from-green-400 hover:to-green-300 text-black font-extrabold text-lg rounded-xl transition-all shadow-lg hover:shadow-green-500/50 active:scale-95 flex items-center justify-center gap-2 uppercase tracking-wide"
+                            >
+                                ⚡ Confirmar y Finalizar Pedido
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -403,17 +512,27 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
                             </div>
 
                             <button
-                                onClick={handleSubmit}
-                                disabled={!form.clienteNombre || !form.fechaEntrega || form.items.length === 0}
-                                className="w-full py-4 bg-gradient-to-r from-primavera-gold to-yellow-500 hover:from-yellow-400 hover:to-yellow-300 text-black font-extrabold text-lg rounded-xl transition-all shadow-[0_0_15px_rgba(212,175,55,0.4)] hover:shadow-[0_0_20px_rgba(212,175,55,0.6)] active:scale-[0.98] disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                onClick={handleOpenPreview}
+                                disabled={!isFormValid}
+                                className={`w-full py-4 font-extrabold text-lg rounded-xl transition-all flex items-center justify-center gap-2 
+                                    ${isFormValid
+                                        ? 'bg-white text-black hover:bg-gray-100 shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] active:scale-[0.98]'
+                                        : 'bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700'
+                                    }`}
                             >
-                                {isEdit ? '💾 Guardar Cambios' : '⚡ Confirmar y Guardar'}
+                                🔍 Revisar Pedido Completo
                             </button>
 
-                            {(!form.clienteNombre || !form.fechaEntrega || form.items.length === 0) && (
-                                <p className="text-center text-xs text-red-400/80 mt-3">
-                                    Requiere nombre de cliente y al menos 1 artículo.
-                                </p>
+                            {!isFormValid && (
+                                <div className="mt-4 p-3 bg-red-900/20 border border-red-900/40 rounded-lg text-xs text-red-300/90 leading-relaxed">
+                                    <span className="font-bold flex items-center gap-1 mb-1">⚠️ Campos requeridos faltantes:</span>
+                                    <ul className="list-disc list-inside opacity-80">
+                                        {!form.clienteNombre && <li>Nombre del Cliente</li>}
+                                        {!form.clienteTelefono && <li>Teléfono del Cliente</li>}
+                                        {!form.direccionEntrega && <li>Dirección de Entrega</li>}
+                                        {form.items.length === 0 && <li>Al menos 1 artículo en la lista</li>}
+                                    </ul>
+                                </div>
                             )}
                         </div>
                     </div>
