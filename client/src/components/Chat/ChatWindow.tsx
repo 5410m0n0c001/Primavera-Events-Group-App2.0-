@@ -99,9 +99,10 @@ export default function ChatWindow({ isAdmin }: Props) {
                     if (selectedVoice) break;
                 }
 
-                // Exclude male known voices if possible
+                // Si no hay mach con los nombres femeninos, nos aseguramos al 100% de EXCLUIR los nombres masculinos nativos
                 if (!selectedVoice) {
-                    selectedVoice = spanishVoices.find(v => !v.name.toLowerCase().includes('pablo') && !v.name.toLowerCase().includes('jorge'));
+                    const excludedMales = ['pablo', 'jorge', 'raul', 'david', 'carlos'];
+                    selectedVoice = spanishVoices.find(v => !excludedMales.some(male => v.name.toLowerCase().includes(male)));
                 }
 
                 if (selectedVoice) {
