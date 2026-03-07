@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from 'date-fns';
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths, setMonth, setYear } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 interface VenueCalendarProps {
@@ -92,15 +92,34 @@ const VenueCalendar: React.FC<VenueCalendarProps> = ({ venueId, venueName, onClo
     const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
     const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
 
-    const renderHeader = () => (
-        <div className="flex justify-between items-center mb-4">
-            <button onClick={prevMonth} className="p-2 hover:bg-gray-100 rounded-full">&lt;</button>
-            <h2 className="text-xl font-bold text-gray-800 capitalize">
-                {format(currentMonth, 'MMMM yyyy', { locale: es })}
-            </h2>
-            <button onClick={nextMonth} className="p-2 hover:bg-gray-100 rounded-full">&gt;</button>
-        </div>
-    );
+    const renderHeader = () => {
+        const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const currentYear = currentMonth.getFullYear();
+        const years = Array.from({ length: 10 }, (_, i) => currentYear - 5 + i); // 5 years back, 4 years forward
+
+        return (
+            <div className="flex justify-between items-center mb-4">
+                <button onClick={prevMonth} className="p-2 hover:bg-gray-100 rounded-full">&lt;</button>
+                <div className="flex gap-2">
+                    <select
+                        className="p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1c1c1e] text-black dark:text-white font-bold capitalize"
+                        value={currentMonth.getMonth()}
+                        onChange={(e) => setCurrentMonth(setMonth(currentMonth, parseInt(e.target.value)))}
+                    >
+                        {months.map((m, i) => <option key={m} value={i}>{m}</option>)}
+                    </select>
+                    <select
+                        className="p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1c1c1e] text-black dark:text-white font-bold"
+                        value={currentMonth.getFullYear()}
+                        onChange={(e) => setCurrentMonth(setYear(currentMonth, parseInt(e.target.value)))}
+                    >
+                        {years.map(y => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                </div>
+                <button onClick={nextMonth} className="p-2 hover:bg-gray-100 rounded-full">&gt;</button>
+            </div>
+        );
+    };
 
     const renderDays = () => (
         <div className="grid grid-cols-7 mb-2 text-center text-sm font-semibold text-gray-600">

@@ -195,9 +195,16 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
     try {
+        // Desvincular eventos para evitar fallo de clave foránea
+        await prisma.event.updateMany({
+            where: { venueId: id },
+            data: { venueId: null }
+        });
+
         await prisma.venue.delete({ where: { id } });
         res.json({ message: 'Venue deleted' });
     } catch (error) {
+        console.error('API venues DELETE error:', error);
         res.status(500).json({ error: 'Failed to delete venue' });
     }
 });
