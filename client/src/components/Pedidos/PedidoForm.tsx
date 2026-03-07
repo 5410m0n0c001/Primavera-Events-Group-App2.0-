@@ -394,24 +394,24 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
             <div className="flex-1 overflow-hidden flex flex-col xl:flex-row gap-6 lg:gap-8">
 
                 {/* Center Column: Added Items List (Action Center) */}
-                <div className="flex-[5] flex flex-col h-full gap-4 min-h-[400px]">
-                    <div className="flex gap-4 mb-2 shrink-0">
+                <div className="flex-[5] flex flex-col h-full gap-3 min-h-[400px]">
+                    <div className="flex gap-3 mb-1 shrink-0">
                         <button
                             onClick={() => setMobileTab('catalogo')}
-                            className="flex-1 bg-gray-900 dark:bg-white text-white dark:text-black py-4 rounded-xl font-bold text-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition shadow-lg flex items-center justify-center gap-2"
+                            className="flex-1 bg-gray-900 dark:bg-white text-white dark:text-black py-2 md:py-3 rounded-lg font-bold text-sm md:text-base hover:bg-gray-800 dark:hover:bg-gray-200 transition shadow-md flex items-center justify-center gap-2"
                         >
-                            📦 + Agregar Artículos del Catálogo
+                            📦 + Añadir Mobiliario
                         </button>
                         <button
                             onClick={() => setStep(2)}
-                            className="flex-1 bg-white dark:bg-[#1c1c1e] text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 py-4 rounded-xl font-bold text-lg hover:border-primavera-gold transition shadow-sm flex items-center justify-center gap-2"
+                            className="flex-1 bg-white dark:bg-[#1c1c1e] text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 py-2 md:py-3 rounded-lg font-bold text-sm md:text-base hover:border-primavera-gold transition shadow-sm flex items-center justify-center gap-2"
                         >
-                            👤 Editar Datos del Cliente
-                            {form.clienteNombre && <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full ml-2">Completo</span>}
+                            👤 Datos de Cliente
+                            {form.clienteNombre && <span className="text-[10px] bg-green-100 text-green-800 px-2 py-0.5 rounded-full ml-1 md:ml-2">OK</span>}
                         </button>
                     </div>
 
-                    <div className="flex-1 flex flex-col bg-white dark:bg-[#1c1c1e] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+                    <div className="flex-1 flex flex-col bg-white dark:bg-[#1c1c1e] rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
                         <div className="flex justify-between items-center p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-black/20 shrink-0">
                             <div>
                                 <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">Lista de Artículos del Pedido</h3>
@@ -477,15 +477,15 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
                 </div>
 
                 {/* Right Column: Sticky Summary & Checkout */}
-                <div className="flex-[2] flex flex-col h-full min-h-[400px]">
-                    <div className="bg-gray-900 dark:bg-black p-6 rounded-2xl shadow-xl border border-gray-800 text-white flex flex-col h-full">
-                        <h3 className="font-bold text-primavera-gold uppercase text-[15px] tracking-widest mb-6 border-b border-gray-800 pb-3 flex items-center gap-2 shrink-0">
+                <div className="flex-[2.5] flex flex-col h-full min-h-[400px]">
+                    <div className="bg-gray-900 dark:bg-black p-4 md:p-5 rounded-xl shadow-xl border border-gray-800 text-white flex flex-col h-full overflow-hidden">
+                        <h3 className="font-bold text-primavera-gold uppercase text-[13px] tracking-widest mb-4 border-b border-gray-800 pb-2 flex items-center gap-2 shrink-0">
                             🧾 Resumen del Pedido
                         </h3>
 
                         {/* Client Mini-Summary */}
-                        <div className="mb-6 bg-white/5 p-4 rounded-xl border border-white/10 shrink-0">
-                            <p className="text-xs text-gray-400 uppercase tracking-wider border-b border-white/10 pb-2 mb-2">Cliente Asignado</p>
+                        <div className="mb-4 bg-white/5 p-3 rounded-lg border border-white/10 shrink-0">
+                            <p className="text-[10px] text-gray-400 uppercase tracking-wider border-b border-white/10 pb-1 mb-1">Cliente Asignado</p>
                             {form.clienteNombre ? (
                                 <div>
                                     <p className="font-bold text-lg">{form.clienteNombre}</p>
@@ -498,41 +498,39 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
                             )}
                         </div>
 
-                        <div className="space-y-3 text-[15px] text-gray-300 flex-1 overflow-y-auto custom-scrollbar">
-                            <div className="flex justify-between items-center"><p>Subtotal de Artículos:</p><p className="font-bold">${subtotal.toFixed(2)}</p></div>
-                            {form.costoFlete > 0 && <div className="flex justify-between items-center bg-gray-800/50 p-2 rounded-lg"><p>🚚 Flete:</p><p className="text-yellow-400 font-bold">+ ${form.costoFlete.toFixed(2)}</p></div>}
-                            {form.descuento > 0 && <div className="flex justify-between items-center bg-red-900/20 p-2 rounded-lg border border-red-900/30"><p>🔥 Descuento:</p><p className="text-red-400 font-bold">- ${form.descuento.toFixed(2)}</p></div>}
-                            {form.requiereFactura && <div className="flex justify-between items-center pt-3 border-t border-gray-800"><p>IVA (16%):</p><p>${iva.toFixed(2)}</p></div>}
+                        <div className="space-y-2 text-sm text-gray-300 flex-1 overflow-y-auto custom-scrollbar pr-1 pb-2">
+                            <div className="flex justify-between items-center"><p>Subtotal de Art.</p><p className="font-bold">${subtotal.toFixed(2)}</p></div>
+                            {form.costoFlete > 0 && <div className="flex justify-between items-center bg-gray-800/50 p-2 rounded"><p>🚚 Flete:</p><p className="text-yellow-400 font-bold">+ ${form.costoFlete.toFixed(2)}</p></div>}
+                            {form.descuento > 0 && <div className="flex justify-between items-center bg-red-900/20 p-2 rounded border border-red-900/30"><p>🔥 DTO:</p><p className="text-red-400 font-bold">- ${form.descuento.toFixed(2)}</p></div>}
+                            {form.requiereFactura && <div className="flex justify-between items-center pt-2 border-t border-gray-800"><p>IVA (16%):</p><p>${iva.toFixed(2)}</p></div>}
                         </div>
 
-                        <div className="shrink-0 mt-4">
-                            <div className="flex flex-col justify-between items-end mb-6 gap-1 pt-4 border-t border-gray-700">
-                                <p className="text-gray-400 font-bold uppercase tracking-wider text-sm">TOTAL OFICIAL</p>
-                                <p className="text-4xl font-extrabold text-green-400 tracking-tight">
-                                    ${total.toFixed(2)}
-                                </p>
+                        <div className="shrink-0 mt-2 bg-gray-900 pt-2 border-t border-gray-700">
+                            <div className="flex justify-between items-end mb-4">
+                                <p className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Total Oficial</p>
+                                <p className="text-3xl font-extrabold text-green-400 tracking-tight leading-none">${total.toFixed(2)}</p>
                             </div>
 
                             <button
                                 onClick={handleOpenPreview}
                                 disabled={!isFormValid}
-                                className={`w-full py-4 font-extrabold text-lg rounded-xl transition-all flex items-center justify-center gap-2 
+                                className={`w-full py-3 font-extrabold text-sm md:text-base rounded-lg transition-all flex items-center justify-center gap-2 
                                     ${isFormValid
                                         ? 'bg-white text-black hover:bg-gray-100 shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] active:scale-[0.98]'
                                         : 'bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700'
                                     }`}
                             >
-                                🔍 Revisar Pedido Completo
+                                🔍 Revisar Pedido
                             </button>
 
                             {!isFormValid && (
-                                <div className="mt-4 p-3 bg-red-900/20 border border-red-900/40 rounded-lg text-xs text-red-300/90 leading-relaxed">
-                                    <span className="font-bold flex items-center gap-1 mb-1">⚠️ Campos requeridos faltantes:</span>
-                                    <ul className="list-disc list-inside opacity-80">
-                                        {!form.clienteNombre && <li>Nombre del Cliente</li>}
-                                        {!form.clienteTelefono && <li>Teléfono del Cliente</li>}
-                                        {!form.direccionEntrega && <li>Dirección de Entrega</li>}
-                                        {form.items.length === 0 && <li>Al menos 1 artículo en la lista</li>}
+                                <div className="mt-2 p-2 bg-red-900/20 border border-red-900/40 rounded text-[11px] text-red-300/90 leading-tight">
+                                    <span className="font-bold block mb-1">Llenar Requeridos:</span>
+                                    <ul className="list-disc list-inside opacity-80 pl-1">
+                                        {!form.clienteNombre && <li>Nombre</li>}
+                                        {!form.clienteTelefono && <li>Teléfono</li>}
+                                        {!form.direccionEntrega && <li>Dir. Entrega</li>}
+                                        {form.items.length === 0 && <li>1 artículo min.</li>}
                                     </ul>
                                 </div>
                             )}
