@@ -216,20 +216,17 @@ const ProductionDashboard: React.FC = () => {
         try {
             setIsExporting(true);
 
-            // Un-hide containers forcefully for html2canvas
+            // Guardamos las clases originales para no romper la UI del usuario
             const layoutContainer = document.getElementById('layout-container');
             const timelineContainer = document.getElementById('timeline-container');
 
-            if (layoutContainer) layoutContainer.classList.remove('opacity-0');
-            if (timelineContainer) timelineContainer.classList.remove('opacity-0');
+            const originalLayoutClass = layoutContainer ? layoutContainer.className : '';
+            const originalTimelineClass = timelineContainer ? timelineContainer.className : '';
 
             // Temporarily remove zoom for crisp layout rendering
             const zoomContainer = layoutElement.parentElement;
             const originalTransform = zoomContainer ? zoomContainer.style.transform : '';
             if (zoomContainer) zoomContainer.style.transform = 'scale(1)';
-
-            // Wait for repaint
-            await new Promise(r => setTimeout(r, 400));
 
             // We use A4 portrait format
             const pdf = new jsPDF('p', 'mm', 'a4');
@@ -249,14 +246,23 @@ const ProductionDashboard: React.FC = () => {
 
                 if (logoImg.complete && logoImg.naturalWidth > 0) {
                     const logoAspectRatio = logoImg.naturalWidth / logoImg.naturalHeight;
-                    const logoh = 25;
-                    const logow = logoh * logoAspectRatio;
+                    let logoh = 15;
+                    let logow = logoh * logoAspectRatio;
+                    // Limitar tamaño máximo del logo
+                    if (logow > 50) {
+                        logow = 50;
+                        logoh = logow / logoAspectRatio;
+                    }
+                    if (logoh > 25) {
+                        logoh = 25;
+                        logow = logoh * logoAspectRatio;
+                    }
                     pdf.addImage(logoImg, 'PNG', 10, currentY, logow, logoh);
 
                     pdf.setFontSize(22);
                     pdf.setFont("helvetica", "bold");
-                    pdf.text('Reporte de Producción', 10 + logow + 10, currentY + 15);
-                    currentY += Math.max(logoh, 25) + 10;
+                    pdf.text('Reporte de Producción', 10 + logow + 10, currentY + Math.max(logoh / 2, 5) + 5);
+                    currentY += Math.max(logoh, 15) + 10;
                 } else {
                     pdf.setFontSize(22);
                     pdf.setFont("helvetica", "bold");
@@ -272,6 +278,11 @@ const ProductionDashboard: React.FC = () => {
 
             // 1. Export Layout if it has elements
             if (layoutObjects.length > 0) {
+                // Focus Layout explicitly
+                if (layoutContainer) layoutContainer.className = "flex-1 flex flex-col md:flex-row overflow-hidden md:overflow-hidden overflow-y-auto";
+                if (timelineContainer) timelineContainer.className = "absolute opacity-0 pointer-events-none -z-50 w-full h-full top-0 left-0";
+                await new Promise(r => setTimeout(r, 400)); // wait for transitions/paint
+
                 pdf.setFontSize(12);
                 pdf.text('Plano de Distribución:', 10, currentY);
                 currentY += 5;
@@ -299,6 +310,11 @@ const ProductionDashboard: React.FC = () => {
 
             // 2. Export Timeline if it has elements
             if (timelineItems.length > 0) {
+                // Focus Timeline explicitly so html2canvas can 'see' it z-index-wise
+                if (timelineContainer) timelineContainer.className = "p-8 overflow-y-auto h-full bg-[#FAFAFA]";
+                if (layoutContainer) layoutContainer.className = "absolute opacity-0 pointer-events-none -z-50 w-full h-full top-0 left-0";
+                await new Promise(r => setTimeout(r, 400)); // wait for paint
+
                 if (currentY > pdfHeight - 40) {
                     pdf.addPage();
                     currentY = 10;
@@ -336,14 +352,25 @@ const ProductionDashboard: React.FC = () => {
 
             // Restore state
             if (zoomContainer) zoomContainer.style.transform = originalTransform;
-            if (view !== 'layout' && layoutContainer) layoutContainer.classList.add('opacity-0');
-            if (view !== 'timeline' && timelineContainer) timelineContainer.classList.add('opacity-0');
+            if (layoutContainer) layoutContainer.className = originalLayoutClass;
+            if (timelineContainer) timelineContainer.className = originalTimelineClass;
 
             setIsExporting(false);
         } catch (err) {
             console.error('Error exportando PDF:', err);
             alert('Hubo un error al generar el PDF combinado. Revisa la consola para más detalles.');
             setIsExporting(false);
+
+            // Failsafe restore
+            const layoutContainer = document.getElementById('layout-container');
+            const timelineContainer = document.getElementById('timeline-container');
+            if (view === 'layout') {
+                if (layoutContainer && layoutContainer.className.includes('opacity-0')) layoutContainer.className = layoutContainer.className.replace('opacity-0', '');
+                if (timelineContainer) timelineContainer.className = "absolute opacity-0 pointer-events-none -z-50 w-full h-full top-0 left-0";
+            } else {
+                if (timelineContainer && timelineContainer.className.includes('opacity-0')) timelineContainer.className = timelineContainer.className.replace('opacity-0', '');
+                if (layoutContainer) layoutContainer.className = "absolute opacity-0 pointer-events-none -z-50 w-full h-full top-0 left-0";
+            }
         }
     };
 
