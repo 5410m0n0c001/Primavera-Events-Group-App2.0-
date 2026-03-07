@@ -11,9 +11,10 @@ interface InventarioItem {
 interface ItemSelectorProps {
     onSelect: (item: InventarioItem) => void;
     fechaEntrega: string; // YYYY-MM-DD
+    addedItems?: Record<string, number>;
 }
 
-export default function InventarioSelector({ onSelect, fechaEntrega }: ItemSelectorProps) {
+export default function InventarioSelector({ onSelect, fechaEntrega, addedItems = {} }: ItemSelectorProps) {
     const [items, setItems] = useState<InventarioItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
@@ -86,19 +87,27 @@ export default function InventarioSelector({ onSelect, fechaEntrega }: ItemSelec
                         <div key={cat} className="mb-4">
                             <h4 className="font-semibold text-primavera-gold text-xs uppercase tracking-wider mb-2 sticky top-0 bg-white/90 dark:bg-black/90 backdrop-blur py-1">📂 {cat} ({grouped[cat].length})</h4>
                             <ul>
-                                {grouped[cat].map(item => (
-                                    <li
-                                        key={item.id}
-                                        onClick={() => onSelect(item)}
-                                        className="flex justify-between items-center p-2 text-sm hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer rounded transition group"
-                                    >
-                                        <div className="truncate pr-2">
-                                            <span className="text-gray-400 opacity-50 mr-2 group-hover:text-primavera-gold transition-colors">○</span>
-                                            <span className="dark:text-gray-300">{item.nombre}</span>
-                                        </div>
-                                        <span className="font-medium text-green-600 dark:text-green-400 shrink-0">${item.precioRenta}</span>
-                                    </li>
-                                ))}
+                                {grouped[cat].map(item => {
+                                    const qty = addedItems[item.id] || 0;
+                                    return (
+                                        <li
+                                            key={item.id}
+                                            onClick={() => onSelect(item)}
+                                            className={`flex justify-between items-center p-2 text-sm cursor-pointer rounded transition group ${qty > 0 ? 'bg-primavera-gold/5 dark:bg-primavera-gold/10 hover:bg-primavera-gold/10 dark:hover:bg-primavera-gold/20' : 'hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                                        >
+                                            <div className="flex items-center gap-2 truncate pr-2">
+                                                <span className={`transition-colors ${qty > 0 ? 'text-primavera-gold' : 'text-gray-400 opacity-50 group-hover:text-primavera-gold'}`}>○</span>
+                                                <span className="dark:text-gray-300 truncate">{item.nombre}</span>
+                                                {qty > 0 && (
+                                                    <span className="bg-primavera-gold text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0">
+                                                        {qty} agregados
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <span className="font-medium text-green-600 dark:text-green-400 shrink-0">${item.precioRenta}</span>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         </div>
                     ))

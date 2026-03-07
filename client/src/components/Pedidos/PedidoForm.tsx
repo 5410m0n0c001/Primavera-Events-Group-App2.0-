@@ -187,6 +187,11 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
 
     if (loading) return <div className="p-8 text-center text-white">Cargando...</div>;
 
+    const addedItemsRecord = form.items.reduce((acc: any, item: any) => {
+        acc[item.inventarioId] = (acc[item.inventarioId] || 0) + item.cantidad;
+        return acc;
+    }, {} as Record<string, number>);
+
     return (
         <div className="bg-[#f8f9fa] dark:bg-[#121212] rounded-2xl shadow-2xl border border-gray-200 dark:border-white/10 p-4 md:p-8 w-[95vw] md:w-[90vw] max-w-7xl mx-auto flex flex-col h-[90vh] md:h-[85vh]">
             <div className="flex justify-between items-center bg-white dark:bg-[#1c1c1e] p-4 rounded-xl mb-6 shrink-0 border border-gray-100 dark:border-gray-800 shadow-sm">
@@ -213,7 +218,7 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
                         <button onClick={() => setMobileTab('carrito')} className="text-gray-500 hover:text-red-500 transition px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm font-medium">Cerrar Catálogo</button>
                     </div>
                     <div className="flex-1 overflow-hidden p-4">
-                        <InventarioSelector onSelect={(item) => { handleAddItem(item); /* Optional auto-close here */ }} fechaEntrega={form.fechaEntrega} />
+                        <InventarioSelector onSelect={(item) => { handleAddItem(item); }} fechaEntrega={form.fechaEntrega} addedItems={addedItemsRecord} />
                     </div>
                 </div>
             </div>
@@ -394,7 +399,7 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
             <div className="flex-1 overflow-hidden flex flex-col xl:flex-row gap-6 lg:gap-8">
 
                 {/* Center Column: Added Items List (Action Center) */}
-                <div className="flex-[5] flex flex-col h-full gap-3 min-h-[400px]">
+                <div className="flex-[5] flex flex-col h-full gap-3 min-h-[300px] overflow-hidden">
                     <div className="flex gap-3 mb-1 shrink-0">
                         <button
                             onClick={() => setMobileTab('catalogo')}
@@ -411,7 +416,7 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
                         </button>
                     </div>
 
-                    <div className="flex-1 flex flex-col bg-white dark:bg-[#1c1c1e] rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+                    <div className="flex-1 flex flex-col bg-white dark:bg-[#1c1c1e] rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden min-h-0">
                         <div className="flex justify-between items-center p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-black/20 shrink-0">
                             <div>
                                 <h3 className="font-bold text-gray-900 dark:text-white text-lg flex items-center gap-2">Lista de Artículos del Pedido</h3>
@@ -477,8 +482,8 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
                 </div>
 
                 {/* Right Column: Sticky Summary & Checkout */}
-                <div className="flex-[2.5] flex flex-col h-full min-h-[400px]">
-                    <div className="bg-gray-900 dark:bg-black p-4 md:p-5 rounded-xl shadow-xl border border-gray-800 text-white flex flex-col h-full overflow-hidden">
+                <div className="flex-[2.5] flex flex-col h-full min-h-[300px] overflow-hidden">
+                    <div className="bg-gray-900 dark:bg-black p-4 md:p-5 rounded-xl shadow-xl border border-gray-800 text-white flex flex-col h-full overflow-hidden min-h-0">
                         <h3 className="font-bold text-primavera-gold uppercase text-[13px] tracking-widest mb-4 border-b border-gray-800 pb-2 flex items-center gap-2 shrink-0">
                             🧾 Resumen del Pedido
                         </h3>
