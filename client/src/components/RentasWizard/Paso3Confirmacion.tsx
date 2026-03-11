@@ -1,19 +1,72 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useRentasWizard } from './RentasContext';
 
 const Paso3Confirmacion: React.FC = () => {
     const { clienteActual, carrito, totalPedido, setStepActual, limpiarWizard } = useRentasWizard();
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleConfirmar = () => {
-        // Aquí iría la llamada a la API y el vaciado del form en caso de éxito.
-        alert('Pedido Confirmado con éxito. Inventario actualizado.');
-        limpiarWizard();
+    const guardarPedido = async (isDraft: boolean = false) => {
+        if (carrito.length === 0) {
+            alert('El carrito está vacío');
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            // Construir payload
+            const payload = {
+                clienteNombre: clienteActual.nombre || 'Cliente Genérico',
+                clienteTelefono: '', // Podríamos agregarlo a ClienteData luego
+                direccionEntrega: clienteActual.direccionEntrega || 'Retiro en Sucursal',
+                fechaEntrega: clienteActual.fechaEntrega || new Date().toISOString(),
+                horaEntrega: clienteActual.horaEntrega || '00:00',
+                fechaRecoleccion: clienteActual.fechaRecoleccion || new Date().toISOString(),
+                horaRecoleccion: clienteActual.horaRecoleccion || '00:00',
+                requiereFactura: clienteActual.requiereFactura,
+                notas: clienteActual.notas,
+                costoFlete: totalPedido.flete,
+                descuento: totalPedido.descuento,
+                items: carrito.map(c => ({
+                    inventarioId: c.item.id,
+                    cantidad: c.cantidad,
+                    precioUnitario: c.item.price
+                }))
+            };
+
+            const response = await fetch('http://localhost:3000/api/pedidos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload) // Crea status BORRADOR por default en backend
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al crear el pedido');
+            }
+
+            const pedidoCb = await response.json();
+
+            // Si es confirmación real, pasarlo a CONFIRMADO (asumiendo que POST crea en BORRADOR)
+            if (!isDraft) {
+                const confRes = await fetch(`http://localhost:3000/api/pedidos/${pedidoCb.id}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'CONFIRMADO' })
+                });
+                if (!confRes.ok) throw new Error('Error al confirmar el pedido');
+            }
+
+            alert(isDraft ? 'Pedido guardado como borrador con éxito.' : 'Pedido Confirmado con éxito. Inventario actualizado.');
+            limpiarWizard();
+        } catch (error: any) {
+            alert(error.message || 'Error de conexión');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const handleGuardarBorrador = () => {
-        alert('Pedido guardado como borrador.');
-        limpiarWizard();
-    };
+    const handleConfirmar = () => guardarPedido(false);
+    const handleGuardarBorrador = () => guardarPedido(true);
 
     return (
         <div className="max-w-4xl mx-auto pb-10">
@@ -91,15 +144,30 @@ const Paso3Confirmacion: React.FC = () => {
                         <div className="w-full md:w-1/2 lg:w-1/3 bg-gray-50 p-6 rounded-lg border border-gray-200">
                             <div className="flex justify-between items-center mb-2 text-sm text-gray-600">
                                 <span>Subtotal</span>
-                                <span>${totalPedido.toFixed(2)}</span>
+                                <span>${totalPedido.subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
                             </div>
+
+                            {totalPedido.flete > 0 && (
+                                <div className="flex justify-between items-center mb-2 text-sm text-gray-600">
+                                    <span>Costo de Flete</span>
+                                    <span>${totalPedido.flete.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                                </div>
+                            )}
+
+                            {totalPedido.descuento > 0 && (
+                                <div className="flex justify-between items-center mb-2 text-sm text-gray-600">
+                                    <span>Descuento</span>
+                                    <span className="text-red-500">-${totalPedido.descuento.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                                </div>
+                            )}
+
                             <div className="flex justify-between items-center mb-4 text-sm text-gray-600">
                                 <span>Impuestos (16%)</span>
-                                <span>${(totalPedido * 0.16).toFixed(2)}</span>
+                                <span>${totalPedido.iva.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
                             </div>
                             <div className="flex justify-between items-end border-t border-gray-200 pt-4">
                                 <span className="font-bold text-gray-900 text-lg">Total</span>
-                                <span className="font-black text-indigo-600 text-2xl">${(totalPedido * 1.16).toFixed(2)}</span>
+                                <span className="font-black text-indigo-600 text-2xl">${totalPedido.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
                             </div>
                         </div>
                     </div>
@@ -110,23 +178,33 @@ const Paso3Confirmacion: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-end items-center">
                 <button
                     onClick={() => setStepActual(2)}
-                    className="w-full sm:w-auto px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors order-3 sm:order-1"
+                    disabled={isLoading}
+                    className="w-full sm:w-auto px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors order-3 sm:order-1 disabled:opacity-50"
                 >
                     Volver a Editar
                 </button>
                 <button
                     onClick={handleGuardarBorrador}
-                    className="w-full sm:w-auto px-6 py-3 border border-transparent text-base font-medium rounded-lg text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors order-2"
+                    disabled={isLoading}
+                    className="w-full sm:w-auto px-6 py-3 border border-transparent text-base font-medium rounded-lg text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors order-2 disabled:opacity-50"
                 >
                     Guardar Borrador
                 </button>
                 <button
                     onClick={handleConfirmar}
-                    className="w-full sm:w-auto px-8 py-3 border border-transparent shadow-md text-base font-bold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all flex items-center justify-center order-1 sm:order-3"
+                    disabled={isLoading}
+                    className="w-full sm:w-auto px-8 py-3 border border-transparent shadow-md text-base font-bold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all flex items-center justify-center order-1 sm:order-3 disabled:opacity-50"
                 >
-                    <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                    </svg>
+                    {isLoading ? (
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    ) : (
+                        <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    )}
                     Confirmar Pedido
                 </button>
             </div>

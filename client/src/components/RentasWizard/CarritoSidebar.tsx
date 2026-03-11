@@ -81,11 +81,41 @@ const CarritoSidebar: React.FC = () => {
 
             {/* Total y Botón */}
             <div className="bg-white border-t border-gray-200 p-6 z-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-                <div className="flex justify-between items-end mb-4">
-                    <span className="text-gray-600 font-medium">Subtotal</span>
-                    <span className="text-2xl font-bold text-gray-900 flex items-end">
-                        <span className="text-lg mr-1 text-gray-500 font-normal">$</span>
-                        {totalPedido.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-600 font-medium text-sm">Subtotal</span>
+                    <span className="font-bold text-gray-900">
+                        ${totalPedido.subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                    </span>
+                </div>
+                {totalPedido.iva > 0 && (
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-600 font-medium text-sm">IVA (16%)</span>
+                        <span className="font-bold text-gray-900">
+                            ${totalPedido.iva.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                        </span>
+                    </div>
+                )}
+                {totalPedido.descuento > 0 && (
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-600 font-medium text-sm">Descuento</span>
+                        <span className="font-bold text-red-600">
+                            -${totalPedido.descuento.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                        </span>
+                    </div>
+                )}
+                {totalPedido.flete > 0 && (
+                    <div className="flex justify-between items-center mb-2">
+                        <span className="text-gray-600 font-medium text-sm">Flete</span>
+                        <span className="font-bold text-gray-900">
+                            ${totalPedido.flete.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                        </span>
+                    </div>
+                )}
+                <div className="flex justify-between items-end mb-4 border-t border-gray-100 pt-3 mt-3">
+                    <span className="text-gray-800 font-bold">Total</span>
+                    <span className="text-2xl font-bold text-indigo-600 flex items-end">
+                        <span className="text-lg mr-1 text-indigo-400 font-normal">$</span>
+                        {totalPedido.total.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                     </span>
                 </div>
 

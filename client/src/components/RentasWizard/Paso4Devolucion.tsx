@@ -11,7 +11,7 @@ interface EstadoRecepcion {
 }
 
 const Paso4Devolucion: React.FC = () => {
-    const { clienteActual, carrito, limpiarWizard } = useRentasWizard();
+    const { clienteActual, carrito, limpiarWizard, pedidoCargadoId } = useRentasWizard();
     const [recepcion, setRecepcion] = useState<EstadoRecepcion>(
         carrito.reduce((acc, item) => ({
             ...acc,
@@ -33,10 +33,44 @@ const Paso4Devolucion: React.FC = () => {
         }));
     };
 
-    const handleFinalizar = () => {
-        // Lógica de API para devolver inventario
-        alert('Recepción de mobiliario procesada. Inventario actualizado y pedido cerrado.');
-        limpiarWizard();
+    const handleFinalizar = async () => {
+        if (!pedidoCargadoId) {
+            alert('No hay un pedido cargado para devolver.');
+            return;
+        }
+
+        try {
+            // 1. Marcar el pedido como COMPLETADO (esto devuelve el stock general)
+            const statusRes = await fetch(`http://localhost:3000/api/pedidos/${pedidoCargadoId}/status`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'COMPLETADO' })
+            });
+            if (!statusRes.ok) throw new Error('Error al actualizar el estado del pedido');
+
+            // 2. Procesar ítems dañados o faltantes
+            const problemas = carrito.filter(c => recepcion[c.item.id]?.estado !== 'completo');
+            for (const item of problemas) {
+                const estado = recepcion[item.item.id];
+                // Registrar "Loss" en el inventario para deducir esas piezas permanentemente
+                await fetch('http://localhost:3000/api/inventory/maintenance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        itemId: item.item.id,
+                        type: 'Loss',
+                        quantity: item.cantidad, // Asumimos toda la cantidad (se podría mejorar para deducir parcial)
+                        cost: 0,
+                        notes: `Devolución ${pedidoCargadoId} - ${estado.estado}: ${estado.notas}`
+                    })
+                });
+            }
+
+            alert('Recepción de mobiliario procesada. Inventario actualizado y pedido cerrado.');
+            limpiarWizard();
+        } catch (error: any) {
+            alert(error.message || 'Error al procesar la devolución');
+        }
     };
 
     return (
