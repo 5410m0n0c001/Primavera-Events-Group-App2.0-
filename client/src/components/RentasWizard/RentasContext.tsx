@@ -3,6 +3,8 @@ import { InventoryItem } from '../../types/InventoryTypes';
 
 export interface ClienteData {
     nombre: string;
+    telefono: string;
+    rfc?: string;
     direccionEntrega: string;
     fechaEntrega: string;
     horaEntrega: string;
@@ -50,6 +52,8 @@ interface RentasContextType {
 
 const defaultCliente: ClienteData = {
     nombre: '',
+    telefono: '',
+    rfc: '',
     direccionEntrega: '',
     fechaEntrega: '',
     horaEntrega: '',

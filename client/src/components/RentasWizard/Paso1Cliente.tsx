@@ -16,7 +16,17 @@ const Paso1Cliente: React.FC = () => {
 
     const handleContinue = (e: React.FormEvent) => {
         e.preventDefault();
-        // Validation could go here
+
+        if (!clienteActual.telefono || clienteActual.telefono.length < 10) {
+            alert('Por favor ingresa un número de teléfono válido de al menos 10 dígitos.');
+            return;
+        }
+
+        if (clienteActual.requiereFactura && (!clienteActual.rfc || clienteActual.rfc.length < 12)) {
+            alert('Por favor agrega un RFC válido para completar la facturación.');
+            return;
+        }
+
         setStepActual(2);
     };
 
@@ -45,6 +55,24 @@ const Paso1Cliente: React.FC = () => {
                                 className="w-full rounded-md border border-gray-300 px-4 py-2 text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-shadow"
                                 placeholder="Ej: Eventos Primavera S.A. de C.V."
                             />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 mb-1">Teléfono Fijo o Celular <span className="text-red-500">*</span></label>
+                                <input
+                                    type="tel"
+                                    name="telefono"
+                                    id="telefono"
+                                    required
+                                    value={clienteActual.telefono}
+                                    onChange={handleChange}
+                                    pattern="[0-9]{10,14}"
+                                    className="w-full rounded-md border border-gray-300 px-4 py-2 text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-shadow"
+                                    placeholder="Ej: 5512345678"
+                                    title="Ingresa 10 dígitos sin espacios"
+                                />
+                            </div>
                         </div>
 
                         <div>
@@ -143,6 +171,23 @@ const Paso1Cliente: React.FC = () => {
                                 El cliente requiere Factura Fiscal de esta orden
                             </label>
                         </div>
+
+                        {clienteActual.requiereFactura && (
+                            <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100 flex flex-col gap-2 mt-2">
+                                <label htmlFor="rfc" className="block text-sm font-medium text-blue-900 mb-1">RFC del Cliente <span className="text-red-500">*</span></label>
+                                <input
+                                    type="text"
+                                    name="rfc"
+                                    id="rfc"
+                                    required={clienteActual.requiereFactura}
+                                    value={clienteActual.rfc}
+                                    onChange={handleChange}
+                                    className="w-full rounded-md border border-blue-200 px-4 py-2 text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none uppercase"
+                                    placeholder="Ej: XAXX010101000"
+                                />
+                                <p className="text-xs text-blue-600">Al solicitar factura se agregará automáticamente un 16% de IVA al total del pedido al finalizar el flujo.</p>
+                            </div>
+                        )}
 
                         <div>
                             <label htmlFor="notas" className="block text-sm font-medium text-gray-700 mb-1">Notas u Observaciones (Opcional)</label>

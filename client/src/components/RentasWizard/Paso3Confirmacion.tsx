@@ -13,14 +13,22 @@ const Paso3Confirmacion: React.FC = () => {
 
         setIsLoading(true);
         try {
+            // Helper formater fechas compatibles con Prisma (Full DateTime)
+            const safeDate = (dateStr: string, timeStr: string) => {
+                if (!dateStr) return new Date().toISOString();
+                const ts = timeStr || '00:00';
+                return new Date(`${dateStr}T${ts}:00`).toISOString();
+            };
+
             // Construir payload
             const payload = {
                 clienteNombre: clienteActual.nombre || 'Cliente Genérico',
-                clienteTelefono: '', // Podríamos agregarlo a ClienteData luego
+                clienteTelefono: clienteActual.telefono || '0000000000',
+                rfc: clienteActual.requiereFactura ? clienteActual.rfc : undefined,
                 direccionEntrega: clienteActual.direccionEntrega || 'Retiro en Sucursal',
-                fechaEntrega: clienteActual.fechaEntrega || new Date().toISOString(),
+                fechaEntrega: safeDate(clienteActual.fechaEntrega, clienteActual.horaEntrega),
                 horaEntrega: clienteActual.horaEntrega || '00:00',
-                fechaRecoleccion: clienteActual.fechaRecoleccion || new Date().toISOString(),
+                fechaRecoleccion: safeDate(clienteActual.fechaRecoleccion, clienteActual.horaRecoleccion),
                 horaRecoleccion: clienteActual.horaRecoleccion || '00:00',
                 requiereFactura: clienteActual.requiereFactura,
                 notas: clienteActual.notas,
@@ -33,15 +41,15 @@ const Paso3Confirmacion: React.FC = () => {
                 }))
             };
 
-            const response = await fetch('http://localhost:3000/api/pedidos', {
+            const response = await fetch('/api/pedidos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload) // Crea status BORRADOR por default en backend
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Error al crear el pedido');
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Error desconocido al crear el pedido');
             }
 
             const pedidoCb = await response.json();
