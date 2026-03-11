@@ -7,7 +7,7 @@ interface PedidoFormProps {
     onSave: () => void;
 }
 
-const InputLine = ({ label, name, type = "text", req = false, isHalf = false, value, onChange }: any) => (
+const InputLine = ({ label, name, type = "text", req = false, isHalf = false, value, onChange, pattern, title, autoComplete }: any) => (
     <div className={`flex flex-col mb-4 ${isHalf ? 'w-full md:w-[48%]' : 'w-full'}`}>
         <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
             {label} {req && <span className="text-red-500">*</span>}
@@ -17,6 +17,9 @@ const InputLine = ({ label, name, type = "text", req = false, isHalf = false, va
             value={value || ''}
             onChange={onChange}
             required={req}
+            pattern={pattern}
+            title={title}
+            autoComplete={autoComplete}
             className="p-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-black/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-primavera-gold outline-none transition"
         />
     </div>
@@ -243,17 +246,17 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
                 <div className="bg-white dark:bg-[#1c1c1e] w-[95vw] md:w-[60vw] max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden relative border border-gray-200 dark:border-white/10">
                     <div className="flex justify-between items-center p-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-black/40 shrink-0">
                         <h3 className="font-bold text-xl text-gray-900 dark:text-white flex items-center gap-2">👨‍💼 Datos de Operación</h3>
-                        <button onClick={() => setStep(1)} className="text-gray-500 hover:text-primavera-gold transition px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm font-medium">✔ Guardar Datos</button>
+                        <button type="submit" form="client-data-form" className="text-gray-500 hover:text-primavera-gold transition px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm font-medium">✔ Guardar Datos</button>
                     </div>
 
-                    <div className="p-6 overflow-y-auto custom-scrollbar space-y-6">
+                    <form id="client-data-form" onSubmit={(e) => { e.preventDefault(); setStep(1); }} className="p-6 overflow-y-auto custom-scrollbar space-y-6">
                         {/* Sec 1: Cliente */}
                         <fieldset className="border border-gray-200 dark:border-gray-800 rounded-xl p-4 bg-gray-50/50 dark:bg-black/20">
                             <legend className="px-3 font-bold text-primavera-gold uppercase text-sm tracking-wide bg-white dark:bg-[#1c1c1e] rounded-full border border-gray-200 dark:border-gray-800 py-1">Datos del Cliente</legend>
                             <div className="flex flex-wrap justify-between pt-2">
-                                <InputLine label="Nombre" name="clienteNombre" value={form.clienteNombre} onChange={handleChange} req isHalf />
-                                <InputLine label="Teléfono" name="clienteTelefono" value={form.clienteTelefono} onChange={handleChange} req isHalf />
-                                <InputLine label="Email" name="clienteEmail" type="email" value={form.clienteEmail} onChange={handleChange} isHalf />
+                                <InputLine label="Nombre" name="clienteNombre" value={form.clienteNombre} onChange={handleChange} req isHalf autoComplete="name" />
+                                <InputLine label="Teléfono" name="clienteTelefono" type="tel" value={form.clienteTelefono} onChange={handleChange} req isHalf pattern="[0-9]{10,14}" title="10 a 14 dígitos numéricos" autoComplete="tel" />
+                                <InputLine label="Email" name="clienteEmail" type="email" value={form.clienteEmail} onChange={handleChange} isHalf autoComplete="email" />
                                 <InputLine label="Tipo de Evento" name="eventoTipo" value={form.eventoTipo} onChange={handleChange} isHalf />
                             </div>
                         </fieldset>
@@ -266,7 +269,7 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
                             <div className="flex flex-wrap justify-between">
                                 <InputLine label="Fecha" name="fechaEntrega" type="date" value={form.fechaEntrega} onChange={handleChange} req isHalf />
                                 <InputLine label="Hora" name="horaEntrega" type="time" value={form.horaEntrega} onChange={handleChange} req isHalf />
-                                <InputLine label="Dirección de Entrega" name="direccionEntrega" value={form.direccionEntrega} onChange={handleChange} req />
+                                <InputLine label="Dirección de Entrega" name="direccionEntrega" value={form.direccionEntrega} onChange={handleChange} req autoComplete="street-address" />
                             </div>
 
                             <h4 className="text-sm border-b border-gray-200 dark:border-gray-800 pb-1 mb-2 mt-2 text-gray-500 uppercase tracking-widest font-semibold">Recolección</h4>
@@ -293,8 +296,8 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
                             {form.requiereFactura && (
                                 <div className="flex flex-wrap justify-between animate-fade-in-up bg-white dark:bg-black/40 p-4 rounded-xl border border-gray-100 dark:border-gray-800 mb-4 shadow-inner">
                                     <InputLine label="Razón Social" name="razonSocial" value={form.razonSocial} onChange={handleChange} req isHalf />
-                                    <InputLine label="RFC" name="rfc" value={form.rfc} onChange={handleChange} req isHalf />
-                                    <InputLine label="Email Factura" name="emailFactura" type="email" value={form.emailFactura} onChange={handleChange} req isHalf />
+                                    <InputLine label="RFC" name="rfc" value={form.rfc} onChange={handleChange} req isHalf pattern="^[A-ZÑ&]{3,4}\d{6}(?:[A-Z\d]{3})?$" title="Formato RFC válido de 12 a 13 caracteres mayúsculas" />
+                                    <InputLine label="Email Factura" name="emailFactura" type="email" value={form.emailFactura} onChange={handleChange} req isHalf autoComplete="email" />
                                     <InputLine label="Uso CFDI" name="usoCFDI" value={form.usoCFDI} onChange={handleChange} isHalf />
                                 </div>
                             )}
@@ -308,7 +311,8 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
                                 />
                             </div>
                         </fieldset>
-                    </div>
+                        <button type="submit" className="hidden" id="hidden-submit-client-data">Guardar</button>
+                    </form>
                 </div>
             </div>
 
