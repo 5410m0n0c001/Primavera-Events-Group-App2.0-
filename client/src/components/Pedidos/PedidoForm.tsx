@@ -177,7 +177,13 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
 
     const handleOpenPreview = () => {
         if (!isFormValid) {
-            alert("Por favor, completa los Datos del Cliente, Teléfono, Dirección de Entrega y asegúrate de tener al menos 1 artículo agregado.");
+            const missing = [];
+            if (!form.clienteNombre) missing.push("Nombre");
+            if (!form.clienteTelefono) missing.push("Teléfono");
+            if (!form.direccionEntrega) missing.push("Dir. Entrega");
+            if (form.items.length === 0) missing.push("1 artículo min");
+
+            alert("Por favor, completa los siguientes datos requeridos:\n- " + missing.join("\n- "));
             return;
         }
         setShowPreview(true);
@@ -483,7 +489,7 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
 
                 {/* Right Column: Sticky Summary & Checkout */}
                 <div className="flex-[2.5] flex flex-col h-full min-h-[300px] overflow-hidden">
-                    <div className="bg-gray-900 dark:bg-black p-4 md:p-5 rounded-xl shadow-xl border border-gray-800 text-white flex flex-col h-full overflow-hidden min-h-0">
+                    <div className="bg-gray-900 dark:bg-black p-4 md:p-5 rounded-xl shadow-xl border border-gray-800 text-white flex flex-col h-full overflow-y-auto custom-scrollbar min-h-0">
                         <h3 className="font-bold text-primavera-gold uppercase text-[13px] tracking-widest mb-4 border-b border-gray-800 pb-2 flex items-center gap-2 shrink-0">
                             🧾 Resumen del Pedido
                         </h3>
@@ -518,27 +524,14 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
 
                             <button
                                 onClick={handleOpenPreview}
-                                disabled={!isFormValid}
                                 className={`w-full py-3 font-extrabold text-sm md:text-base rounded-lg transition-all flex items-center justify-center gap-2 
                                     ${isFormValid
                                         ? 'bg-white text-black hover:bg-gray-100 shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] active:scale-[0.98]'
-                                        : 'bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700'
+                                        : 'bg-gray-800 text-gray-400 hover:bg-gray-700 border border-gray-600'
                                     }`}
                             >
                                 🔍 Revisar Pedido
                             </button>
-
-                            {!isFormValid && (
-                                <div className="mt-2 p-2 bg-red-900/20 border border-red-900/40 rounded text-[11px] text-red-300/90 leading-tight">
-                                    <span className="font-bold block mb-1">Llenar Requeridos:</span>
-                                    <ul className="list-disc list-inside opacity-80 pl-1">
-                                        {!form.clienteNombre && <li>Nombre</li>}
-                                        {!form.clienteTelefono && <li>Teléfono</li>}
-                                        {!form.direccionEntrega && <li>Dir. Entrega</li>}
-                                        {form.items.length === 0 && <li>1 artículo min.</li>}
-                                    </ul>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
