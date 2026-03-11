@@ -24,6 +24,7 @@ export const MobileNavigation: React.FC<MobileNavigationProps> = ({
         { view: 'calendar', emoji: '📅', label: 'Calendario' },
         { view: 'finance', emoji: '💰', label: 'Finanzas' },
         { view: 'inventory', emoji: '📦', label: 'Inventario' },
+        { view: 'pedidos', emoji: '🚚', label: 'Renta de Mobiliario' },
         { view: 'analytics', emoji: '📊', label: 'Analytics' },
         { view: 'suppliers', emoji: '🚚', label: 'Proveedores' },
         { view: 'catering', emoji: '👨‍🍳', label: 'Catering' },
