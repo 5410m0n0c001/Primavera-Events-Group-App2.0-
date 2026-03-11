@@ -157,7 +157,12 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
             const method = isEdit ? 'PUT' : 'POST';
             const url = isEdit ? `/api/pedidos/${pedidoId}` : '/api/pedidos';
 
-            const payload = { ...form };
+            // Ensure dates are parsed correctly as full ISO strings since Prisma expects proper Dates
+            const payload = {
+                ...form,
+                fechaEntrega: new Date(`${form.fechaEntrega}T${form.horaEntrega}:00`).toISOString(),
+                fechaRecoleccion: new Date(`${form.fechaRecoleccion}T${form.horaRecoleccion}:00`).toISOString()
+            };
 
             const res = await fetch(url, {
                 method,
@@ -165,11 +170,15 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
                 body: JSON.stringify(payload)
             });
 
-            if (!res.ok) throw new Error('Error saving pedido');
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.error || 'Error desconocido al guardar el pedido');
+            }
+            alert("✅ ¡Pedido guardado exitosamente!");
             onSave();
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            alert("Hubo un error al guardar el pedido.");
+            alert(`⚠️ Error al guardar el pedido:\n${error.message}`);
         }
     };
 
@@ -402,10 +411,10 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
             </div>
 
             {/* MAIN VIEW - Streamlined */}
-            <div className="flex-1 overflow-hidden flex flex-col xl:flex-row gap-6 lg:gap-8">
+            <div className="flex-1 overflow-hidden flex flex-col xl:flex-row gap-6 lg:gap-8 min-h-0">
 
                 {/* Center Column: Added Items List (Action Center) */}
-                <div className="flex-[5] flex flex-col h-full gap-3 min-h-[300px] overflow-hidden">
+                <div className="flex-[5] flex flex-col h-full gap-3 min-h-0 overflow-hidden">
                     <div className="flex gap-3 mb-1 shrink-0">
                         <button
                             onClick={() => setMobileTab('catalogo')}
@@ -488,8 +497,8 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
                 </div>
 
                 {/* Right Column: Sticky Summary & Checkout */}
-                <div className="flex-[2.5] flex flex-col h-full min-h-[300px] overflow-hidden">
-                    <div className="bg-gray-900 dark:bg-black p-4 md:p-5 rounded-xl shadow-xl border border-gray-800 text-white flex flex-col h-full overflow-y-auto custom-scrollbar min-h-0">
+                <div className="flex-[2.5] flex flex-col h-full min-h-[400px]">
+                    <div className="bg-gray-900 dark:bg-black p-4 md:p-5 rounded-xl shadow-xl border border-gray-800 text-white flex flex-col h-full overflow-y-auto custom-scrollbar">
                         <h3 className="font-bold text-primavera-gold uppercase text-[13px] tracking-widest mb-4 border-b border-gray-800 pb-2 flex items-center gap-2 shrink-0">
                             🧾 Resumen del Pedido
                         </h3>
