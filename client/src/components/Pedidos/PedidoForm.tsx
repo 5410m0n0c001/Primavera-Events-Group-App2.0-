@@ -415,10 +415,10 @@ export default function PedidoForm({ pedidoId, onClose, onSave }: PedidoFormProp
             </div>
 
             {/* MAIN VIEW - Streamlined */}
-            <div className="flex-1 overflow-hidden flex flex-col xl:flex-row gap-6 lg:gap-8 min-h-0">
+            <div className="flex-1 overflow-y-auto custom-scrollbar xl:overflow-hidden flex flex-col xl:flex-row gap-6 lg:gap-8 min-h-0 pb-10 xl:pb-0">
 
                 {/* Center Column: Added Items List (Action Center) */}
-                <div className="flex-[5] flex flex-col h-full gap-3 min-h-0 overflow-hidden">
+                <div className="flex-[5] flex flex-col h-[60vh] xl:h-full gap-3 min-h-0 overflow-hidden shrink-0 xl:shrink">
                     <div className="flex gap-3 mb-1 shrink-0">
                         <button
                             onClick={() => setMobileTab('catalogo')}

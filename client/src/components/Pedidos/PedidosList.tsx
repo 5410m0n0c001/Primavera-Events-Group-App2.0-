@@ -108,10 +108,10 @@ export default function PedidosList({ onCreateNew, onEdit }: PedidosListProps) {
                                             <button onClick={() => onEdit(p.id)} className="text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/20 px-3 py-1.5 rounded-lg text-sm transition-colors">Ver/Editar</button>
                                             <button
                                                 onClick={() => handleDownloadPDF(p.id, p.numeroPedido)}
-                                                className="text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 px-3 py-1.5 rounded-lg text-sm transition-colors"
-                                                title="Descargar PDF"
+                                                className="flex items-center gap-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 px-3 py-1.5 rounded-lg text-sm transition-colors font-medium border border-red-200 dark:border-red-900/30"
+                                                title="Imprimir pedido en PDF"
                                             >
-                                                📄
+                                                📄 PDF
                                             </button>
                                             <button
                                                 onClick={() => handleSharePDF(p.id, p.numeroPedido)}
