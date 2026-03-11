@@ -13,7 +13,7 @@ import VenuesManager from './components/Venues/VenuesManager';
 import WebsiteDashboard from './components/Website/WebsiteDashboard';
 import AIChatInterface from './components/Chat/AIChatInterface';
 import AdminLogin from './components/Auth/AdminLogin';
-import PedidosDashboard from './components/Pedidos/PedidosDashboard';
+import RentasWizardWrapper from './components/RentasWizard';
 
 export type ViewState = 'quote' | 'events' | 'floorplans' | 'inventory' | 'catalog' | 'landing' | 'budget' | 'exports' | 'aiChat' | 'adminLogin' | 'crm' | 'calendar' | 'suppliers' | 'finance' | 'catering' | 'production' | 'analytics' | 'venues' | 'website' | 'pedidos';
 
@@ -145,7 +145,7 @@ function App() {
         {view === 'crm' && <ClientList />}
         {view === 'calendar' && <CalendarView />}
         {view === 'inventory' && <InventoryDashboard />}
-        {view === 'pedidos' && <PedidosDashboard />}
+        {view === 'pedidos' && <RentasWizardWrapper />}
         {view === 'suppliers' && <SupplierList />}
         {view === 'finance' && <FinanceDashboard />}
         {view === 'catering' && <CateringDashboard />}
